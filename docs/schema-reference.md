@@ -18,7 +18,7 @@ Used to define a Model in the schema. The model name should be written in _Upper
  }
 ```
 
-#### `fields`
+### `fields`
 
 Used to define the fields a Model contains. Only valid inside a `model` block.
 
@@ -30,7 +30,7 @@ model Author {
 }
 ```
 
-#### `operations`
+### `operations`
 
 Used to define the auto-generated operations a Model has. Only valid inside a `model` block.
 
@@ -45,7 +45,7 @@ model Author {
 }
 ```
 
-#### `functions`
+### `functions`
 
 Used to define the custom functions that will be implemented for a Model. Only valid inside a `model` block.
 
@@ -162,8 +162,6 @@ model Person {
 #### Short-form inputs
 
 There is a short-form way of defining inputs where the input names correspond to a field name on the model. The following example is semantically exactly the same as the previous example, but is much more concise.
-
-##### Example of short-form inputs
 
 ```graphql
 model Person {
