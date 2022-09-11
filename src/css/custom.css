@@ -1,0 +1,235 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap");
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #286fde;
+  --ifm-color-primary-dark: #1f63cc;
+  --ifm-color-primary-darker: #1e5dc1;
+  --ifm-color-primary-darkest: #184d9f;
+  --ifm-color-primary-light: #3f7ee1;
+  --ifm-color-primary-lighter: #4a86e3;
+  --ifm-color-primary-lightest: #6c9de8;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --ifm-font-family-base: "Inter", system-ui, -apple-system, Segoe UI, Roboto,
+    Ubuntu, Cantarell, Noto Sans, sans-serif, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  --ifm-font-size-base: 15px;
+  --ifm-font-size-small: 13px;
+  --ifm-code-font-size: 90%;
+
+  --ifm-leading-desktop: 1;
+  --ifm-leading-mobile: 1;
+
+  --ifm-font-weight-light: 300;
+  --ifm-font-weight-normal: 400;
+  --ifm-font-weight-semibold: 500;
+  --ifm-font-weight-bold: 700;
+  --ifm-font-weight-base: var(--ifm-font-weight-normal);
+  --ifm-line-height-base: 1.65;
+
+  --ifm-h1-font-size: 2rem;
+  --ifm-h2-font-size: 1.5rem;
+  --ifm-h3-font-size: 1.25rem;
+  --ifm-h4-font-size: 1rem;
+  --ifm-h5-font-size: 0.875rem;
+  --ifm-h6-font-size: 0.85rem;
+
+  --ifm-navbar-shadow: none;
+
+  --ifm-transition-fast: 200ms;
+  --ifm-transition-slow: 400ms;
+
+  --ifm-color-content: rgba(0, 0, 0, 0.8);
+  --ifm-footer-background-color: none;
+  --ifm-footer-color: var(--ifm-color-content-secondary);
+
+  --ifm-menu-color: var(--ifm-color-content);
+  --ifm-menu-color-active: var(--ifm-color-primary);
+  --ifm-menu-color-background-active: var(--ifm-hover-overlay);
+  --ifm-menu-color-background-hover: var(--ifm-hover-overlay);
+  --ifm-menu-link-padding-horizontal: 0.75rem;
+  --ifm-menu-link-padding-vertical: 0.5rem;
+
+  --ifm-toc-padding-vertical: 6px;
+  --ifm-toc-padding-horizontal: 12px;
+
+  --ifm-global-spacing: 1rem;
+  --ifm-spacing-vertical: var(--ifm-global-spacing);
+  --ifm-spacing-horizontal: var(--ifm-global-spacing);
+  --ifm-container-width: 1140px;
+  --ifm-container-width-xl: 1320px;
+
+  --ifm-global-radius: 4px;
+
+  --ifm-code-padding-horizontal: 0.3rem;
+  --ifm-code-padding-vertical: 0.2rem;
+  --ifm-code-background: var(--ifm-hover-overlay);
+
+  --ifm-menu-color-background-hover: var(--ifm-hover-overlay);
+  --ifm-hover-overlay: rgba(0, 0, 0, 0.04);
+
+  --ifm-breadcrumb-item-background-active: none;
+  --ifm-breadcrumb-padding-horizontal: 0.6rem;
+  --ifm-breadcrumb-padding-vertical: 0.2rem;
+  --ifm-breadcrumb-color-active: var(--ifm-color-content-secondary);
+
+  --ifm-navbar-link-color: var(--ifm-color-content-secondary);
+
+  /* Elevation 1 */
+  --ifm-global-shadow-lw: 0px 0px 1px rgba(0, 0, 0, 0.4),
+    0px 1px 8px rgba(0, 0, 0, 0.02);
+
+  /* Elevation 2 */
+  --ifm-global-shadow-md: 0px 0px 1px rgba(0, 0, 0, 0.4),
+    0px 4px 9px rgba(0, 0, 0, 0.05);
+
+  /* Elevation 3 */
+  --ifm-global-shadow-tl: 0px 0px 1px rgba(0, 0, 0, 0.4),
+    0px 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.main-wrapper {
+  --ifm-global-spacing: 2rem;
+  --ifm-spacing-vertical: var(--ifm-global-spacing);
+  --ifm-spacing-horizontal: var(--ifm-global-spacing);
+}
+
+code {
+  border: none;
+  color: rgb(43 55 134);
+}
+
+.breadcrumbs__link {
+  color: var(--ifm-color-content-secondary);
+}
+
+.pagination-nav__link {
+  background: white;
+}
+
+.menu__link {
+  font-size: var(--ifm-font-size-small);
+}
+
+.menu__link--sublist-caret:after {
+  background: var(--ifm-menu-link-sublist-icon) 50% / 1rem 1rem;
+}
+
+.menu__list-item-collapsible .menu__link--active,
+.menu__list-item-collapsible .menu__link--active:hover {
+  background: #d4e2f8 !important;
+  color: var(--ifm-menu-color);
+}
+
+.menu__link--active:not(.menu__link--sublist) {
+  background: linear-gradient(
+    91.03deg,
+    #3c87e7 0.02%,
+    #4597e6 97.38%
+  ) !important;
+  color: white;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.navbar__link {
+  margin-top: 4px; /* for logo vertical alignment */
+  font-size: 14px;
+}
+
+.theme-doc-sidebar-container {
+  border: none !important;
+}
+
+.markdown h1:first-child {
+  --ifm-h1-font-size: 2rem;
+  margin-top: var(--ifm-leading);
+}
+
+.markdown > h2 {
+  --ifm-h2-font-size: 1.5rem;
+}
+.markdown > h3 {
+  --ifm-h3-font-size: 1.25rem;
+}
+.markdown > h4 {
+  --ifm-h4-font-size: 1rem;
+}
+.markdown > h5 {
+  --ifm-h5-font-size: 0.875rem;
+}
+
+.footer__copyright {
+  font-size: var(--ifm-font-size-small);
+  /* color: var(--ifm-color-content-secondary); */
+}
+
+body {
+  background: linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.75),
+      rgba(255, 255, 255, 0.75)
+    ),
+    linear-gradient(
+      116.82deg,
+      rgba(40, 111, 222, 0.1) 0%,
+      rgba(40, 111, 222, 0) 100%
+    ),
+    linear-gradient(
+      296.82deg,
+      rgba(91, 183, 235, 0.1) 0%,
+      rgba(91, 183, 235, 0) 100%
+    ),
+    linear-gradient(
+      63.18deg,
+      rgba(255, 46, 0, 0) 0%,
+      rgba(255, 46, 0, 0.08) 100%
+    ),
+    #ffffff;
+}
+
+.theme-doc-sidebar-container {
+  --doc-sidebar-width: 275px;
+}
+
+.table-of-contents__left-border {
+  border-left: none;
+}
+
+.table-of-contents__left-border li {
+  margin: 0;
+}
+
+.table-of-contents__left-border li a {
+  margin: 0;
+  padding: var(--ifm-toc-padding-vertical) var(--ifm-toc-padding-horizontal);
+  border-left: 3px solid rgba(0, 0, 0, 0.08);
+}
+
+.table-of-contents,
+.table-of-contents ul {
+  padding-left: 0;
+}
+
+.table-of-contents__left-border ul li a {
+  padding-left: calc(2 * var(--ifm-toc-padding-horizontal));
+}
+.table-of-contents__left-border ul ul li a {
+  padding-left: calc(3 * var(--ifm-toc-padding-horizontal));
+}
+
+.table-of-contents__left-border li a.table-of-contents__link--active {
+  border-color: #6ea5fd;
+  color: var(--ifm-color-content);
+}
