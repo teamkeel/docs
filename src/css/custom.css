@@ -84,6 +84,10 @@
 
   --ifm-navbar-link-color: var(--ifm-color-content-secondary);
 
+  --ifm-hr-background-color: var(--ifm-color-emphasis-200);
+  --ifm-hr-height: 1px;
+  --ifm-hr-margin-vertical: 3rem;
+
   /* Elevation 1 */
   --ifm-global-shadow-lw: 0px 0px 1px rgba(0, 0, 0, 0.4),
     0px 1px 8px rgba(0, 0, 0, 0.02);
@@ -158,7 +162,7 @@ code {
 }
 
 .markdown > h2 {
-  --ifm-h2-font-size: 1.5rem;
+  --ifm-h2-font-size: 1.75rem;
 }
 .markdown > h3 {
   --ifm-h3-font-size: 1.25rem;
