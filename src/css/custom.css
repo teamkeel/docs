@@ -134,6 +134,10 @@ code {
   color: var(--ifm-menu-color);
 }
 
+.theme-doc-sidebar-item-category-level-1 .menu__list-item-collapsible {
+  font-weight: 600;
+}
+
 .menu__link--active:not(.menu__link--sublist) {
   background: linear-gradient(
     91.03deg,
