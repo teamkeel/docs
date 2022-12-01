@@ -52,6 +52,10 @@ model Person {
 }
 ```
 
+### Read and write inputs
+
+Inputs to actions are either _read inputs_ or _write inputs_.  Inputs used for reading (or filtering) data are defined in the first set of parenthesis in an action definition and inputs used writing data are defined after the `with` keyword in the second set of parenthesis.
+
 ### Short-form inputs
 
 There is a short-form way of defining inputs where the input names correspond to a field name on the model. The following example is semantically exactly the same as the previous example, but is much more concise.
