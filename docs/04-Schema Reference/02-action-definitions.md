@@ -14,7 +14,7 @@ Created a new record. Must accept all required fields that don’t have default 
 
 ### `update`
 
-Updates a single record. Must accept as inputs a unique field to look up the record and at least one field to update.
+Updates a single record. Must accept as inputs a unique field to look up the record. 
 
 ### `get`
 
