@@ -24,6 +24,10 @@ Retrieves a single record. Must accept a unique field as input.
 
 Returns a list of records. May accept as inputs any number of non-unique fields to filter the results.
 
+### `delete`
+
+Deletes a single record.  Must accept a unique field as input.
+
 ## Action Name
 
 An action name must be _globally_ unique. This is because in both the case of GraphQL or RPC actions are top level and so if two models both defined an action with the same name they would clash.
