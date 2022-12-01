@@ -6,6 +6,10 @@ Expressions can be used as the argument to a number of attributes to provide run
 
 The current model is available in its _lowerCamelCased_ form, so if the model is called `FeaturedPost` then the expression can reference `featuredPost`. Any field on the model can be referenced using dot notation e.g. `modelName.fieldName`.
 
+### Referencing nested models
+
+Related models and their fields can be referenced by expressing the relationship with dot notation.  If the model called `FeaturedPost` has a field called `PrimaryAuthor` of model type `Author`, then a field on that related model can be accessed through an expresion such as `featuredPost.primaryAuthor.name`.
+
 ## Referencing the context
 
 The current context, which in many cases can be thought of as the current request, is available as `ctx`. This object has the following fields:
