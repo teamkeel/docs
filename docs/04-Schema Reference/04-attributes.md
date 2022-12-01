@@ -103,7 +103,7 @@ model Post {
     title Text
   }
   operations {
-    update updatePost(title) {
+    update updatePost(id) with (title) {
       @permission(
         expression: post.author == ctx.identity
       )
@@ -159,8 +159,8 @@ model Task {
   }
 
   operations {
-    update assignTask(id, assignedTo)
-    update startTask() {
+    update assignTask(id) with (assignedTo)
+    update startTask(id) {
       // cannot start a task if it is not assigned to someone
       @validate(task.assignedTo != null)
       @set(task.startedAt = ctx.timestamp)

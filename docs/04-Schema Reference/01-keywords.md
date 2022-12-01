@@ -34,7 +34,7 @@ model Author {
     name Text
   }
   operations {
-    create createAuthor(name)
+    create createAuthor() with (name)
   }
 }
 ```
@@ -49,7 +49,7 @@ model Author {
     name Text
   }
   functions {
-    create createAuthor(name)
+    create createAuthor() with (name)
   }
 }
 ```

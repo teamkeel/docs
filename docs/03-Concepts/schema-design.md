@@ -75,7 +75,7 @@ model Author {
     books Book[]
   }
   operations {
-    create createAuthor(name)
+    create createAuthor() with (name)
     get author(id)
   }
 }
@@ -86,7 +86,7 @@ model Book {
     authors Author[]
   }
   operations {
-    create createBook(title, authors)
+    create createBook() with (title, authors)
     get book(id)
   }
 }
@@ -110,7 +110,7 @@ model Book {
     authors Author[]
   }
   operations {
-    create createBook(title, authors)
+    create createBook() with (title, authors)
     get book(id)
     get bookByIsbn(isbn)
   }
@@ -165,7 +165,7 @@ model Author {
   }
 
   operations {
-    create createAuthor(name)
+    create createAuthor() with (name)
     get author(id)
   }
 
@@ -233,7 +233,7 @@ model Author {
   }
 
   operations {
-    create createAuthor(name)
+    create createAuthor() with (name)
     get author(id)
   }
 
@@ -284,8 +284,8 @@ model Author {
   }
 
   operations {
-    create createAuthor(name)
-		update updateAuthor(name)
+    create createAuthor() with (name)
+		update updateAuthor(id) with (name)
     get author(id)
   }
 
@@ -311,7 +311,7 @@ model Book {
   }
 
   operations {
-    create createBook(title, authors)
+    create createBook() with (title, authors)
     get book(id)
     get bookByIsbn(isbn)
   }

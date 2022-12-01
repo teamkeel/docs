@@ -14,7 +14,7 @@ Created a new record. Must accept all required fields that don’t have default 
 
 ### `update`
 
-Updates a single record. Must accept as inputs a unique field to look up the record and at least one field to update.
+Updates a single record. Must accept as inputs a unique field to look up the record. 
 
 ### `get`
 
@@ -23,6 +23,10 @@ Retrieves a single record. Must accept a unique field as input.
 ### `list`
 
 Returns a list of records. May accept as inputs any number of non-unique fields to filter the results.
+
+### `delete`
+
+Deletes a single record.  Must accept a unique field as input.
 
 ## Action Name
 
@@ -41,12 +45,16 @@ model Person {
     get getPerson(id: ID) {
       @where(person.id == id)
     }
-    create createPerson(firstname: Text) {
+    create createPerson() with (firstname: Text) {
       @set(person.firstname = firstname)
     }
   }
 }
 ```
+
+### Read and write inputs
+
+Inputs to actions are either _read inputs_ or _write inputs_.  Inputs used for reading (or filtering) data are defined in the first set of parenthesis in an action definition and inputs used writing data are defined after the `with` keyword in the second set of parenthesis.
 
 ### Short-form inputs
 
@@ -59,7 +67,7 @@ model Person {
   }
   operations {
     get getPerson(id)
-    create createPerson(firstname)
+    create createPerson() with (firstname)
   }
 }
 ```

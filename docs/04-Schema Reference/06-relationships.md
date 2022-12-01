@@ -4,7 +4,7 @@ When a field uses another model as its type that creates a relationship being th
 
 | Model A            | Model B      | Relationship Type (from perspective of Model A) |
 | ------------------ | ------------ | ----------------------------------------------- |
-| ModelB[]           | No reference | One-to-many                                     |
+| ModelB[]           | No reference | Invalid                                         |
 | ModelB[]           | ModelA       | One-to-many                                     |
 | ModelB[]           | ModelA[]     | Many-to-many                                    |
 | ModelB { @unique } | No reference | One-to-one                                      |
@@ -14,13 +14,13 @@ When a field uses another model as its type that creates a relationship being th
 
 Models can reference one another via standard relational concepts such as has_one, has_many, belongs_to.
 
-#### Example of has_many / belongs to:
+#### Example of has_many / belongs_to:
 
 ```graphql
 model Post {
   fields {
     title Text
-		author Author
+    author Author
   }
 }
 
@@ -32,13 +32,15 @@ model Author {
 }
 ```
 
+Note that the `posts Post[]` field on `Author` can be omitted entirely for the above relationship to still be valid. However, the "many" side (i.e. `author Author` on `Post`) is always required in such a relationship.
+
 #### Example of many to many relationship
 
 ```graphql
 model Project {
   fields {
     title Text
-		author Author
+    author Author
     assignments ProjectAssignment[]
   }
 }
