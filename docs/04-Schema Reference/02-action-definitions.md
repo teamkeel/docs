@@ -45,7 +45,7 @@ model Person {
     get getPerson(id: ID) {
       @where(person.id == id)
     }
-    create createPerson(firstname: Text) {
+    create createPerson() with (firstname: Text) {
       @set(person.firstname = firstname)
     }
   }
@@ -63,7 +63,7 @@ model Person {
   }
   operations {
     get getPerson(id)
-    create createPerson(firstname)
+    create createPerson() with (firstname)
   }
 }
 ```
