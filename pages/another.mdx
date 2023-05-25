@@ -1,31 +1,36 @@
-# Another Page
+# Page with some tabbed code
 
-```js filename="demo.js" {3} copy
-let a = 1;
+import { Tab, Tabs } from "nextra-theme-docs";
 
-console.log(a);
+<Tabs items={["Schema", "Function"]}>
+  <Tab>
+``` 
+model Person {
+  fields {
+    name Text
+  }
+}
 ```
+  </Tab>
+  <Tab>
+```ts 
+function foo() {
+  // something here
+}
+```
+  </Tab>
+</Tabs>
 
-## Component
+Hello
 
-import { useState } from 'react'
+## Second title
 
-{/* Import CSS modules */}
-import styles from '../components/counters.module.css'
+More words.
 
-export const Counter = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <div>
-      <button onClick={() => setCount(count + 1)} className={styles.counter}>Clicked {count} times</button>
-    </div>
-  );
-};
+More wordss
 
-<Counter/>
+### A third title
 
-## External Component
+This is **nice**
 
-import Counters from '../components/counters'
-
-<Counters />
+> a wuote
