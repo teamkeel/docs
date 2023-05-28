@@ -1,0 +1,205 @@
+# Models
+
+A Keel app is built around your data, which is described using models. Models are defined in your schema files and typically look something like this.
+
+```keel
+model Product {
+  fields {
+    title Text
+    description Text
+    price Number
+    onSale Boolean
+  }
+}
+```
+
+This example defines a model called `Product` which has a number of fields, which are defined inside a `fields` block within the model definition. Each field has a **name** and a **type**. The type can be any of the built-in Keel types or one you’ve defined elsewhere in your schema, for example an enum or another model.
+
+All models have a few built-in fields by default - `id`, `createdAt`, and `updatedAt`, so although not something you are likely to do a lot it is valid to define a model with no fields block. This means the following is a valid model.
+
+```keel
+model Product {}
+```
+
+## Naming
+
+Keel enforces certain naming conventions to ensure consistency in your schema and API’s. Specifically, your models must be named in **UpperCamelCase**, and your fields must be named in **lowerCamelCase**.
+
+We also recommend that you name your models using singular terms, such as `Product` rather than `Products`.
+
+## Field Types
+
+The basic built-in Keel types are:
+
+- `Text` - suitable for any text data of any length
+- `Number` - a whole number, positive or negative
+- `Boolean` - a true or false value
+- `Timestamp` - a date time accurate to a microsecond
+- `Date` - a date, with no time
+- `ID` - basically the same as `Text` but indicates the value is used to identify *something*
+
+As previously mentioned, all models **automatically** have the following fields:
+
+- `id` - a field of type `ID` that can be used to identify an individual record
+- `createdAt` - a field of type `Timestamp` which indicates when a record was created
+- `updatedAt` - a field of type `Timestamp` which indicates when a record was last updated
+
+You don't have to manually set or update these fields as they all have default values which are filled in automatically when you create or update a record.
+
+## Enums
+
+An enum is a set of *named* values. They are useful when you want to constrain a field to only contain certain values. For example if you are defining a model for an order and want to make sure that the status of the order can only be placed, picked, packed or dispatched, then you can do that with an enum.
+
+```keel
+enum OrderStatus {
+  Placed
+  Picked
+  Packed
+  Dispatched
+}
+
+model Order {
+  fields {
+    status OrderStatus
+  }
+}
+```
+
+Now you can be sure that the `status` field of an order can only be one of the values listed in the enum.
+
+## Repeated Fields
+
+Some fields can be marked as repeated, meaning they contain a list of values rather than a single value. To mark a field as repeated, add `[]` after its type. A field can be repeated if its type is `Text`, `Number`, an enum, or another model.
+
+```keel
+model Product {
+  fields {
+    title Text
+    tags Text[]
+  }
+}
+```
+
+## Unique Fields
+
+Sometimes a field needs to be unique across all instances of a model. As an example every book has an International Standard Book Number (ISBN), which is unique to each book. To model this in a Keel schema you can use a `Text` field with the `@unique` attribute.
+
+```keel
+model Book {
+  fields {
+    isbn Text @unique foo
+  }
+}
+```
+
+Now we can be sure that no two books will have the same ISBN.
+
+## Default values
+
+Previously, we discussed how a models built-in fields have default values that are used when a record is created. You can also add default values to your own fields using the `@default` attribute. This attribute accepts a single argument, which is the value you want to use as the default
+
+For example, the following schema specifies that if no value is provided for the `status` field when an order is created, then the default value `Placed` should be used.
+
+```keel
+model Order {
+  fields {
+    status OrderStatus @default(OrderStatus.Placed)
+  }
+}
+```
+
+The value you provide to the `@default` attribute **must** match the type of the field, otherwise you will get a schema validation error.
+
+## Relationships
+
+Data in a Keel app is *relational*, which means that models can be related to one another. This is expressed in a Keel schema by using a **model as a field type**.
+
+### One to many relationships
+
+One to many relationships are very common, and a simple example is the idea of an order which *has many* items. To model this in a Keel schema you would add fields to both the `OrderItem` and `Order` model that reference each other.
+
+```keel
+model Order {
+  fields {
+    items OrderItem[]
+  }
+}
+
+model OrderItem {
+  fields {
+    order Order
+  }
+}
+```
+
+Because an order *has many* items, the `items` field in the `Order` model is repeated (indicated by `[]` after the model name), whereas an item *belongs to* a single order, so the `order` field in the `OrderItem` model is not repeated. In one-to-many relationships the *belongs to* side **must** be defined, whereas the *has many* side is optional.
+
+### Many to many relationships
+
+Another common type of relationship in data modelling is *many to many*. Many to many relationships are a little bit more complex than one to many relationships as they require an *intermediary* model. The intermediary **model is just a normal model that is used to *join* the two models that should have a many-to-many relationship together.
+
+A simple example of a many to many relationship is products and tags, where a product can have many tags and a tag can be applied to many products. This would be modelled in a Keel schema using the following three models.
+
+```keel
+model Product {
+  fields {
+    tags ProductTags[]
+  }
+}
+
+model Tag {
+  fields {
+    products ProductTags[]
+  }
+}
+
+model ProductTag {
+  fields {
+    product Product
+    tag Tag
+  }
+}
+```
+
+The models `Product` and `Tag` don’t directly reference each other in this schema, that is done in the `ProductTag` model, which references both. In fact, even though we would talk about this as a many-to-many relationship, it’s actually implemented using **two one to many relationships**. 
+
+As the join model is just a normal model, it has all the normal built-in model fields. This means you can reference a specific product/tag relationship by its `id` field and know when it was created by using the `createdAt` field.
+
+You can add any fields you like to these join models, which can be useful for storing additional properties about the relationship. For example if you are modelling team members and projects, where a project is worked on by many team members and team members can be part of many projects, you might also want to store what role each team member takes in each project. The join model would be a good place to store this information.
+
+```keel
+enum TeamMemberRole {
+  Lead
+  Member
+  Observer
+}
+
+model TeamMember {}
+model Project {}
+
+model ProjectTeamMember {
+  fields {
+    teamMember TeamMember
+    project Project
+    role TeamMemberRole
+  }
+}
+```
+
+### One to one relationships
+
+A one-to-one relationship is a relationship in which neither side is repeated, and one side uses the `@unique` attribute. For example, in the following schema, a country can have only one capital city (sorry [South Africa](https://en.wikipedia.org/wiki/List_of_countries_with_multiple_capitals)), and a city can be in only one country.
+
+```keel
+model Country {
+  fields {
+    capitalCity City
+  }
+}
+
+model City {
+  fields {
+    country Country @unique
+  }
+}
+```

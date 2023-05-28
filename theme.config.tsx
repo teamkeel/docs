@@ -6,9 +6,14 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/teamkeel/keel",
   },
-  docsRepositoryBase: "https://github.com/teamkeel/keel-docs",
   footer: {
     text: "Keel",
+  },
+  editLink: {
+    component: () => null,
+  },
+  feedback: {
+    useLink: () => `mailto:help@keel.xyz`,
   },
 };
 

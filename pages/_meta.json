@@ -1,7 +1,11 @@
 {
   "index": "Introduction",
-  "another": "Another Page",
-  "advanced": "Advanced (A Folder)",
+  "models": "Models",
+  "actions": "Actions",
+  "functions": "Functions",
+  "identity": "Identity & Authentication",
+  "permissions": "Permissions",
+
   "blog": {
     "title": "Blog",
     "type": "page"

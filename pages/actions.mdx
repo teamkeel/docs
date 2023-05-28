@@ -1,0 +1,395 @@
+# Actions
+
+In Keel, models not only describe what your data looks like, but also how it behaves. This is done using **Actions**, which is a general term for two features in Keel: **Operations** and **Functions**. An operation is implemented by Keel purely based on what is written in your schema and requires no extra code to work. Functions are also defined in your schema but are implemented in code by you.
+
+As a simple example, the following schema has one action which lets you fetch a product by its `id`. As it is defined as an operation this schema requires no code to be written.
+
+```keel
+model Product {
+  operations {
+    get getProduct(id)
+  }
+}
+```
+
+Actions are how you define API’s in Keel but API’s are not covered in this page. See the [API docs](/apis) for more information.
+
+<aside>
+🙌 In the future Actions will also be used to auto-generate internal tools for you and your team in the Keel console.
+
+</aside>
+
+## Action Types
+
+Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for operations and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/functions) documentation. The table below describes the behaviour of each action type.
+
+| Type | Behaviour | Operation | Function |
+| --- | --- | --- | --- |
+| get | Returns a single record or null | ✅ | ✅ |
+| list | Returns a list of records, supports complex filtering, pagination, and sorting | ✅ | ✅ |
+| create | Creates a new record and returns it | ✅ | ✅ |
+| update | Updates a record and returns it | ✅ | ✅ |
+| delete | Deletes a record and returns the id of the deleted record | ✅ | ✅ |
+| read | Read and return data of any type |  | ✅ |
+| write | Perform updates to your data and return data of any type |  | ✅ |
+
+A model can have multiple actions of the same type.
+
+## Action Names
+
+Action names must be written in **lowerCamelCase** and must be unique across your whole app, not just within each model. 
+
+## `get`
+
+A `get` Action is for reading a single record, for example reading a record by it’s built-in `id` field.
+
+```keel
+model Book {
+  operations {
+    get getBook(id)
+  }
+}
+```
+
+### Using a unique field
+
+`get` operations support reading a record by any unique field.
+
+```keel
+model Book {
+  fields {
+    isbn Text @unique
+  }
+  operations {
+    get getBook(isbn)
+  }
+}
+```
+
+### Multiple optional inputs
+
+If you want to be able to read a record using either its `id` or another one of its unique fields, you can do so by providing multiple inputs and marking them all as optional using `?`.
+
+```keel
+model Book {
+  fields {
+    isbn Text @unique
+  }
+  operations {
+    get getBook(id?, isbn?)
+  }
+}
+```
+
+### Using a relationship field
+
+It is possible to look up a record by a unique field of a related record. For example, you might want to get the author of a book using its ISBN. This is possible if:
+
+- A book has only one author
+- The `isbn` field is marked as `@unique`
+
+Inputs that reference fields on related models use dot-notation as shown in the example below.
+
+```keel
+model Author {
+  fields {
+    books Book[]
+  }
+  operations {
+    get getAuthorByIsbn(books.isbn)
+  }
+}
+
+model Book {
+  fields {
+    author Author
+    isbn Text @unique
+  }
+}
+```
+
+### Using `@where`
+
+You can use the `@where` attribute in a `get` operation to filter records. One use case for this is defining an action that returns data based on the calling identity.
+
+```keel
+model Profile {
+  fields {
+    identity Identity @unique
+  }
+  operations {
+    get myProfile() {
+      @where(profile.identity == ctx.identity)
+    }
+  }
+}
+```
+
+In the above schema, `myProfile` is valid even though it doesn't accept any inputs. This is because the expression in the `@where` attribute filters on the `identity` field, which is marked as being unique.
+
+### Validation
+
+For `get` operations, Keel will validate that you are filtering on at least one unique field. There are no restrictions on the inputs accepted by functions, but they must return a single record. Refer to the [Functions documentation](/functions) for further information.
+
+## `create`
+
+A `create` Action is for creating a new record.
+
+```keel
+model Book {
+  fields {
+    title Text
+    genre Text
+  }
+
+  operations {
+    create createBook() with (title, genre)
+  }
+}
+```
+
+As shown in the above schema, the inputs for a `create` action come after the `with` keyword. This is because the first set of inputs (those that come after the action name) are **read inputs**, which are used for reading or filtering data. The inputs after the `with` keyword are **write inputs**, which are used for writing data. Since a `create` action creates a new record, it will never accept any read inputs.
+
+### Using `@set`
+
+You can use the `@set` attribute in a `create` operation to set fields on the newly created record. One use case for this is to set the calling identity on a field that uses the `Identity` model
+
+```keel
+model Customer {
+  fields {
+    name Text
+    identity Identity
+  }
+  operations {
+    create newCustomer() with (name) {
+      @set(customer.identity = ctx.identity)
+    }
+  }
+}
+```
+
+In this example we accept the `name` field as in input to the action but set the `identity` field based on the callers Identity. For more information on Identity see the [Identity docs](/identity).
+
+### Creating nested records
+
+It is possible to create nested records using a `create` operation by using dot-notation to define the input fields.
+
+```keel
+model Lesson {
+  fields {
+    title Text
+    date Date
+    course Course
+  }
+}
+
+model Course {
+  fields {
+    name Text
+    lessons Lesson[]
+  }
+  operations {
+    create createCourse() with (name, lessons.title, lessons.date)
+  }
+}
+
+```
+
+The `createCourse` Operation allows you create a course along with a number of linked lessons. The `course` field of the newly created `Lesson` records will be automatically set to the newly created `Course`.
+
+### Linking to existing records
+
+When creating a record you can link existing records by specifying the `id` of the related field. In the example below we can create a new `Lesson` but set its `course` field to an existing `Course`. 
+
+```keel
+model Course {}
+
+model Lesson {
+  fields {
+    title Text
+    date Date
+    course Course
+  }
+  operations {
+    create createLesson() with (title, date, course.id)
+  }
+}
+```
+
+### Validation
+
+For `create` operations, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
+
+## `update`
+
+An `update` Action is for updating an existing record. As you need to specify both *which* record you want to update and the fields to be updated, an `update` Action can have both **read and write inputs**.
+
+```keel
+model Book {
+  fields {
+    title Text
+  }
+  operations {
+    update updateBook(id) with (title)
+  }
+}
+
+```
+
+The `updateBook` operation in the above schema lets you update the `title` field of a book identified by it’s `id`.
+
+### Using a unique field for lookup
+
+As with `get`, you can use any unique field to identify the record that should be updated. The following schema shows how you can update a book by its unique `isbn` field.
+
+```keel
+model Book {
+  fields {
+    isbn Text @unique
+    title Text
+  }
+  operations {
+    update updateBook(isbn) with (title)
+  }
+}
+```
+
+### Using optional write inputs
+
+By using optional inputs, it is possible to define `update` actions that allow the caller to choose which fields they want to update. In the following schema, we define an action called `updateBook` which permits the `title` and `publishDate` fields to be updated. Both fields are marked as optional, meaning the caller can provide either one, both, or neither.
+
+```keel
+model Book {
+  fields {
+    title Text
+    publishDate Date
+  }
+  operations {
+    update updateBook(id) with (title?, publishDate?)
+  }
+}
+```
+
+### Using `@set`
+
+You can use the `@set` attribute in an `update` Operation to update additional fields on top of those provided as write inputs. In fact if you use `@set` you don’t need to have any write inputs at all. To illustrate this we can make a `publishBook` Action that just accepts the `id` of the book to publish and then uses the `@set` attribute to set the `publishDate` field to the current date using `ctx.now`.
+
+```keel
+model Book {
+  fields {
+    publishDate Date
+  }
+  operations {
+    update publishBook(id) {
+      @set(book.publishDate = ctx.now)
+    }
+  }
+}
+```
+
+Expressions used in a `@set` attribute can also reference enums from your schema. Therefore, another use case for `@set` would be to create specific actions for changing the status of a record. In the schema below we have specific actions for starting and completing a `Todo`.
+
+```keel
+enum Status {
+  Todo
+  InProgress
+  Completed
+}
+
+model Todo {
+  fields {
+    status Status
+    startedAt Timestamp?
+    completedAt Timestamp?
+  }
+  operations {
+   update startTodo(id) {
+      @set(todo.status = Status.InProgress)
+      @set(todo.startedAt = ctx.now)
+    }
+    update completeTodo(id) {
+      @set(todo.status = Status.Completed)
+      @set(todo.completedAt = ctx.now)
+    }
+  }
+}
+```
+
+### Validation
+
+For `update` operations, Keel will validate that you are filtering on at least one unique field. For Functions there are no restrictions on what inputs you accept, just that your function updates and returns a single record. For more information see the [Function docs](/functions).
+
+## `list`
+
+A `list` Action is for reading a number of records and supports complex filtering on inputs, pagination and sorting.
+
+```keel
+model Book {
+	fields {
+    title Text
+  }
+  operations {
+    list listBooks(title)
+  }
+}
+```
+
+The `listBooks` Operation in the above schema would allow for any of the following use-cases:
+
+- Find all books with the exact title `"Great Gatsby"`
+- Find all books whose title contains the text `"at Ga"`
+- Find all books whose title starts with the text `"Gre"`
+- Find all books whose title ends with the text `"atsby"`
+- Find all books whose title is either `"Great Gatsby"` or `"Great Expectations"`
+
+For more info on how filtering works in `list` actions see the [API docs](/apis).
+
+### Filtering on multiple fields
+
+A `list` Action can accept multiple inputs which are combined with **AND.**
+
+```keel
+model Book {
+  fields {
+    title Text
+    publishDate Date
+  }
+  operations {
+    list listBooks(title, publishDate)
+  }
+}
+```
+
+With this schema it would be possible to use the `listBooks` operation to do things like:
+
+- Find all books whose title contains the text `"Adventure"` and which were published in 1954
+- Find all books whose title starts with the text `"Great"` and which were published between 1990 and 1995
+
+### Using `@where`
+
+You can use the `@where` attribute in `list` operations to provide some additional filters that are applied on top of the inputs. As an example we could make a `list` operation that only returned completed Todo’s.
+
+```keel
+model Todo {
+  fields {
+    completed Boolean
+  }
+  operations {
+    list completedTodos() {
+      @where(todo.completed == false)
+    }
+  }
+}
+```
+
+## `delete`
+
+A `delete` Action is for deleting a single record. It’s pretty much analogous to `get`, just rather than reading and returning the record it deletes the record and returns the value of its `id` field.
+
+```keel
+model Book {
+  operations {
+    delete deleteBook(id)
+  }
+}
+```

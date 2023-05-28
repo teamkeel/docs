@@ -1,0 +1,372 @@
+# Functions
+
+Functions are [Actions](/actions) that are defined in your schema but implemented using code. We currently support TypeScript for writing functions.
+
+Your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`. 
+
+## A simple function
+
+Functions can use the same action types as operations, for example `get`, `list` and so on. To illustrate how functions work lets implement a simple `get` function.
+
+```keel filename="schema.keel"
+model Product {
+  functions {
+    get getProduct(id)
+  }
+}
+```
+
+If we then run `keel generate` a function file will be created for us which will look something like this.
+
+```tsx filename="functions/getProduct.ts"
+import { GetProduct } from "@teamkeel/sdk";
+
+export default GetProduct(async (ctx, inputs) => {
+  // your code here
+});
+```
+
+The `@teamkeel/sdk` package is auto-generated based on your schema and contains wrapper functions for each of your schema-defined functions. These wrapper functions ensure that your code is correctly typed without having to explicitly declare types.
+
+To implement this function we can use the generated model API's available from the `@teamkeel/sdk` package.
+
+```tsx filename="functions/getProduct.ts"
+import { GetProduct, models } from "@teamkeel/sdk";
+
+export default GetProduct((ctx, inputs) => {
+  return models.product.findOne({
+    id: inputs.id,
+  });
+});
+```
+
+That's it, our function will now work as expected. Obviously this example is very simple, and in practice this kind of action would be defined as an operation in our schema, but it illustrates the basics of how to implement a function.
+
+## Function arguments
+
+Your functions receive three arguments.
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+
+## Using the database
+
+The `@teamkeel/sdk` package is generated based on your schema and contains type-safe API's for interacting with your models. These API's are all available on the exported `models` object.
+
+### Reading a single record
+
+As shown in the simple example at the start of this page, we can read a single record by using the `findOne` model API.
+
+```tsx filename="functions/getProduct.ts"
+import { GetProduct, models } from "@teamkeel/sdk";
+
+export default GetProduct(async (ctx, inputs) => {
+  return models.product.findOne({
+    id: inputs.id,
+  });
+});
+```
+
+The return type of a **get** function is `Promise<Model | null>`, which conveniently matches the model API method `findOne`. So for a simple function like this we can just return the result of `findOne`.
+
+### Reading multiple records
+
+To find and return many records you can use `findMany` model API method. The following schema defines a `list` function which takes no inputs.
+
+```keel filename="schema.keel"
+model Product {
+  functions {
+    list latestProducts()
+  }
+}
+```
+
+Below is an example implementation of `latestProducts`.
+
+```tsx filename="functions/latestProducts.ts"
+import { ListProducts, models } from "@teamkeel/sdk";
+import sub from 'date-fns/sub';
+
+export default LatestProducts((ctx, inputs) => {
+  const oneWeekAgo = sub(ctx.now(), {
+    days: 7,
+  });
+
+  return models.product.findMany({
+    createdAt: {
+      after: oneWeekAgo,
+    },
+  });
+});
+```
+
+A few things to note in this example:
+
+- The use of the `@date-fns` package - you can use any 3rd party packages you like in your functions. Just install them as you normally (currently only `npm` is supported).
+- The use of `ctx.now()` to get the current date. The third argument to your functions is a `ctx` object which is very similar to the `ctx` available in schema expressions.
+- Using the `after` filter on the `createdAt` field in the `findMany` call. There are many filtering fields available when using `findMany` which are explained in more detail later on in this page.
+
+The `findMany` model API method returns `Promise<Model[]>`, which is also the expected return type of a **list** function, so we can return the result of that method directly.
+
+### Creating a new record
+
+To create a new record in the database you use the `create` model API method. The following schema defines a function for creating a new post.
+
+```keel filename="schema.keel"
+model Author {}
+
+model Post {
+  fields {
+    title Text
+    body Text
+    author Author
+  }
+
+  functions {
+    create createPost() with (title, body, author.id)
+  }
+}
+```
+
+A simple implementation of `createPost` might look something like this.
+
+```tsx filename="functions/createPost.ts"
+import { CreatePost, models } from "@teamkeel/sdk";
+
+export default CreatePost(async (ctx, inputs) => {
+  const { title, body, author } = inputs;
+
+  return models.post.create({
+    title,
+    body,
+    // we set authorId here, which is the auto-generated 
+    // foreign key for the author field in the model
+    authorId: author.id,
+  });
+});
+```
+
+The return type of `create` is `Promise<Model>`, which is also the expected return type of a **create** function.
+
+### Updating a record
+
+To update an existing record in the database you can use the `update` model API method. This accepts two arguments, an object containing filters that indicate which record should be updated, and an object containing the values to update.
+
+To illustrate how an `update` function might work, the following schema defines a `publishPost` function with just accepts the `id` of the post to publish.
+
+```keel filename="schema.keel"
+model Account {
+  fields {
+    identity Identity @unique
+  }
+}
+
+model Post {
+  fields {
+    published Boolean
+    publishedAt Timestamp
+    publishedBy Account
+  }
+
+  functions {
+    update publishPost(id)
+  }
+}
+```
+
+In the implementation for this function we need to do a few things:
+
+- Get the `Account` that is linked to the calling Identity
+- Build the where conditions object for the update
+- Build the values object for the update
+
+```tsx filename="functions/publishPost.ts"
+import { PublishPost, models } from "@teamkeel/sdk";
+
+export default PublishPost(async (ctx, inputs) => {
+  // first find the account of the authenticated user
+  const account = await models.account.findOne({
+    identityId: ctx.identity.id,
+  });
+
+  // the where conditions for the update is just the provided id
+  const where = inputs.where;
+
+  // the values we want to update
+  const values = {
+    published: true,
+    publishedAt: ctx.now(),
+    publishedById: account.id,
+  };
+
+  // update and return the record
+  return models.post.update(where, values);
+});
+```
+
+This example also shows how you can access the Identity of the person performing the action by using `ctx.identity`. 
+
+## Using `fetch`
+
+We deploy your functions into an environment running Node.js 18.x, which means the Fetch API is available.
+
+One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel API's. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend. 
+
+The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function.
+
+```keel filename="schema.keel"
+model MyThing {
+  functions {
+    read doSomething(Any) returns (Any)
+  }
+}
+```
+
+The function implementation calls the 3rd party API, passing the API token, and return its response.
+
+```tsx filename="functions/doSomething.ts"
+import {DoSomething} from "@teamkeel/sdk";
+
+export default DoSomething(async (ctx, inputs) => {
+  // make an API call to 3rd party
+  const res = await fetch("https://some-cool-api.com", {
+    method: "POST",
+    headers: {
+      // use a secret to store your API token
+      "Api-Token": ctx.secrets.API_TOKEN,
+    },
+    body: JSON.stringify({
+      some: "param",
+    }),
+  });
+
+  // return the response as JSON
+  return res.json();
+});
+```
+
+## Using Headers
+
+You can access request headers by using `ctx.headers`, which is a *read-only* version of the `[Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers)` object, and you can set response headers by using `ctx.response.headers` which is a normal [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers) object.
+
+```tsx filename="functions/myFunction.ts"
+export default MyFunction((inputs, api, ctx) => {
+  // read a request header
+  const reqHeader = ctx.headers.get("X-My-Custom-Header");
+  
+  // write a response header
+  ctx.api.headers.set("X-My-Other-Header", "1234");
+});
+```
+
+## Environment Variables and Secrets
+
+Any environment variables you've defined in your `keelconfig.yaml` file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
+
+In much the same way any secrets you've defined in your `keelconfig.yaml` file will be available by using `ctx.secrets` which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
+
+As an example if we have the following `keelconfig.yaml` file.
+
+```yaml filename="keelconfig.yaml"
+environment:
+  default:
+    - name: MY_ENV_VAR
+      value: "some-value"
+secrets:
+	- name: MY_SECRET
+```
+
+We could then access these in a function like so.
+
+```tsx filename="functions/myFunction.ts"
+export default MyFunction(async (ctx, inputs) => {
+  ctx.env.MY_ENV_VAR // "some-value"
+  ctx.secrets.MY_SECRET // will be decrypted secret value
+
+  // TypeScript will catch this with the error:
+  // ts(2339) Property 'FOO' does not exist on type 'Environment'.
+  ctx.env.FOO
+
+  // TypeScript will catch this with the error:
+  // ts(2339) Property 'FOO' does not exist on type 'Secrets'.
+  ctx.secrets.FOO
+});
+```
+
+## Custom functions
+
+There may be cases where you want to define a function that returns custom data or needs to receive unknown data as input. For these situations, you can use the `read` and `write` action types with **messages**.
+
+### Custom inputs and responses
+
+To illustrate how custom functions work we will create a batch create function. The built-in Keel action types do not support this, but it can be implemented using the `write` action type and messages.
+
+```keel filename="schema.keel"
+enum Genre {
+  Horror
+  Romance
+}
+
+model Book {
+  fields {
+    title Text
+    genre Genre
+  }
+  functions {
+    write createBooks(CreateBooksInput) returns (CreateBooksResponse)
+  }
+}
+```
+
+Actions that use the `read` or `write` type must take a message as input and use the `returns` keyword to define the response message. The following example demonstrates how to define the messages we used in the `createBooks` action.
+
+```keel filename="schema.keel"
+message CreateBooksInput {
+  // messages can be nested
+  books CreateBooksBookFields[]
+}
+
+message CreateBooksBookFields {
+  title Text
+  // messages can contain enums
+  genre Genre
+}
+
+message CreateBooksResponse {
+  // messages can contain models
+  books Book[]
+}
+```
+
+Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a model definition. Message fields can be other messages, models, enums, or built-in Keel types. 
+
+import { Callout } from 'nextra/components'
+
+<Callout>
+  Message names must be **UpperCamelCase** and must be distinct from any model or enum name.
+</Callout>
+
+There is nothing really different about the code for functions that use messages, and they will still be correctly typed. The implementation for `createBooks` might look like this.
+
+```tsx filename="functions/createBooks.ts"
+import { CreateBooks, models } from "@teamkeel/sdk";
+
+export default CreateBooks(async (ctx, input) => {
+  const books = await Promise.all(
+    input.books.map((fields) => {
+      return models.book.create({
+        title: fields.title,
+        genre: fields.genre,
+      });
+    })
+  );
+
+  return {
+    books,
+  };
+});
+```
+
+### The `Any` message
+
+The built-in message `Any` can be used as the input or response of a `read` or `write` function. When you use this message the inputs or return type of your function will be the TypeScript type `any`. The `Any` message is useful if you want to receive unknown or arbitrary data in your function or return dynamic data.
