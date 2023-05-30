@@ -1,0 +1,299 @@
+# GraphQL API
+
+[GraphQL](https://graphql.org/) is an open-source data query language that allows clients to specify the data they need from the API. It also allows querying data across relational data models, meaning that you can do in one API call what might otherwise require several.
+
+The GraphQL endpoint for your Keel app is `/api/graphql`. When running locally with `keel run` you can also access a [GraphiQL](https://github.com/graphql/graphiql) playground at `/api/graphiql`.
+
+## Queries & Mutations
+
+GraphQL has the concept of **queries** which are for reading data and **mutations** which are for writing data. Any **get**, **list**, and **read** actions in your Keel schema become queries in your GraphQL API whilst **create**, **update**, **delete**, and **write** actions become mutations.
+
+All queries or mutations in your GraphQL API accept a single input value called `input`.
+
+## Types
+
+The built-in Keel types are mapped to GraphQL types in the following way:
+
+| Keel type | GraphQL type |
+| --- | --- |
+| Text | String |
+| Number | Int |
+| Boolean | Boolean |
+| Timestamp | Timestamp (custom type) |
+| Date | Date (custom type) |
+
+### Optional / Required
+
+In a Keel schema fields are required by default, but can be marked optional by adding `?` after the type. In a GraphQL schema it's the *other way around*, with fields being optional by default and `!` after the type indicating the field is required.
+
+This means that if a field in your Keel is schema does not have a `?` after it's type, then it will have a `!` after it in GraphQL.
+
+```keel filename="schema.keel"
+model Profile {
+  fields {
+    username Text
+    realname Text?
+  }
+}
+```
+
+```graphql filename="Generated GraphQL type"
+type Profile {
+  username: String!
+  realname: String
+}
+```
+
+This applies to model fields, action inputs, and message fields.
+
+### Timestamp & Date
+
+The `Timestamp` and `Date` types in a Keel schema correspond to the following GraphQL types.
+
+```graphql filename="Built-in Timestamp and Date GraphQL types"
+type Timestamp {
+  # a value based on the provided format
+  formatted(format: String!): String!
+  
+  # a value like "in 2 days" or "5 months ago"
+  fromNow: String!
+
+  # ISO-8601 format string e.g. "2023-05-27T15:02:14.185Z"
+  iso8601: String!
+
+  # Unix time
+  seconds: Int!
+}
+
+type Date {
+  # a value based on the provided format
+  formatted(format: String!): String!
+
+  # ISO-8601 format string e.g. "2023-05-27"
+  iso8601: String!
+}
+```
+
+The `formatted` field of these types accept a format string that contain the following placeholders.
+
+| Placeholder | Description | Example (for 2023-01-02 14:09:05) |
+| --- | --- | --- |
+| YYYY | full year | "2023" |
+| YY | short year | "23" |
+| MMMM | full month | "January" |
+| MMM | abbreviated month | "Jan" |
+| MM | zero-padded month number | "01" |
+| M | month number | "1" |
+| DDDD | zero-padded day of year | "002" |
+| DD | zero-padded day of month | "02" |
+| D | day of month | "2" |
+| dddd | full day of week | "Thursday" |
+| ddd | abbreviated day of week | "Thu" |
+| HH | zero-padded hour (24-hour) | "14" |
+| hh | zero-padded hour (12-hour) | "02" |
+| h | hour (12-hour) | "2" |
+| A | upper-case AM/PM | "PM" |
+| a | lower-case am/pm | "pm" |
+| mm | zero-padded minute | "09" |
+| m | minute | "9" |
+| ss | zero-padded seconds | "05" |
+| s | seconds | "5" |
+| ZZZ | time-zone with name | "UTC" |
+
+### Models
+
+Models defined in your Keel schema become types in your GraphQL API.
+
+```keel filename="schema.keel"
+model Profile {
+  fields {
+    username Text
+  }
+}
+```
+
+```graphql filename="Generated GraphQL schema"
+type Profile {
+  id: ID!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  username: String!
+}
+```
+
+You'll see that the GraphQL Person type contains all the built-in model fields as well as the ones you defined in your schema.
+
+### Enums
+
+Enums defined in your Keel schema become enums in your GraphQL API. GraphQL represents enums in exactly the same say as Keel.
+
+```graphql
+enum Category {
+  Sports
+  Finance
+  Politics
+}
+```
+
+## Creating a new record
+
+You can define an action for creating a new record in your Keel schema using the **create** action type.
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+ 
+<Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
+  <Tab>
+```keel {7} filename="schema.keel"
+model Profile {
+  fields {
+    username Text @unique
+    bio Text
+  }
+  operations {
+    create createProfile() with (username, bio)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2} filename="Generated GraphQL schema"
+type Mutation {
+  createProfile(input: CreateProfileInput!): Profile!
+}
+
+input CreateProfileInput {
+  username: String!
+  bio: String!
+}
+
+type Profile {
+  id: ID!
+  username: String!
+  bio: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2}
+mutation {
+  createProfile(input: { username: "mickeymouse", bio: "I am a cartoon mouse" }) {
+    id
+    username
+    bio
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+## Reading a single record
+
+You can define an action for reading a single record in your Keel schema using the **get** action type.
+
+<Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
+  <Tab>
+```keel {6} filename="schema.keel"
+model Profile {
+  fields {
+    username Text
+  }
+  operations {
+    get getProfile(id)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2} filename="Generated GraphQL schema"
+type Query {
+  getProfile(input: GetProfileInput!): Profile
+}
+
+input GetProfileInput {
+  id: ID!
+}
+
+type Profile {
+  id: ID!
+  username: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2}
+query {
+  getPerson(input: { id: "1234" }) {
+    id
+    username
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+## Updating a record
+
+You can define an action for updating a single record in your Keel schema using the **update** action type.
+
+<Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
+  <Tab>
+```keel {7} filename="schema.keel"
+model Profile {
+  fields {
+    username Text @unique
+    bio Text
+  }
+  operations {
+    update updateBio(id) with (bio)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2} filename="Generated GraphQL schema"
+type Mutations {
+  updateBio(input: UpdateBioInput!): Profile!
+}
+
+input UpdateBioInput {
+  where: UpdateBioWhere!
+  values: UpdateBioValues!
+}
+
+input UpdateBioWhere {
+  id: ID!
+}
+
+input UpdateBioValues {
+  bio: String!
+}
+
+type Profile {
+  id: ID!
+  username: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+```
+  </Tab>
+  <Tab>
+```graphql {2-7}
+mutation {
+  updateBio(
+    input: {
+      where: { id: "1234" }
+      values: { bio: "I'm a cartoon mouse who's always up for an adventure" }
+    }
+  ) {
+    id
+    username
+    bio
+  }
+}
+```
+  </Tab>
+</Tabs>

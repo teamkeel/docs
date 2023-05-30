@@ -1,10 +1,46 @@
 {
-  "index": "Introduction",
-  "models": "Models",
-  "actions": "Actions",
-  "functions": "Functions",
-  "identity": "Identity & Authentication",
-  "permissions": "Permissions",
+  "index": {
+    "title": "Introduction",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "models": {
+    "title": "Models",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "actions": {
+    "title": "Actions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "functions": {
+    "title": "Functions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "identity": {
+    "title": "Identity & Authentication",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "permissions": {
+    "title": "Permissions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "apis": {
+    "title": "API's",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
 
   "blog": {
     "title": "Blog",
