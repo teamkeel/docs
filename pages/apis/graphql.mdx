@@ -16,11 +16,11 @@ The built-in Keel types are mapped to GraphQL types in the following way:
 
 | Keel type | GraphQL type |
 | --- | --- |
-| Text | String |
-| Number | Int |
-| Boolean | Boolean |
-| Timestamp | Timestamp (custom type) |
-| Date | Date (custom type) |
+| `Text` | `String` |
+| `Number` | `Int` |
+| `Boolean` | `Boolean` |
+| `Timestamp` | `Timestamp` (custom type) |
+| `Date` | `Date` (custom type) |
 
 ### Optional / Required
 
@@ -137,7 +137,7 @@ enum Category {
 
 ## Creating a new record
 
-You can define an action for creating a new record in your Keel schema using the **create** action type.
+You can define an action for creating a new record in your Keel schema using the **create** action type. These actions will become mutations in your GraphQL schema.
 
 import { Tab, Tabs } from 'nextra-theme-docs'
  
@@ -176,7 +176,7 @@ type Profile {
 ```
   </Tab>
   <Tab>
-```graphql {2}
+```graphql {2} filename="Example of using the createProfile mutation"
 mutation {
   createProfile(input: { username: "mickeymouse", bio: "I am a cartoon mouse" }) {
     id
@@ -190,7 +190,7 @@ mutation {
 
 ## Reading a single record
 
-You can define an action for reading a single record in your Keel schema using the **get** action type.
+You can define an action for reading a single record in your Keel schema using the **get** action type. These actions will become queries in your GraphQL schema.
 
 <Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
   <Tab>
@@ -237,7 +237,7 @@ query {
 
 ## Updating a record
 
-You can define an action for updating a single record in your Keel schema using the **update** action type.
+You can define an action for updating a single record in your Keel schema using the **update** action type. These actions will become mutations in your GraphQL schema.
 
 <Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
   <Tab>
@@ -297,3 +297,159 @@ mutation {
 ```
   </Tab>
 </Tabs>
+
+## Listing records
+
+You can define an action for listing many records in your Keel schema using the **list** action type. These actions will become queries in your GraphQL schema. You'll see in the example below that the input types for **list** actions are a little more complex than the other action types, and this is because they allow for filtering records in a number of different ways. See the **Query Inputs** section below for more info on this.
+
+<Tabs items={['Keel schema', 'GraphQL schema', 'GraphQL query']}>
+  <Tab>
+```keel {8} filename="schema.keel"
+model Book {
+  fields {
+    title Text
+    genre Text
+    releaseDate Date
+  }
+  operations {
+    list listBooks(title?, genre?, releaseDate?)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```graphql filename="Generated GraphQL schema"
+type Query {
+  listBooks(input: ListBooksInput!): BookConnection!
+}
+
+type Book {
+  id: ID!
+  title: String!
+  genre: String!
+  releaseDate: Date!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+}
+
+input ListBooksInput {
+  after: String
+  before: String
+  first: Int
+  last: Int
+  where: ListBooksWhere!
+}
+
+input ListPeopleWhere {
+  title: StringQueryInput
+  genre: StringQueryInput
+  releaseDate: DateQueryInput
+}
+
+type BookConnection {
+  edges: [BookEdge!]!
+  pageInfo: PageInfo!
+}
+
+type BookEdge {
+  node: Book!
+}
+
+type PageInfo {
+  count: Int!
+  endCursor: String!
+  hasNextPage: Boolean!
+  startCursor: String!
+  totalCount: Int!
+}
+
+```
+  </Tab>
+  <Tab>
+```graphql
+query {
+  listBooks(
+    input: {
+      first: 10
+      where: {
+        title: { contains: "Love" }
+        releaseDate: { after: "2022-01-01" }
+      }
+    }
+  ) {
+    edges {
+      node {
+        title
+        releaseDate {
+          formatted(format: "YYYY-MM-DD")
+        }
+      }
+    }
+    pageInfo {
+      endCursor
+    }
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+
+### Query Inputs
+
+We can use this a **list** action to perform queries like:
+
+* Find all books whose title contains the word "Love"
+* Find all books whose genre is "Sci-Fi" or "Crime" and were released in the last year
+
+This is possible because in a **list** action each input gets wrapped in a query type. For example an input that points to a `Text` field in a Keel schema will become a `StringQueryInput` in the GraphQL schema. The `StringQueryInput` looks like this:
+
+```graphql
+input StringQueryInput {
+  contains: String
+  endsWith: String
+  equals: String
+  notEquals: String
+  oneOf: [String]
+  startsWith: String
+}
+```
+
+All Keel types have a corresponding GraphQL query type that allow filtering in ways that make sense for that type, for example the `StringQueryInput` type has a `contains` field whereas the `IntQueryInput` has a `greaterThan` field.
+
+### Connection pattern
+
+The response type of a **list** action in GraphQL follows the [Relay Connection Spec](https://relay.dev/graphql/connections.htm) which means that for a model called `Book` the response type of a **list** action in GraphQL will be a `BookConnection`.
+
+```graphql
+type BookConnection {
+  edges: [BookEdge!]!
+  pageInfo: PageInfo!
+}
+
+type BookEdge {
+  node: Book!
+}
+
+type PageInfo {
+  count: Int!
+  endCursor: String!
+  hasNextPage: Boolean!
+  startCursor: String!
+  totalCount: Int!
+}
+```
+
+### Pagination
+
+The input type for a **list** action has four fields that relate to pagination.
+
+* `first` - Only return the first _N_ records. Can be used with `after`.
+* `last` - Only return the last _N_ records. Can be used with `before`.
+* `after` - Return records after this cursor.
+* `before` - Return records before this cursor.
+
+The `startCursor` and `endCursor` fields of a `PageType` can be passed to `after` or `before` in subsequent queries. For example if you fetched the first 10 book records and in the response the `endCursor` value was "1234" then to get the next 10 records you would pass "1234" to the `after` input.
+
+
+
