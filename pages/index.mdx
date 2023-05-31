@@ -1,3 +1,64 @@
 # Documentation
 
-These are our docs.
+Keel is an all-in-one backend platform that is designed to give you *everything* you need to build your product. We believe those things are:
+
+- A fully-managed relational database
+- Scalable infrastructure
+- A great local development experience
+- Flexible and customisable API's
+- Authentication & Permissions
+- Multiple environments
+- Configuration and secret management
+- Observability
+- Git-based deployments
+- Pub/sub *(coming soon)*
+- Cron jobs *(coming soon)*
+- Generated internal tools *(coming soon)*
+
+We also believe that whilst there are some things that absolutely require writing code, there are many that do not, and that ultimately less code is better than more code. For this reason Keel takes a **schema-driven approach** to application development.
+
+## Schema
+
+In your Keel schema you define your data models, API's and permission rules. For many API actions you won't need to write any code, with the Keel runtime handling them for you based on your schema. When you do need to write custom code you get a type-safe SDK generated from your schema and full access to your database.
+
+## Database
+
+We believe that relational databases are a good choice for most applications, and with Keel you get a fully-managed Postgres database powered by [Neon](https://neon.tech/) per environment. Your database schema is based on your Keel schema and migrations are generated and applied automatically for you when you deploy your app.
+
+In your functions you get a fully-typed database client as well as the ability to run raw SQL if you need.
+
+## Managed Infrastructure
+
+We're not big fans of buzzwords, but we do think that there are many benefits to taking a serverless approach for backend applications. In practice this means things like [AWS Lambda](https://aws.amazon.com/lambda/) and [Neon's](https://neon.tech/) serverless Postgres. We use AWS Lambda so that your app will scale as needed. We also take care of provisioning and managing all the other required infrastructure needed for you app to run.
+
+## Local Development
+
+You can develop and run your Keel app locally using your favourite editor, although we do have a rather snazzy VSCode extension which provides inline validation, auto-completion, and go-to-definition support for Keel schema files.
+
+## Flexible API's
+
+The API's you build with Keel all support three API *flavours* out the box - [GraphQL](https://graphql.org/), JSON, and spec-compliant JSON-RPC. If you're familiar with GraphQL it can be a great choice for building frontend applications, but does come with some complexity. If you'd prefer something simpler then you also get JSON endpoints with OpenAPI definitions.
+
+## Authentication & Permissions
+
+Knowing who people are and what they are allowed to do is a critical part of any backend system. It's also a tricky thing to get right. You'll likely want to support multiple authentication methods for your customers, have different requirements for authentication for your team, and then you have to work out who is allowed to do what. Keel aims to make this as painless as possible by providing flexible authentication options and powerful way to define permissions that supports both role-based and row-based rules. 
+
+## Multiple Environments
+
+With Keel you can have as many environments as you need. Isolated production environments for different customers or different regions, long running feature branches, PR previews, staging and QA environments. Environments can be spun up quickly and removed when no longer needed.
+
+## Configuration & Secret Management
+
+As well as each environment having it's own isolated database, it's common to want to configure each environment differently. Some configuration values (like API keys) are sensitive and need to handled carefully. Keel comes with a built-in way to manage both sensitive and non-sensitive configuration at the environment level and gives you access to both values in a type-safe way in both your schema and function code.
+
+## Observability
+
+Keel apps come with a full distributed tracing setup using [OpenTelemetry](https://opentelemetry.io/) and an easy way to find and view traces in the console. By default all API requests, database interactions, logs and errors are included in traces, making debugging your app a breeze.
+
+## Git-based Deployments
+
+Any environment you create in your Keel project is tied to a branch on your connected Github repo. Whenever you push a new commit to a branch that is connected to an environment Keel will pull that commit and build it for you. If the build succeeds then that commit can now be deployed. Environments can be set to auto-deploy all successful builds or require approval.
+
+## Roadmap
+
+Our mission is to make it easier to build the kind of systems needed to power a successful business and so our roadmap is focussed on features that we believe enable that. This includes scheduled jobs (cron jobs), pub/sub style events and subscriptions, and generated internal tools.

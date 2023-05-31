@@ -394,7 +394,6 @@ query {
   </Tab>
 </Tabs>
 
-
 ### Query Inputs
 
 We can use this a **list** action to perform queries like:
@@ -451,5 +450,75 @@ The input type for a **list** action has four fields that relate to pagination.
 
 The `startCursor` and `endCursor` fields of a `PageType` can be passed to `after` or `before` in subsequent queries. For example if you fetched the first 10 book records and in the response the `endCursor` value was "1234" then to get the next 10 records you would pass "1234" to the `after` input.
 
+## Functions
 
+These docs talk about **actions**, which is the general term for both operations (implemented by the Keel runtime) and functions (implemented by you using code). There is no difference between how operations and functions are surfaced in GraphQL.
 
+## Authentication
+
+Authentication works in your GraphQL API by passing a bearer token as an `Authorization` header when making requests. You obtain a token by using the built-in `authenticate` mutation.
+
+<Tabs items={['Authenticate GraphQL schema', 'Example']}>
+  <Tab>
+```graphql
+type Mutation {
+  authenticate(input: AuthenticateInput!): AuthenticateResponse
+}
+
+input AuthenticateInput {
+  createIfNotExists: Boolean
+  emailPassword: EmailPasswordInput!
+}
+
+input EmailPasswordInput {
+  email: String!
+  password: String!
+}
+
+type AuthenticateResponse {
+  identityCreated: Boolean!
+  token: String!
+}
+```
+  </Tab>
+  <Tab>
+```graphql
+mutation {
+  authenticate(input: {
+      emailPassword: { 
+        email: "bob@disney.com", 
+        password: "m1ck3ym0us3",
+      }
+  }) {
+    token
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+### Request Password Reset
+
+You can use the built-in `requestPasswordReset` mutation to request that a password reset token is sent to the user.
+
+```graphql
+mutation {
+  requestPasswordReset(input: {email: "bob@disney.com", redirectUrl: "https://www.disney.com/resetPassword"}) {
+    success
+  }
+}
+```
+
+If a user (Identity) exists with the given email address they will receive an email containing the link to the URL provided as `redirectUrl` with a `token` parameter appended to it. That token can be used with the `resetPassword` mutation to actually reset a users password.
+
+### Reset a password
+
+Once you have obtained a password reset token you can sent it, along with the users new password, to the `resetPassword` mutation.
+
+```graphql
+mutation {
+  resetPassword(input: {password: "iwontforgetthisone", token: "abc123"}) {
+    success
+  }
+}
+```
