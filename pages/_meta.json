@@ -5,6 +5,12 @@
       "breadcrumb": false
     }
   },
+  "getting-started": {
+    "title": "Getting Started",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "models": {
     "title": "Models",
     "theme": {
