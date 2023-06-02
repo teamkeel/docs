@@ -41,6 +41,18 @@
       "breadcrumb": false
     }
   },
+  "envvars": {
+    "title": "Environment Variables",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "secrets": {
+    "title": "Secrets",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "apis": {
     "title": "API's",
     "theme": {

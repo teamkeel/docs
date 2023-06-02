@@ -1,0 +1,85 @@
+# Environment Variables
+
+With Keel you can have as many environments as you need and often different environments need different configuration. This is where **environment variables** are useful.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning" emoji="⚠️">
+  Do not use environment variables for sensitive values such as API keys. For these kinds of values use [secrets](/secrets).
+</Callout>
+
+## Defining Environment Variables
+
+Environment variables are defined in a `keelconfig.yaml` file which should be in the root of your project. 
+
+```yaml filename="keelconfig.yaml"
+environment:
+  staging:
+    - name: MY_ENV_VAR
+      value: "my staging value"
+  production:
+    - name: MY_ENV_VAR
+      value: "my production value"
+```
+
+### Environment Types
+
+Environment variable values are defined in the config file under the environment type. The available types are:
+
+- `development` - Local environments
+- `test` - For test runners
+- `staging` - Staging environments
+- `production` - Production environments
+
+<Callout type="info" emoji="⚠️">
+  There isn't currently support for setting values for specific environments, only for environment types.
+</Callout>
+
+### Names
+
+Environment variables must be named in UPPER_SNAKE_SNAKE and cannot start with any of the following values:
+
+* `KEEL_`
+* `AWS_`
+* `OTEL_`
+
+### Values
+
+Environment variables are always strings. You don't have to provide a value for every environment type.
+
+## Using Environment Variables
+
+There are two ways you will use your environment variables - from your Keel schema or from your function code.
+
+### From a Keel schema
+
+Environments variables can be accessed with `ctx.env.ENV_VAR_NAME` from within any expression in your schema.
+
+```keel {8} filename="schema.keel"
+model Person {
+    fields {
+        name Text
+    }
+
+    operations {
+        create createPerson() with () {
+            @set(person.name = ctx.env.PERSON_NAME)
+        }
+    }
+}
+```
+
+### From a function
+
+You can access your environments variables in a **type-safe way** through the `ctx` argument that is passed to your functions, for example `ctx.env.MY_ENV_VAR`.
+
+```tsx filename="functions/myFunction.ts"
+export default MyFunction(async (ctx, inputs) => {
+  // "some-vale"
+  ctx.env.MY_ENV_VAR
+
+  // TypeScript will catch this with the error:
+  // ts(2339) Property 'FOO' does not exist on type 'Environment'.
+  ctx.env.FOO
+});
+```
