@@ -12,12 +12,13 @@ model Product {
 }
 ```
 
-Actions are how you define API’s in Keel but API’s are not covered in this page. See the [API docs](/apis) for more information.
+To find out how to use your Actions from your API's see the [API docs](/apis).
 
-<aside>
-🙌 In the future Actions will also be used to auto-generate internal tools for you and your team in the Keel console.
+import { Callout } from 'nextra/components'
 
-</aside>
+<Callout type="info" emoji="🙌">
+  In the future Actions will also be used to auto-generate internal tools for you and your team in the Keel console.
+</Callout>
 
 ## Action Types
 
@@ -41,7 +42,7 @@ Action names must be written in **lowerCamelCase** and must be unique across you
 
 ## `get`
 
-A `get` Action is for reading a single record, for example reading a record by it’s built-in `id` field.
+A `get` Action is for reading a single record, for example reading a record by it's built-in `id` field.
 
 ```keel
 model Book {
@@ -168,7 +169,7 @@ model Customer {
 }
 ```
 
-In this example we accept the `name` field as in input to the action but set the `identity` field based on the callers Identity. For more information on Identity see the [Identity docs](/identity).
+In this example we accept the `name` field as in input to the action but set the `identity` field based on the callers Identity. For more information on Identity see the [Identity docs](/schema/identity).
 
 ### Creating nested records
 
@@ -236,7 +237,7 @@ model Book {
 
 ```
 
-The `updateBook` operation in the above schema lets you update the `title` field of a book identified by it’s `id`.
+The `updateBook` operation in the above schema lets you update the `title` field of a book identified by it's `id`.
 
 ### Using a unique field for lookup
 
@@ -272,7 +273,7 @@ model Book {
 
 ### Using `@set`
 
-You can use the `@set` attribute in an `update` Operation to update additional fields on top of those provided as write inputs. In fact if you use `@set` you don’t need to have any write inputs at all. To illustrate this we can make a `publishBook` Action that just accepts the `id` of the book to publish and then uses the `@set` attribute to set the `publishDate` field to the current date using `ctx.now`.
+You can use the `@set` attribute in an `update` Operation to update additional fields on top of those provided as write inputs. In fact if you use `@set` you don't need to have any write inputs at all. To illustrate this we can make a `publishBook` Action that just accepts the `id` of the book to publish and then uses the `@set` attribute to set the `publishDate` field to the current date using `ctx.now`.
 
 ```keel
 model Book {
@@ -367,7 +368,7 @@ With this schema it would be possible to use the `listBooks` operation to do thi
 
 ### Using `@where`
 
-You can use the `@where` attribute in `list` operations to provide some additional filters that are applied on top of the inputs. As an example we could make a `list` operation that only returned completed Todo’s.
+You can use the `@where` attribute in `list` operations to provide some additional filters that are applied on top of the inputs. As an example we could make a `list` operation that only returned completed Todo's.
 
 ```keel
 model Todo {
@@ -384,7 +385,7 @@ model Todo {
 
 ## `delete`
 
-A `delete` Action is for deleting a single record. It’s pretty much analogous to `get`, just rather than reading and returning the record it deletes the record and returns the value of its `id` field.
+A `delete` Action is for deleting a single record. It's pretty much analogous to `get`, just rather than reading and returning the record it deletes the record and returns the value of its `id` field.
 
 ```keel
 model Book {

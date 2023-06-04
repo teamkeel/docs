@@ -11,14 +11,8 @@
       "breadcrumb": false
     }
   },
-  "models": {
-    "title": "Models",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "actions": {
-    "title": "Actions",
+  "schema": {
+    "title": "Schema",
     "theme": {
       "breadcrumb": false
     }
@@ -29,32 +23,14 @@
       "breadcrumb": false
     }
   },
-  "identity": {
-    "title": "Identity & Authentication",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "permissions": {
-    "title": "Permissions",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "envvars": {
-    "title": "Environment Variables",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "secrets": {
-    "title": "Secrets",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
   "apis": {
     "title": "API's",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "config": {
+    "title": "Config",
     "theme": {
       "breadcrumb": false
     }

@@ -4,7 +4,7 @@ Keel takes a **secure by default** approach, which means that unless you explici
 
 A role-based permission rule allows anyone who has one of the given role to perform any of the specified action types.
 
-```keel {2-5}
+```keel filename="Example of role-based permission"
 model MyModel {
   @permission(
     roles: [Staff],
@@ -15,7 +15,7 @@ model MyModel {
 
 A row-based permission rule is based on the data being acted on and uses an expression to determine if the action is allowed.
 
-```keel {2-5}
+```keel filename="Example of row-based permission"
 model MyModel {
   @permission(
     expression: post.author.identity == ctx.identity,
@@ -42,7 +42,7 @@ Some key things to understand are:
 
 ### Expressions
 
-If provided the `expression` argument is evaluated for each record being acted upon, and has the following in-scope identifiers:
+If provided the `expression` argument is evaluated for every record being acted upon, and has the following in-scope identifiers:
 
 - the record, available as the **lowerCamelCase** version of the model name
 - `ctx` - contains things like the authenticated identity, environment variables & secrets
@@ -161,9 +161,9 @@ model Post {
 
 ### Relationships
 
-You’ll generally only add an `Identity` field to the model that represents users in your app, which means that you’ll often write permission rules that need to traverse your data model. Luckily this is very easy to do with expressions.
+You'll generally only add an `Identity` field to the model that represents users in your app, which means that you'll often write permission rules that need to traverse your data model. Luckily this is very easy to do with expressions.
 
-Imagine you’re building a project management app which has users, projects, and tasks. Users can create projects and tasks can be added to projects. You only want the owner of a project to be able to update a task. To do this we just need to write a permission rule in the `Task` model that joins to the `User` and checks the `identity` field against the authenticated Identity calling the action.
+Imagine you're building a project management app which has users, projects, and tasks. Users can create projects and tasks can be added to projects. You only want the owner of a project to be able to update a task. To do this we just need to write a permission rule in the `Task` model that joins to the `User` and checks the `identity` field against the authenticated Identity calling the action.
 
 ```keel {18-21}
 model User {
@@ -192,7 +192,7 @@ model Task {
 
 ### Many-to-many Relationships
 
-In the previous example we saw how we can implement permission rules based on the owner (or creator) of some data, but what if we want to allow many people permission to edit some data. To illustrate this let’s extend our project management app to allow for collaboration between users. Now many users can access a project and anyone with access to a project can create tasks in it.
+In the previous example we saw how we can implement permission rules based on the owner (or creator) of some data, but what if we want to allow many people permission to edit some data. To illustrate this let's extend our project management app to allow for collaboration between users. Now many users can access a project and anyone with access to a project can create tasks in it.
 
 ```keel {26-30}
 model User {
@@ -235,56 +235,8 @@ This schema has a many-to-many relationship between users and projects, represen
 - From **each** `UserProject` go to the `User`
 - From **each** `User` get the `identity` field
 
-The important thing here is the **“for each”** part of the last two steps. Because a project has many users we ultimately end up with a **list of Identity’s**. This means we can’t compare `ctx.identity` to `task.project.users.user.identity` with `==` as they are different types. For this case we need to use the `in` operator to say that the authenticated Identity must be in the list of Identity’s with access to the project.
+The important thing here is the **“for each”** part of the last two steps. Because a project has many users we ultimately end up with a **list of Identity's**. This means we can't compare `ctx.identity` to `task.project.users.user.identity` with `==` as they are different types. For this case we need to use the `in` operator to say that the authenticated Identity must be in the list of Identity's with access to the project.
 
 ## Functions
 
-For all actions types other than `read` and `write` you don’t need to do anything special in your function for permissions to work. For example the following schema has a function called `completeTask` that can only be performed by the person assigned to that task.
-
-```keel {9-11} filename="schema.keel"
-model Task {
-  fields {
-    assignedTo Identity? @unique
-    completedAt Timestamp?
-  }
-
-  functions {
-    update completeTask(id) {
-      @permission(
-        expression: task.assignedTo == ctx.identity
-      )
-    }
-  }
-}
-```
-
-The function code doesn’t need to contain any specific permissions code.
-
-```tsx filename="functions/completeTask.ts"
-import { CompleteTask } from "@teamkeel/sdk";
-
-export default CompletetTask(async (input, api, ctx) => {
-  const where = {
-    assignedTo: ctx.identity.id,
-  };
-
-  const values = {
-    completedAt: ctx.now(),
-  };
-
-  return api.models.task.update(where, values);
-});
-```
-
-This works because your function is run inside a database transaction which is rolled back if no permission rule passes against the record(s) returned by your function.
-
-### Custom Functions
-
-For `read` and `write` functions you need to implement permissions inside your function. This is done by calling one of the two following methods:
-
-- `api.permissions.allow()`
-- `api.permissions.deny()`
-
-When you call `api.permissions.allow()` the function is marked as having permission allowed, and the database transaction your functions runs in will be committed.
-
-If you call `api.permissions.deny()` then your function will stop executing and the database transaction will be rolled back, and the caller of your function will get a permission denied error.
+Permission rules apply to both operations and functions, and you can add permission rules to specific functions too. The only exception to this is for `read` and `write` functions - schema defined permission rules do not apply to these functions and so you must implement any permissions logic in your code. See the docs on [custom functions](/functions/custom-functions) for more info.

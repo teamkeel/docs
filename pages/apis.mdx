@@ -18,15 +18,13 @@ When running locally with `keel run` you can also access a [GraphiQL](https://gi
 
 [OpenAPI](https://www.openapis.org/) is an open-source specification for describing JSON API's. It describes which endpoints are available and the data-type's of the requests and responses. There are many open source libraries for generating clients from an OpenAPI spec and you can download the OpenAPI (v3.1) definitions for your JSON API from the API Explorer in the console or from the `/api/json/openapi.json` endpoint of your Keel app.
 
-[The the JSON API docs](/apis/json)
+[Read the JSON API docs](/apis/json)
 
 ## JSON-RPC
 
 **Endpoint:** `/api/rpc`
 
 [JSON-RPC](https://www.jsonrpc.org/) is a lightweight [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) protocol. The JSON-RPC endpoint is `/api/rpc` and is compliant with the JSON-RPC 2.0 spec. 
-
-[Read the JSON-RPC docs](/apis/rpc)
 
 ## Which API should I use?
 
@@ -42,40 +40,10 @@ import { Callout } from 'nextra/components'
 
 ## Authentication
 
-Authentication works in the same way across all the different API types. First you need to get a JWT (JSON Web Token) by calling the built-in `authenticate` action. This action will return a JWT which you then pass in all subsequent requests in an `Authorization` header as a Bearer token.
+All API endpoints use the same JWT-based authentication. First you need to get a JWT (JSON Web Token) by calling the built-in `authenticate` action. You can then pass this JWT in the `Authorization` header on all subsequent requests.
 
-### Example using `fetch` with JSON API
-
-```tsx
-// this would probably be set using an environment variable
-const apiUrl = "http://localhost:8000";
-
-// Authenticate
-const res = await fetch(`${apiUrl}/web/json/authenticate`, {
-  method: "POST",
-  body: JSON.stringify({
-    emailPassword: {
-      email: "bob@disney.com",
-      password: "m1ck3ym0us3",
-    },
-  }),
-});
-
-// Get JSON response
-const json = await res.json();
-
-// Extract JWT
-const token = json.token;
-
-// Make an authenticated request
-await fetch(`${apiUrl}/web/json/myAction`, {
-  method: "POST",
-  body: JSON.stringify({
-    // some inputs
-  }),
-  headers: {
-    // Pass JWT as Bearer token
-    Authorization: `Bearer ${token}`,
-  },
-});
+``` filename="Example of authorization header"
+Authorization: Bearer <JWT token>
 ```
+
+See the individual API docs for examples.

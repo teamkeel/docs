@@ -1,0 +1,97 @@
+# Identity
+
+Almost every application requires authentication and for this purpose Keel comes with a built-in `Identity` model. This model represents the different **identities** that have **authenticated** with your app and includes a few actions that can be used to build authentication into your product.
+
+## Usage in models
+
+Since `Identity` is a regular model you can use it as a relationship field. A common use-case for this is to add `Identity` to the model that represents **users** in your application. For instance, you might add `Identity` to a `Customer` model.
+
+```keel
+model Customer {
+  fields {
+    identity Identity @unique
+  }
+}
+```
+
+When using `Identity` like this you will probably want to **mark the field as unique**, so that an identity relates to a single customer.
+
+## Usage in expressions
+
+When writing an expression in your schema or writing a function, `ctx.identity` refers to the currently **authenticated** `Identity`. If the caller of an action is not authenticated then `ctx.identity` will be null.
+
+### Filtering records by Identity
+
+It is common to want to make API's that only return data owned by the caller. This can be done in a Keel app by filtering the returned records by the authenticated `Identity`. As an example in the following schema there is a `myPosts` action that only returns the posts created by a profile that is linked to the calling Identity.
+
+```keel {3,10,14}
+model Profile {
+  fields {
+    identity Identity @unique
+    posts Post[]
+  }
+}
+
+model Post {
+  fields {
+    profile Profile
+  }
+  operations {
+    list myPosts() {
+      @where(post.profile.identity == ctx.identity)
+    }
+  }
+}
+```
+
+Note that filtering records like this is different to defining [**permissions**](/schema/permissions).
+
+### Setting a field to the callers Identity
+
+When `Identity` is used in a model as a relationship field you'll always want to use `ctx.identity` to set it, rather than trying to accept it as an input (which won't work).
+
+```keel
+model Profile {
+  fields {
+    identity Identity @unique
+  }
+  operations {
+    create createProfile() {
+      @set(profile.identity = ctx.identity)
+    }
+  }
+}
+```
+
+### Permissions
+
+You can use `ctx.identity` in a permission expression to restrict who is allowed to perform certain actions.
+
+```keel {22}
+model Profile {
+  fields {
+    identity Identity @unique
+  }
+}
+
+model Post {
+  fields {
+    profile Profile
+  }
+
+  operations {
+    get getPost(id)
+    delete deletePost(id)
+  }
+
+  @permission(
+    expression: true,
+    actions: [get]
+  )
+
+  @permission(
+    expression: post.profile.identity == ctx.identity,
+    actions: [delete]
+  )
+}
+```

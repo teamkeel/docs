@@ -1,3 +1,42 @@
 # JSON API
 
 Coming soon 🙌
+
+---
+
+## Authentication
+Example using `fetch` with the JSON API.
+
+```ts
+// this would probably be set using an environment variable
+const apiUrl = "http://localhost:8000";
+
+// Authenticate
+const res = await fetch(`${apiUrl}/web/json/authenticate`, {
+  method: "POST",
+  body: JSON.stringify({
+    emailPassword: {
+      email: "bob@disney.com",
+      password: "m1ck3ym0us3",
+    },
+  }),
+});
+
+// Get JSON response
+const json = await res.json();
+
+// Extract JWT
+const token = json.token;
+
+// Make an authenticated request
+await fetch(`${apiUrl}/web/json/myAction`, {
+  method: "POST",
+  body: JSON.stringify({
+    // some inputs
+  }),
+  headers: {
+    // Pass JWT as Bearer token
+    Authorization: `Bearer ${token}`,
+  },
+});
+```

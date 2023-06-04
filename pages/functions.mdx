@@ -1,8 +1,8 @@
 # Functions
 
-Functions are [Actions](/actions) that are defined in your schema but implemented using code. We currently support TypeScript for writing functions.
+Functions allow you to implement actions using code, but they are so much more than just "serverless functions". Your functions are deeply integrated into your app, meaning that inputs are validated, authentication and permissions are handled for you, and you have full access to your database.
 
-Your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`. 
+We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`. 
 
 ## A simple function
 
@@ -44,7 +44,7 @@ That's it, our function will now work as expected. Obviously this example is ver
 
 ## Function arguments
 
-Your functions receive three arguments.
+Your functions receive two arguments.
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
@@ -255,7 +255,7 @@ export default MyFunction((inputs, api, ctx) => {
   const reqHeader = ctx.headers.get("X-My-Custom-Header");
   
   // write a response header
-  ctx.api.headers.set("X-My-Other-Header", "1234");
+  ctx.response.headers.set("X-My-Other-Header", "1234");
 });
 ```
 
@@ -263,7 +263,7 @@ export default MyFunction((inputs, api, ctx) => {
 
 Any environment variables you've defined in your `keelconfig.yaml` file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
 
-In much the same way any secrets you've defined in your `keelconfig.yaml` file will be available by using `ctx.secrets` which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
+In much the same way, any secrets you've defined in your `keelconfig.yaml` file will be available on `ctx.secrets`, which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
 
 As an example if we have the following `keelconfig.yaml` file.
 
