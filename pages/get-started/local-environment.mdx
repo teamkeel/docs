@@ -1,0 +1,76 @@
+# Local environment setup
+
+When developing your Keel app locally there are two things which you'll probably want to setup - our CLI and our VSCode extension. Our CLI lets you run your project and develop against your API's locally whilst our VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files.
+
+## Install the CLI
+
+The easiest way to install our CLI is via Brew.
+
+```bash
+$ brew tap teamkeel/homebrew-keel
+$ brew install keel
+```
+
+You can check the installation by running `keel version` in your termimal.
+
+```bash
+$ keel version
+v0.313.2
+```
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="ℹ️">
+  In the future we'll support other installation methods for the CLI (such as npm) and also platforms other than Mac.
+</Callout>
+
+### Dependencies
+
+To run your project locally there are two things you need to have installed - Node.js and Docker.
+
+#### Node.js
+Node.js is used for running your functions and tests. We require Node version 18 or higher.
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+
+<Tabs items={['Using the installer', 'Using nvm', 'Using brew']}>
+  <Tab>
+    You can install Node.js using the installer which is available from https://nodejs.org/en/download.
+  </Tab>
+  <Tab>
+    [nvm](https://github.com/nvm-sh/nvm) is a Node.js version manager, which is useful if you need to have multiple versions of Node.js installed on your machine.
+
+    You can install nvm using their installation script.
+
+    ```bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+    ```
+
+    Then to use Node.js 18 you can use `nvm use`.
+
+    ```bash
+    $ nvm use 18
+    Now using node v18.13.0 (npm v8.19.3)
+    $ node -v
+    v18.13.0
+    ```
+  </Tab>
+  <Tab>
+    You can install Node.js using [Brew](https://brew.sh/) by running:
+
+    ```bash
+    $ brew install node@18
+    ```
+  </Tab>
+</Tabs>
+
+#### Docker
+Docker is used to run a local Postgres database. We only require that Docker is installed and running, you don't need to configure it in any way. On a Mac the easiest way to run Docker is by installing [Docker Desktop](https://docs.docker.com/desktop/). 
+
+As well as being installed Docker needs to be running, which you can check by running `docker ps` in your terminal. If you see an error that says "Cannot connect to the Docker daemon" then most likely Docker Desktop is not running.
+
+## VSCode Extension
+
+The Keel VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode.
+
+![Keel VSCode extension](/vscode-extension.png)
