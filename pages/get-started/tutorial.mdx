@@ -100,7 +100,7 @@ model Todo {
 ```
 
 <Callout type="info" emoji="💡">
-  You can learn more about how to [model data in a Keel schema here](/schema/models)
+  You can learn more about how to [model data in a Keel schema here](/docs/models)
 </Callout>
 
 ### Operations & Functions
@@ -127,7 +127,7 @@ model Todo {
 }
 ```
 
-This tutorial doesn't cover functions, but you can read more about them in the [Function](/functions) docs.
+This tutorial doesn't cover functions, but you can read more about them in the [Function](/docs/functions) docs.
 
 A key thing to note here is that Keel doesn't automatically generate CRUD actions for models. All actions are explicitly defined in your schema, which gives you full control in designing your APIs.
 
@@ -164,7 +164,7 @@ For the Todo model we have two permissions rules:
 1. Any `get`, `list`, `update` and `delete` actions can only be performed if the `ctx.identity` (which is the identity of the current authenticated user) must match the value stored in the `owner` field of the entry
 2. The `createTodo` operation can be performed by anyone as long as they are logged in
 
-You can find out more about permissions in the [Permissions](/schema/permissions) docs.
+You can find out more about permissions in the [Permissions](/docs/permissions) docs.
 
 ### The Project model
 
@@ -212,7 +212,7 @@ model Todo {
 }
 ```
 
-These fields define both sides of a one to many relationship - **one** project has **many** todos and **one** todo can belong to only **one** project. You can read more about relationships in the [Models](/schema/models) docs.
+These fields define both sides of a one to many relationship - **one** project has **many** todos and **one** todo can belong to only **one** project. You can read more about relationships in the [Models](/docs/models) docs.
 
 ### APIs
 

@@ -1,0 +1,58 @@
+# CLI
+
+With the Keel CLI you can run your project locally, run tests, validate your schema, and scaffold out new functions. For instructions on how to install the Keel CLI and get your development environment setup see the [Local Environment](/get-started/local-environment) docs.
+
+## Running your project
+
+From your Keel project directory use `keel run` to start a development server for your project.
+
+![The run command](/cli-run.png)
+
+This command will:
+
+* Set up the database including running any migrations
+* Validate your schema
+* Setup your functions
+* Start a development server
+* Watch for any changes to your schema or function files
+
+### GraphiQL playground
+
+While the development server is running you can access a GraphiQL playground for your API at `http://localhost:8000/api/graphiql`.
+
+### Resetting the database
+
+If you want to reset your database you can pass the `--reset` flag to the `run` command.
+
+```
+$ keel run --reset
+```
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning" emoji="⚠️">
+  Using `--reset` will delete all your data in your local database.
+</Callout>
+
+## Running tests
+
+Keel supports writing tests with the [Vitest](https://vitest.dev/) framework. The `keel test` command runs your tests with a sandboxed database and a development server, so you can write tests against your API's.
+
+<Callout type="info" emoji="🙌">
+  Docs for how to write tests coming soon.
+</Callout>
+
+## Validating
+
+You can validate your Keel project using `keel validate` which report any schema or function errors.
+
+![The generate command](/cli-validate.png)
+
+## Generating code
+
+The `@teamkeel/sdk` package that you use in your functions is generated from your schema files. When running a development server with `keel run` this package will be re-generated automatically but if you want to manually re-generate it you can use `keel generate`. 
+
+The `generate` command will also scaffold out any missing function files for you.
+
+![The generate command](/cli-generate.png)
+

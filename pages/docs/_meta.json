@@ -1,0 +1,11 @@
+{
+  "models": "Models",
+  "actions": "Actions",
+  "identity": "Identity",
+  "permissions": "Permissions",
+  "functions": "Functions",
+  "apis": "API's",
+  "envvars": "Environment Variables",
+  "secrets": "Secrets",
+  "cli": "CLI"
+}

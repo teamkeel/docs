@@ -6,36 +6,11 @@
     }
   },
   "get-started": {
-    "title": "Get Started",
-    "theme": {
-      "breadcrumb": false
-    }
+    "title": "Get Started"
   },
-  "schema": {
-    "title": "Schema",
-    "theme": {
-      "breadcrumb": false
-    }
+  "docs": {
+    "title": "Documentation"
   },
-  "functions": {
-    "title": "Functions",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "apis": {
-    "title": "API's",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-  "config": {
-    "title": "Config",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
-
   "blog": {
     "title": "Blog",
     "type": "page"
