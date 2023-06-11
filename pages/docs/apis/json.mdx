@@ -1,11 +1,493 @@
 # JSON API
 
-Coming soon 🙌
+The JSON API is a path-based JSON API, described by an [OpenAPI](https://www.openapis.org/) 3.1 spec, that accepts and returns plain JSON. Actions defined in your schema become JSON endpoints like `/api/json/<actionName>`.
+
+You can download the OpenAPI 3.1 spec for your JSON API from the **API explorer** page in the Keel console by clicking on the "API definitions" button in the top-right of the page. 
+
+![Downloading an OpenAPI spec from the Keel console](/api-explorer-openapi-spec.png)
+
+## Types
+
+The built-in Keel types are mapped to JSON types in the following way:
+
+| Keel type | JSON type |
+| --- | --- |
+| `Text` | `string` |
+| `Number` | `number` |
+| `Boolean` | `boolean` |
+| `Timestamp` | `string` (ISO8601 format) |
+| `Date` | `string` (ISO8601 format) |
+
+### Enums
+
+Enums defined in your Keel schema are represented as strings in both inputs and responses
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+
+<Tabs items={['Keel schema', 'JSON example']}>
+  <Tab>
+```keel {9}
+enum Category {
+  Sports
+  Finance
+  Politics
+}
+
+model Post {
+  fields {
+    category Category
+  }
+  operations {
+    create newPost() with (category)
+  }
+}
+```
+  </Tab>
+   <Tab>
+  ```json {3,9}
+  // POST /api/json/newPost
+  {
+    "category": "Finance"
+  }
+
+  // Response
+  {
+    "id": "2R3aEklU8GmhzY1Ot5CIrQw8QJJ",
+    "category": "Finance",
+    "createdAt": "2023-06-11T10:49:09.028Z",
+    "createdAt": "2023-06-11T10:49:09.028Z"
+  }
+  ```
+  </Tab>
+</Tabs>
+
+### Optional inputs
+
+If an input is marked as optional in your Keel schema then it is valid to completely omit it from the request, otherwise it **must be provided**.
+
+### JSON schema validation
+
+Requests made to your JSON API's are validated against a [JSON schema](https://json-schema.org/) for that action. If the request does not pass validation the API will return an HTTP `400` along with a list of vaidation errors.
+
+```json filename="Example of a validation error"
+{
+  "code": "ERR_INVALID_INPUT",
+  "message": "one or more errors found validating request object",
+  "data": {
+    "errors": [
+      {
+        "error": "Invalid type. Expected: string, given: integer",
+        "field": "id"
+      }
+    ]
+  }
+}
+```
+
+## Creating a new record
+
+You can define an action for creating a new record in your Keel schema using the **create** action type. In the JSON API these actions accept the write inputs (the ones after `with`) and return the newly created record.
+ 
+<Tabs items={['Keel schema', 'JSON request', 'JSON response', 'OpenAPI spec']}>
+  <Tab>
+```keel {7} filename="schema.keel"
+model Profile {
+  fields {
+    username Text @unique
+    bio Text
+  }
+  operations {
+    create createProfile() with (username, bio)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// POST /api/json/createProfile
+{
+  "username": "mickeymouse",
+  "bio": "I am a cartoon mouse"
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "id": "2R3aGKzSuhpOI0qttofYqfFS0fF",
+  "username": "mickeymouse",
+  "bio": "I am a cartoon mouse",
+  "createdAt": "2023-06-11T10:49:09.028Z",
+  "createdAt": "2023-06-11T10:49:09.028Z"
+}
+```
+  </Tab>
+</Tabs>
+
+## Reading a single record
+
+You can define an action for reading a single record in your Keel schema using the **get** action type. In the JSON API these actions return the record or null if the record could not be found.
+
+<Tabs items={['Keel schema', 'JSON request', 'JSON response', 'Record not found']}>
+  <Tab>
+```keel {6} filename="schema.keel"
+model Profile {
+  fields {
+    username Text
+  }
+  operations {
+    get getProfile(id)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// POST /api/json/getProfile
+{
+  "id": "2R3aH4N8EL5oYYTa117AgSZVBj2"
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "id": "2R3aH4N8EL5oYYTa117AgSZVBj2",
+  "username": "mickeymouse",
+  "createdAt": "2023-06-11T10:49:09.028Z",
+  "createdAt": "2023-06-11T10:49:09.028Z"
+}
+```
+  </Tab>
+  <Tab>
+  ```json
+// 200 OK
+null
+  ```
+  </Tab>
+</Tabs>
+
+## Updating a record
+
+You can define an action for updating a single record in your Keel schema using the **update** action type. In the JSON API these actions accept an object with `where` and `values` keys and return the record that was updated. The read inputs of the action (first set of parenthesis) go in the `where` object and the write inputs (those after `with`) go in the `values` object.
+
+<Tabs items={['Keel schema', 'JSON request', 'JSON response']}>
+  <Tab>
+```keel {7} filename="schema.keel"
+model Profile {
+  fields {
+    username Text @unique
+    bio Text
+  }
+  operations {
+    update updateBio(id) with (bio)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+{
+  // POST /api/json/updateBio
+  {
+    "where": {
+      "id": "2R3bDZfx3aQaSHgjrrWzReoLR1l"
+    },
+    "values": {
+      "bio": "I'm a cartoon mouse who's always up for an adventure"
+    }
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "id": "2R3aGKzSuhpOI0qttofYqfFS0fF",
+  "username": "mickeymouse",
+  "bio": "I'm a cartoon mouse who's always up for an adventure",
+  "createdAt": "2023-06-11T10:49:09.028Z",
+  "createdAt": "2023-06-11T12:07:09.028Z"
+}
+```
+  </Tab>
+</Tabs>
+
+### Updates with no values
+
+Update actions don't have to take any write inputs. For example you could define an action that publishes a post that uses a `@set` expression to update the record. For these cases you can omit the **values** key from the request.
+
+<Tabs items={['Keel schema', 'JSON request', 'JSON response']}>
+  <Tab>
+```keel {6-8} filename="schema.keel"
+model Post {
+  fields {
+    published Boolean
+  }
+  operations {
+    update publishPost(id) {
+      @set(post.published = true)
+    }
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+{
+  // POST /api/json/publishPost
+  {
+    "where": {
+      "id": "2R3bDZfx3aQaSHgjrrWzReoLR1l"
+    }
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "id": "2R3bwirtFtntsQDxDeX662bcLAS",
+  "published": true,
+  "createdAt": "2023-06-11T10:49:09.028Z",
+  "createdAt": "2023-06-11T12:07:09.028Z"
+}
+```
+  </Tab>
+</Tabs>
+
+## Listing records
+
+You can define an action for listing many records in your Keel schema using the **list** action type. In the JSON API the inputs for these actions should be provided under a `where` key and accept _query objects_ that allow for complex filtering. The return type of these actions is an object containing `results` and `pageInfo` keys.
+
+<Tabs items={['Keel schema', 'JSON Request', 'JSON response']}>
+  <Tab>
+```keel {8} filename="schema.keel"
+model Book {
+  fields {
+    title Text
+    genre Text
+    releaseDate Date
+  }
+  operations {
+    list listBooks(title?, genre?, releaseDate?)
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// POST /api/json/listBooks
+{
+  "first": 10,
+  "where": {
+    "title": {
+      "contains": "Love"
+    },
+    "releaseDate": {
+      "after": "2022-01-01"
+    }
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "pageInfo": {
+    "endCursor": "2R3dcs3SKO4CugdiW6T4XvsTiP4",
+    "startCursor": "2R3dc3S6BTP6K6ipnPZeHsumTsb",
+    "hasNextPage": false,
+    "totalCount": 2
+  },
+  "results": [
+    {
+      "id": "2R3dc3S6BTP6K6ipnPZeHsumTsb",
+      "title": "A Love Story",
+      "genre": "Fiction",
+      "releaseDate": "2022-03-01T00:00:00.000Z",
+      "createdAt": "2022-01-11T00:00:00.000Z",
+      "updatedAt": "2022-02-11T00:00:00.000Z"
+    },
+    {
+      "id": "2R3dcs3SKO4CugdiW6T4XvsTiP4",
+      "title": "What is Love?",
+      "genre": "Non-Fiction",
+      "releaseDate": "2022-08-01T00:00:00.000Z",
+      "createdAt": "2022-04-11T00:00:00.000Z",
+      "updatedAt": "2022-06-11T00:00:00.000Z"
+    },
+  ]
+}
+```
+  </Tab>
+</Tabs>
+
+### Filtering
+
+We can use a **list** action to perform queries like:
+
+* Find all books whose title contains the word "Love"
+* Find all books whose genre is "Sci-Fi" or "Crime" and were released in the last year
+
+This is possible because in a **list** action each input accepts a _query object_. For example an input that points to a `Text` field in a Keel schema can be filtered using `contains` or `startsWith`.
+
+**At least one key must be provided** and if multiple keys are provided they are AND'd together.
+
+All Keel types have a corresponding query type that allow filtering in ways that make sense for that type, for example a `Text` input can use `contains` whereas a `Number` input can use `greaterThan`.
+
+<Tabs items={['Text filters', 'Number filters', 'Date filters', 'Timestamp filters']}>
+  <Tab>
+```json
+{
+  "equals": "cat",
+  "notEquals": "cat",
+  "contains": "cat",
+  "startsWith": "cat",
+  "endsWith": "cat",
+  "oneOf": ["cat"],
+}
+```
+  </Tab>
+    <Tab>
+```json
+{
+  "equals": 42,
+  "notEquals": 42,
+  "lessThan": 42,
+  "lessThanOrEquals": 42,
+  "greaterThan": 42,
+  "greaterThanOrEquals": 42,
+  "oneOf": [42],
+}
+```
+  </Tab>
+  <Tab>
+```json
+{
+  "equals": "2023-06-11",
+  "before": "2023-06-11",
+  "onOrBefore": "2023-06-11",
+  "after": "2023-06-11",
+  "onOrAfter": "2023-06-11",
+}
+```
+  </Tab>
+  <Tab>
+```json
+{
+  "before": "2023-06-11T00:00:00.000Z",
+  "after": "2023-06-11T00:00:00.000Z",
+}
+```
+  </Tab>
+</Tabs>
+
+### Pagination
+
+The input type for a **list** action has four fields that relate to pagination.
+
+* `first` - Only return the first _N_ records. Can be used with `after`.
+* `last` - Only return the last _N_ records. Can be used with `before`.
+* `after` - Return records after this cursor.
+* `before` - Return records before this cursor.
+
+The response of a **list** action contains a `pageInfo` key which contains `startCursor` and `endCursor` fields. These values can be passed to `after` or `before` in subsequent queries. For example if you fetched the first 10 book records and in the response the `endCursor` value was "1234" then to get the next 10 records you would pass "1234" to the `after` input.
+
+## Functions
+
+These docs talk about **actions**, which is the general term for both operations (implemented by the Keel runtime) and functions (implemented by you using code). There is no difference between how operations and functions are surfaced in the JSON API.
+
+## Authentication
+
+Authentication works in the JSON API by passing a bearer token as an `Authorization` header when making requests. You obtain a token by using the built-in `authenticate` endpoint.
+
+<Tabs items={['Authentiating', 'JSON Response']}>
+  <Tab>
+```json
+// POST /api/json/authenticate
+{
+  "emailPasswod": {
+    "email": "bob@disney.com", 
+    "password": "m1ck3ym0us3"
+  }
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "token": "<JWT>"
+}
+```
+  </Tab>
+</Tabs>
+
+### Creating a new identity
+
+By default the `authenticate` endpoint tries to validate the provided credentials against existing Identity's. To create a new identity you need to pass the `createIfNotExists` flag, which will result in a new Identity being created if it does not already exist. The `identityCreated` field in the response indicates whether the Identity was created or not.
+
+<Tabs items={['Creating a new Identity', 'JSON Response']}>
+  <Tab>
+```json
+// POST /api/json/authenticate
+{
+  "emailPasswod": {
+    "email": "bob@disney.com", 
+    "password": "m1ck3ym0us3"
+  },
+  "createIfNotExists": true
+}
+```
+  </Tab>
+  <Tab>
+```json
+// 200 OK
+{
+  "token": "<JWT>",
+  "identityCreated": true
+}
+```
+  </Tab>
+</Tabs>
+
+### Request Password Reset
+
+You can use the built-in `requestPasswordReset` endpoint to request that a password reset token is sent to the user.
+
+```json
+// POST /api/json/requestPasswordReset
+{
+  "email": "bob@gmail.com",
+  "redirectUrl": "https://www.myapp.com/resetPassword"
+}
+```
+
+If an Identity exists with the given email address they will receive an email containing the link to the URL provided as `redirectUrl` with a `token` parameter appended to it. That token can be used with the `resetPassword` endpoint to actually reset a users password.
+
+### Reset a password
+
+Once you have obtained a password reset token you can sent it, along with the users new password, to the `resetPassword` endpoint.
+
+```json
+// POST /api/json/resetPassword
+{
+  "password": "iwontforgetthisone",
+  "token": "<password-reset-token>"
+}
+```
 
 ---
 
-## Authentication
-Example using `fetch` with the JSON API.
+### Authentication example
+
+This is a simple example of how to make authenticated reuests with the JSON API using `fetch`.
 
 ```ts
 // this would probably be set using an environment variable
