@@ -3,9 +3,7 @@ import { DocsThemeConfig } from "nextra-theme-docs";
 
 const config: DocsThemeConfig = {
   logo: <span>Keel</span>,
-  project: {
-    link: "https://github.com/teamkeel/keel",
-  },
+  project: {},
   footer: {
     text: "Keel",
   },
