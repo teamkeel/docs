@@ -1,26 +1,17 @@
 {
-  "name": "nextra-docs-template",
+  "name": "keel-docs",
   "version": "0.0.1",
-  "description": "Nextra docs template",
+  "description": "Keel docs site",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shuding/nextra-docs-template.git"
-  },
-  "author": "Shu Ding <g@shud.in>",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/shuding/nextra-docs-template/issues"
-  },
-  "homepage": "https://github.com/shuding/nextra-docs-template#readme",
+  "homepage": "https://docs.keel.so",
   "dependencies": {
     "next": "^13.4.4",
     "nextra": "latest",
-    "nextra-theme-docs": "^2.7.0",
+    "nextra-theme-docs": "^2.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
