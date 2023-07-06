@@ -383,6 +383,68 @@ model Todo {
 }
 ```
 
+### Using `@orderBy`
+
+You can use the `@orderBy` attribute in `list` operations to describe how the results are ordered.  
+By default, items are sorted by `createdAt`.
+
+```keel
+model Contestant {
+  fields {
+    name Text
+    gold Number
+    silver Number
+    bronze Number
+  }
+
+  operations {
+    list listRankings(name?) {
+      @orderBy(gold: desc, silver: desc, bronze: desc)
+    }
+  }
+}
+```
+
+
+
+### Using `@sortable`
+
+When you want the client to have control on the sorting order. You can use the `@orderBy` attribute in `list` operations to select which fields are available to sort by. The sort order can then be controled by passing `orderBy` in the request.
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+
+<Tabs items={['Keel schema', 'API request']}>
+  <Tab>
+```keel
+model Post {
+  fields {
+    name Text
+    likes Number
+
+  }
+
+  operations {
+    list listPosts() {
+      @sortable(createdAt, likes)
+    }
+  }
+}
+```
+  </Tab>
+   <Tab>
+  ```json
+  // POST /api/json/listPosts
+  {
+  "orderBy": [
+      { likes: "desc" },
+    ]
+}
+  ```
+  </Tab>
+</Tabs>
+
+
+
 ## `delete`
 
 A `delete` Action is for deleting a single record. It's pretty much analogous to `get`, just rather than reading and returning the record it deletes the record and returns the value of its `id` field.
