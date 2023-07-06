@@ -11,14 +11,10 @@
   "docs": {
     "title": "Documentation"
   },
-  "blog": {
-    "title": "Blog",
-    "type": "page"
-  },
   "contact": {
     "title": "Contact ↗",
     "type": "page",
-    "href": "mailto:help@keel.xyz",
+    "href": "mailto:help@keel.so",
     "newWindow": true
   }
 }
