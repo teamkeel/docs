@@ -4,6 +4,7 @@
   "identity": "Identity",
   "permissions": "Permissions",
   "functions": "Functions",
+  "sdk": "Typescript SDK",
   "apis": "API's",
   "envvars": "Environment Variables",
   "secrets": "Secrets",

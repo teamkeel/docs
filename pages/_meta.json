@@ -11,8 +11,14 @@
   "docs": {
     "title": "Documentation"
   },
+  "website": {
+    "title": "Homepage",
+    "href": "https://keel.so",
+    "newWindow": true,
+    "type": "page"
+  },
   "contact": {
-    "title": "Contact ↗",
+    "title": "Contact",
     "type": "page",
     "href": "mailto:help@keel.so",
     "newWindow": true

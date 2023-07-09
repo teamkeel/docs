@@ -53,6 +53,8 @@ Your functions receive two arguments.
 
 The `@teamkeel/sdk` package is generated based on your schema and contains type-safe API's for interacting with your models. These API's are all available on the exported `models` object.
 
+See [Model API](/docs/sdk/modelApi) for full usage.
+
 ### Reading a single record
 
 As shown in the simple example at the start of this page, we can read a single record by using the `findOne` model API.
@@ -205,6 +207,10 @@ export default PublishPost(async (ctx, inputs) => {
 ```
 
 This example also shows how you can access the Identity of the person performing the action by using `ctx.identity`. 
+
+### Custom database queries
+
+If you need more complex database operations you can use the [Database API](/docs/sdk/databaseApi) to write custom queries.
 
 ## Using `fetch`
 
@@ -370,3 +376,29 @@ export default CreateBooks(async (ctx, input) => {
 ### The `Any` message
 
 The built-in message `Any` can be used as the input or response of a `read` or `write` function. When you use this message the inputs or return type of your function will be the TypeScript type `any`. The `Any` message is useful if you want to receive unknown or arbitrary data in your function or return dynamic data.
+
+
+### Permissions
+
+For custom `read` or `write` functions you must implement any permissions logic in your code. This can be done by importing the `permissions` from the `@teamkeel/sdk` package and using the `allow()` and `deny()` methods.
+
+```tsx filename="functions/createBooks.ts"
+import { permissions } from "@teamkeel/sdk";
+
+export default CustomAction(async (ctx, input) => {
+  
+  if (ctx.headers.get("X-custom-auth-header") == ctx.secrets.AUTH_KEY) {
+    permissions.allow()
+  } else {
+    return
+  }
+
+  // checking row level access
+  if (item.owner != ctx.identity.id) {
+    permissions.deny()
+  }
+  
+});
+```
+
+By default, functions will return permission denied until `allow()` is called so `deny()` only needs to be called if you are explicitly denying access in your code after an `allow()` call.

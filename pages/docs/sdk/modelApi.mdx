@@ -1,0 +1,180 @@
+# The Model API
+
+The `@teamkeel/sdk` package is generated based on your schema and contains type-safe APIs for interacting with your models. These APIs are all available on the exported `models` object.
+
+```jsx
+import { models } from "@teamkeel/sdk";
+```
+
+Given the following Keel schema:
+
+```graphql
+model Post {
+	fields {
+     title Text
+  }
+}
+
+model Author {
+  fields {
+     name Text
+  }
+}
+```
+
+`models.post` and `models.author` will be available.
+
+## Creating a record
+
+`.create()` receives a single parameter:
+
+- `params` - object representing all of the data you would like to insert. This must include all required fields on the model.
+
+Fields that have a `@default` value in the schema will have their default values populated if no value is provided.
+
+For `@unique` fields, inserted data will be checked for uniqueness.
+
+```tsx
+import { models, CreatePost } from "@teamkeel/sdk";
+
+export default CreatePost(async (ctx, inputs) => {
+  const post = await models.post.create({
+    title: "a post about star wars",
+  });
+
+  console.log(post.title); // => a post about star wars
+
+  return post;
+});
+```
+
+The return type is `Promise<Model>`
+
+## Updating a record
+
+`.update()` receives two parameters:
+
+- `where` - the query conditions to lookup records by.
+- `values` - the set of changes you want to update the record(s) with.
+
+For `@unique` fields, updated data will be checked for uniqueness.
+
+```tsx
+import { models, UpdatePost } from "@teamkeel/sdk";
+
+export default UpdatePost(async (ctx, inputs) => {
+  const where = {
+    id: inputs.id,
+  };
+
+  const values = {
+    title: inputs.title,
+  };
+
+  const post = await models.post.update(where, values);
+
+  console.log(`Updated ${post.id}'s title`);
+
+  return post;
+});
+```
+
+The return type is `Promise<Model>`
+
+## Deleting a record
+
+`.delete()` receives a single parameter:
+
+- `where` - the conditions applied to the database query that will determine which records will be deleted
+
+```jsx
+import { models, DeletePost } from "@teamkeel/sdk";
+
+export default DeletePost((ctx, inputs) => {
+  return models.post.delete({
+    id: "123",
+  });
+});
+```
+
+## Reading a single record
+
+`.findOne()` receives a single parameter:
+
+- `where` - an object where the keys are any unique field on a model and the values are the unique values you want to look up by
+
+```jsx
+const post = await models.post.findOne({
+  id: "abc",
+});
+```
+
+The return type is `Promise<Model | null>`
+
+## Reading multiple records
+
+`.findMany` receives a single parameter:
+
+- `params` - Object of type `FindManyParams`
+
+### FindManyParams
+
+Consists of four top level properties:
+
+- `limit` (`number`) - the number of rows to limit the result set by
+  ```tsx
+  const results = await models.post.findMany({
+    limit: 5,
+  });
+  ```
+- `offset` (`number`) - the number of rows to offset by. Usually combined with `limit` and `orderBy` to return individual pages of data.
+  ```tsx
+  const results = await models.post.findMany({
+    limit: 10,
+    offset: 2,
+    orderBy: {
+      title: "asc",
+    },
+  });
+  ```
+- `where` (`Where`) - an object where the keys are one of the fields on the model and the values are objects conforming to the `WhereConditions` type. See the `WhereConditions` reference for a full table of the available options for different field types below.
+  ```tsx
+  const postsBeginningWithA = await models.post.findMany({
+    {
+      where: {
+        title: {
+          startsWith: 'a'
+        }
+      }
+    }
+  });
+  ```
+- `orderBy` (`OrderBy`) - an object used to define the sort order of the results returned from the database. The object must contain **_one_** property where the key is a known field name on the model, and the value must either be `asc`, `desc`.
+  ```tsx
+  const orderedByTitle = await models.post.findMany(
+    orderBy: {
+      title: 'asc'
+    }
+  );
+  ```
+
+### WhereConditions
+
+The `WhereConditions` type can be used with the `findMany` method to filter by a range of different operators:
+
+| Operator Name       | Field Types                     | Description                                                              | Usage                                                |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------- |
+| startsWith          | Text                            | Match values beginning with the search value                             | `{ title: { startsWith: 'abc' }}`                    |
+| endsWith            | Text                            | Match values ending with the search value                                | `{ title: { endsWith: 'xyz' }}`                      |
+| oneOf               | Text                            | Match values against an array of possible values                         | `{ title: { oneOf: ['apple', 'orange'] }}`           |
+| contains            | Text                            | Match values against a partial match within a string                     | `{ title: { contains: 'apple' } }`                   |
+| notEquals           | Text, Number, Boolean           | Find values where not matching search value                              | `{ title: { notEquals: 'apple' }}`                   |
+| equals              | Text, Number, Date, ID, Boolean | Find values matching the search value                                    | `{ title: { equals: 'orange' }}`                     |
+| greaterThan         | Number                          | Find values where the value is greater than the search value             | `{ rating: { greaterThan: 5 }}`                      |
+| greaterThanOrEquals | Number                          | Find values where the value is greater than or equal to the search value | `{ rating: { greaterThanOrEquals: 5 }}`              |
+| lessThan            | Number                          | Find values where the value is less than the search value                | `{ rating: { lessThan: 5 }}`                         |
+| lessThanOrEquals    | Number                          | Find values where the value is less than or equal to the search value    | `{ rating: { lessThanOrEquals: 5 }}`                 |
+| before              | Date                            | Find values where the date is before the search date                     | `{ createdAt: { before: new Date(2020, 1, 1) }}`     |
+| onOrBefore          | Date                            | Find values where the date is equal to or before the search date         | `{ createdAt: { onOrBefore: new Date(2020, 1, 1) }}` |
+| after               | Date                            | Find values where the date is after the search date                      | `{ createdAt: { after: new Date(2020, 1, 1) }}`      |
+| onOrAfter           | Date                            | Find values where the date is equal to or after the search date          | `{ createdAt: { onOrAfter: new Date(2020, 1, 1) }}`  |
