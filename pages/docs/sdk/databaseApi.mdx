@@ -1,0 +1,30 @@
+# Database API
+
+If you need to write more complex queries where you directly control the SQL being generated, we expose an instance of the type-safe JavaScript / TypeScript query builder [Kysely](https://kysely.dev/) via our SDK package:
+
+```tsx
+import { GetPost, useDatabase } from "@teamkeel/sdk";
+
+export default GetPost(async (ctx, inputs) => {
+  const db = useDatabase();
+
+  const post = await db
+    .selectFrom("post")
+    .selectAll()
+    .where("createdAt", ">=", new Date(2020, 1, 1))
+    .executeTakeFirstOrThrow();
+
+  return post;
+});
+```
+
+import { Callout } from "nextra/components";
+
+<Callout>
+  Column and table names are represented in snake_case at the database level,
+  but lowerCamelCase casing should be used when referencing column and table
+  names when building queries (such as `createdAt` above), as Kysely will
+  automatically convert the casing from the former to the latter.
+</Callout>
+
+For more information see the [Kysely documentation](https://kysely.dev/docs/intro)
