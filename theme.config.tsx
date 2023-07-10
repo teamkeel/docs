@@ -20,13 +20,17 @@ const config: DocsThemeConfig = {
   ),
   project: {},
   footer: {
-    text: "Keel",
+    text: <span>© Planko Ltd {new Date().getFullYear()}</span>,
   },
   editLink: {
     component: () => null,
   },
   feedback: {
     useLink: () => `mailto:help@keel.so`,
+  },
+  sidebar: {
+    // Makes collapsible menus collapsed by default
+    defaultMenuCollapseLevel: 1,
   },
   useNextSeoProps: () => {
     const { asPath } = useRouter();
