@@ -1,0 +1,94 @@
+# What are Jobs?
+
+Jobs are the Keel way to deal with tasks that either:
+
+- You want to "fire" automatically, on a scheduled basis (like every Friday)
+- Take hours to run (like a batch data import)
+
+You specify them just like everything else - in your Schema
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+    @schedule("* * * * 5")
+}
+```
+
+That schedule says "every Friday" - using the widely-used [cron](https://devhints.io/cron) format.
+
+Friday being the fifth day of the week.
+
+## So What Happens?
+
+It simply runs your function called `EmailNewCustomerReport` which it expects to find in your
+project's `./jobs directory`.
+
+Once you've specified your Job in the Schema, you can run `keel generate` in the CLI - and it will auto-generate the "skeleton" for your function in 
+your `jobs` directory, ready to put some logic code into.
+
+It looks like this:
+
+```tsx filename="jobs/emailNewCustomerReport.ts"
+export default EmailNewCustomerReport(async (ctx) => {
+  // your logic code here
+});
+```
+
+# What Can Job Functions Do?
+Pretty much anything you like.
+
+So for example:
+- They have read and write access to your database - via the `Model API`
+- They can make requests to external services using `fetch`
+- They can import and use any third party npm packages of your choice
+
+One thing they **cannot** do though is receive an input. Note how the generated function signature does not specify
+an input argument.
+
+By the way, we have **manual** jobs coming soon that you'll be able to fire whenever you want, manually,
+from the Keel console. **For these** you will be able to
+specify inputs in your Schema. (Because now there'll be a human firing the job who can provide the input data).
+
+# How to Develop, Test And Debug Your Job
+
+The CLI includes support for running jobs - to help you develop and debug your Function.
+
+But you do it with the CLI's Test command - but don't forget `keel test` does not touch your real database. Instead it uses a special dedicated temporary database for each test run. That means you can experiment with creating Models in your database over and over without messing up your real database.
+
+### Here's how you use `keel test` for Jobs
+
+todo
+
+# How to See Your Jobs Running in the Keel console
+
+
+
+
+![Jobs intro](/jobs-intro.png)
+
+Click on one of the jobs in the table - to see its run history
+
+![Jobs history](/jobs-run-history.png)
+
+Click on one of the historical runs - to find out more about it
+
+![Jobs analysis](/jobs-run-analysis.png)
+
+
+![Jobs history](/jobs-the-build.png)
+
+
+# todo
+
+- work out how to tell the console story properly
+- switch in better screenshots 
+- permissions
+- code examples
+- the `ctx` argument
+- a job can have more than one schedule
+- provide more cross references to say functions, the CLI, the model API etc
+- split the content across a few (shorter) pages
+- replace the "cron" external link to a better one
+
+
+
+
