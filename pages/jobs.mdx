@@ -1,0 +1,129 @@
+# Jobs
+
+Jobs in Keel allow you to execute tasks in the background away from your normal workflow.
+This can be very useful if you have tasks that need to be run on a regular basis, or that take longer
+to run than usual. 
+
+Jobs can be scheduled or manual, or both. Scheduled jobs are run on a repeating, scheduled basis, whereas Manual jobs are executed
+from the Keel console by an authorised user.
+
+You can define a job in the schema, and implement it just like a [function](./functions). Job definitions are root level blocks, along with Models, Roles and APIs.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+    @schedule("0 6 * * 5")
+}
+```
+
+This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
+
+Running `keel generate` in the CLI will create a new jobs file in a directory called `./jobs`. The file created for us will look something like this.
+
+```tsx filename="jobs/emailNewCustomerReport.ts"
+import { EmailNewCustomerReport } from "@teamkeel/sdk";
+
+export default EmailNewCustomerReport(async (ctx) => {
+  // your code here
+});
+```
+
+To implement this job, we can use the same generated [APIs](./functions/sdk) that are available to functions.
+
+## Scheduled jobs
+
+A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses [cron](https://devhints.io/cron) format to define the
+schedule by which then job is executed. Scheduled jobs take no inputs.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @schedule("0 6 * * 5")
+}
+```
+
+The example above executes the `EmailNewCustomerReport` job at 6:00 every Friday.
+
+Jobs may need to be executed on more than one schedule. Because of this, it is possible to define more than one `@schedule` attribute for a job.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @schedule("0 0 7 ? * 1,2,3,4 *")
+  @schedule("0 6 * * 5")
+}
+```
+
+The example above executes the `EmailNewCustomerReport` job at 7:00 every Monday to Thursday but on Fridays it will execute it at 6:00.
+
+Scheduled jobs can also take a `@permission` attribute. If a job has both a permission and a schedule defined, they can be run both on the schedule and from the Keel console.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @schedule("0 6 * * 5")
+  @permission(roles: [Onboarding])
+}
+```
+
+> Please note that even if a scheduled job has a permission defined, it still cannot take any inputs.
+
+## Manual jobs
+
+A manual job is a job that can be executed from the Keel console. These kinds of jobs can take inputs and require permissions to be defined, 
+which allows you to control the  users in your system that can execute them. 
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  inputs {
+    joinedSince Date?
+    deliveryEmail Text
+  }
+  @permission(roles: [Onboarding])
+}
+```
+This example defines the `EmailNewCustomerReport` as a manual job. It takes two inputs, `joinedSince` an optional `Date` and `deliveryEmail`, a required `String`.
+It also declares permissions for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
+
+To execute a manual job, you will need to use the Keel console. 
+
+Jobs are available in the left menu on your console. Once you select the menu item, the jobs page will list all of the jobs defined within your project on one tab, and the job run history in another.
+
+With the `All Jobs` tab selected, you can see all of the jobs defined within your project, any schedules that are defined for them, the date and time of the last run and the date and time of the next scheduled run, if any.
+Clicking on a job row will display further details about that job.
+
+With the `Run history` tab selected, you can see all of the job runs that have been executed, along with the date and time of the last run, the status of the run and who executed it. Clicking
+on a run row will display further details about the run. Job status's can be either `Running`, `Successful` or `Failed`.
+
+Within the `Job Details` page, you can view any schedule that has been defined, next run details and the run history for that job.
+
+Within the `Run details` page, you can view the date and time of the run, it's status, how long it took to run the job, who ran it, links to the build that executed the job and a full trace of the run to enable debugging if something went wrong.
+
+## Permissions
+
+Jobs that are specified with permissions can be run manually from the Keel console. Permissions can be defined using [Roles](./permissions#roles), or using [expressions](./permissions#expressions). 
+The power of expression support allows us to make permissions rules that are very flexible. The example below shows how to use expressions within permissions to give global access.
+to executing a job.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @permission(true)
+}
+```
+
+## Testing
+
+To help you develop your jobs, Keel makes them available within [tests](./testing).
+
+```tsx filename="jobs/email-new-customer-report.test.ts"
+
+import { jobs, actions, models, resetDatabase } from "@teamkeel/testing";
+import { test, expect, beforeEach } from "vitest";
+
+beforeEach(resetDatabase);
+
+test("Test EmailNewCustomerReport updates new customer flag", async () => {
+    console.log("Test start")
+
+    await jobs.emailNewCustomerReport();
+
+    const res = await actions.getCustomer();
+    expect(res.reportSent).toBeTruthy();
+  });
+```
