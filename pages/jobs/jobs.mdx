@@ -55,21 +55,64 @@ Scheduled jobs also do not have access to the `identity` attribute inside the `c
 
 The CLI includes support for running jobs - to help you develop and debug your Function.
 
-But you do it with the CLI's Test command - but don't forget `keel test` does not touch your real database. Instead it uses a special dedicated temporary database for each test run. That means you can experiment with creating Models in your database over and over without messing up your real database.
+You do it with the CLI's Test command as follows.
 
-pete thinking out loud here...
+> Don't forget to run `keel generate` before trying tests if you have not already.
+> It is that step that makes the `@teamkeel/testing` package that we import from below.
 
-dive straight in with writing a test (trust me)
-then run the command
-what happens?
-then what do you do?
-say anything about database - access it with 3rd party tool
-skim or refer elsewhere for model API
-how to use vscode debugger in this context
+Create a test by making a file like this.
 
-### Here's how you use `keel test` for Jobs
+```tsx filename="jobs/tests-my-job.test.ts"
 
-todo
+import { jobs, actions, models, resetDatabase } from "@teamkeel/testing";
+import { test, expect, beforeEach } from "vitest";
+
+beforeEach(resetDatabase);
+
+test("test something about EmailNewCustomerReport ", async () => {
+
+    // You can see console.log() output.
+    console.log("hello - a greeting from my test")
+
+    // Call your jobs function.
+    await jobs.emailNewCustomerReport();
+
+    // This has already proved that your function compiles and
+    // ran successfully.
+
+    // You can use the vitest package to check the job did what it was
+    // supposed to.
+
+    // Perhaps it was supposed to create some Posts in the database?
+
+    // const res = await actions.listPosts();
+    // expect(res.results.length).greaterThan(3);
+  });
+```
+
+It's easy to run your test - simply with:
+
+`keel test`
+
+Here's the output when the test passes:
+
+![Jobs output](/jobs-test-output-pass.png)
+
+
+
+Your test file(s) have to be in your `jobs` directory, and the file name must end with `.tests.ts`
+
+### Test Database Lifecycle
+Tests use a completely separate and short-lived database that is dedicated to your tests so you need not
+worry about it changing your real (local) database.
+Your test code can load data into the database if you want to, prior to each test running using the Model API
+(todo cross ref the Model API in functions section).
+
+And of course your
+job may well load new data when it runs.
+This example uses `beforeEach(resetDatabase);` - which explicitly clears the database before your test runs.
+You can put more than one test function in each test file, and it will clear your database before each one is run.
+
 
 # Jobs Pages in the Keel Console
 
@@ -87,17 +130,17 @@ What you can do here:
 | See what happened on one particular run | click that run | (on the Job Details page) |
 | See which of your code commits it used | click the `current build` link | (good for debugging a job) |
 
-
-
-
-
 # todo
 
 - address PR feedback
 - switch in better screenshots 
-- permissions
+- permissions - have to defer for now because schema fails validation if you have both a schedule and a permission
+- testing section needs love (and maybe moved to a dedicated section in the CLI section)
+  -  could speak about test fixturing, and the exposed Vite assertions
+  -  not sure if you VSCode debug this - because the node process is ephemeral
+- say about using third party UI tool to look inside the test database
 - code examples
-- the `ctx` argument
+- what you can do with the `ctx` argument
 - a job can have more than one schedule
 - provide more cross references to say functions, the CLI, the model API etc
 - split the content across a few (shorter) pages
