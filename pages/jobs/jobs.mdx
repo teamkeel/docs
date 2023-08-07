@@ -1,0 +1,136 @@
+# What are Jobs?
+
+Jobs are the Keel way to deal with tasks that either:
+
+- You want to run on a scheduled basis (like every Friday),
+- Take longer to run than a normal function (like a batch data import),
+- You want to execute in the background away from your normal workflow.
+
+You specify them just like everything else - in your Schema. 
+Job definitions are root level blocks, along with Models, Roles and APIs.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+    @schedule("* * * * 5")
+}
+```
+
+To define a schedule for a job, you can declare a `@schedule` attribute. 
+This attribute takes a single argument, a String in [cron](https://devhints.io/cron) format.
+The one in the example above declares a job that runs every Friday, Friday being the fifth day of the week. A job defined without a schedule
+is invalid.
+
+## So What Happens?
+
+Once you've specified your Job in the Schema, you can run `keel generate` in the CLI - and it will auto-generate the "skeleton" for your function in 
+your projects `./jobs` directory, ready to put some logic code into. 
+
+It looks like this:
+
+```tsx filename="jobs/emailNewCustomerReport.ts"
+export default EmailNewCustomerReport(async (ctx) => {
+  // your logic code here
+});
+```
+
+At the time specified inside your `@schedule` attribute, Keel will execute your job.
+
+# What Can Job Functions Do?
+Jobs can do anything that a function can do.
+
+- They have read and write access to your database - via the `Model API`
+- They can make requests to external services using `fetch`
+- They can import and use any third party npm packages of your choice
+
+Scheduled jobs **cannot** receive an input. Note how the generated function signature in the example above does not specify
+an input argument.
+
+Scheduled jobs also do not have access to the `identity` attribute inside the `ctx` argument of the function. This is because they are executed by Keel, and not a specific user.
+
+> **Manual** jobs are coming soon. 
+> 
+> These are jobs that can take inputs and which you are able to execute manually from the Keel console.
+
+# How to Develop, Test And Debug Your Job
+
+The CLI includes support for running jobs - to help you develop and debug your Function.
+
+You do it with the CLI's Test command as follows.
+
+> Don't forget to run `keel generate` before trying tests if you have not already.
+> It is that step that makes the `@teamkeel/testing` package that we import from below.
+
+Create a test by making a file like this.
+
+```tsx filename="jobs/tests-my-job.test.ts"
+
+import { jobs, actions, models, resetDatabase } from "@teamkeel/testing";
+import { test, expect, beforeEach } from "vitest";
+
+beforeEach(resetDatabase);
+
+test("test something about EmailNewCustomerReport ", async () => {
+
+    // You can see console.log() output.
+    console.log("hello - a greeting from my test")
+
+    // Call your jobs function.
+    await jobs.emailNewCustomerReport();
+
+    // This has already proved that your function compiles and
+    // ran successfully.
+
+    // You can use the vitest package to check the job did what it was
+    // supposed to.
+
+    // Perhaps it was supposed to create some Posts in the database?
+
+    // const res = await actions.listPosts();
+    // expect(res.results.length).greaterThan(3);
+  });
+```
+
+It's easy to run your test - simply with:
+
+`keel test`
+
+Here's the output when the test passes:
+
+![Jobs output](/jobs-test-output-pass.png)
+
+
+
+Your test file(s) have to be in your `jobs` directory, and the file name must end with `.tests.ts`
+
+### Test Database Lifecycle
+Tests use a completely separate and short-lived database that is dedicated to your tests so you need not
+worry about it changing your real (local) database.
+Your test code can load data into the database if you want to, prior to each test running using the Model API
+(todo cross ref the Model API in functions section).
+
+And of course your
+job may well load new data when it runs.
+This example uses `beforeEach(resetDatabase);` - which explicitly clears the database before your test runs.
+You can put more than one test function in each test file, and it will clear your database before each one is run.
+
+
+# Jobs Pages in the Keel Console
+
+If you visit the Keel Console you'll see a Jobs section in the side bar - which lets
+you view all the jobs you've defined in your schema - and look into individual runs of each job.
+
+![Jobs intro](/jobs-intro.png)
+
+What you can do here:
+
+| Task | How |     |
+| ---  | --- | --- |
+| See complete Run history | go to the `Run History` tab |
+| Focus-in on one named Job | click that row | takes you to a Job Details page |
+| See what happened on one particular run | click that run | (on the Job Details page) |
+| See which of your code commits it used | click the `current build` link | (good for debugging a job) |
+
+
+
+
+
