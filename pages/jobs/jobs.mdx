@@ -2,10 +2,12 @@
 
 Jobs are the Keel way to deal with tasks that either:
 
-- You want to "fire" automatically, on a scheduled basis (like every Friday)
-- Take hours to run (like a batch data import)
+- You want to run on a scheduled basis (like every Friday),
+- Take longer to run than a normal function (like a batch data import),
+- You want to execute in the background away from your normal workflow.
 
-You specify them just like everything else - in your Schema
+You specify them just like everything else - in your Schema. 
+Job definitions are root level blocks, along with Models, Roles and APIs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
@@ -13,17 +15,15 @@ job EmailNewCustomerReport {
 }
 ```
 
-That schedule says "every Friday" - using the widely-used [cron](https://devhints.io/cron) format.
-
-Friday being the fifth day of the week.
+To define a schedule for a job, you can declare a `@schedule` attribute. 
+This attribute takes a single argument, a String in [cron](https://devhints.io/cron) format.
+The one in the example above declares a job that runs every Friday, Friday being the fifth day of the week. A job defined without a schedule
+is invalid.
 
 ## So What Happens?
 
-It simply runs your function called `EmailNewCustomerReport` which it expects to find in your
-project's `./jobs directory`.
-
 Once you've specified your Job in the Schema, you can run `keel generate` in the CLI - and it will auto-generate the "skeleton" for your function in 
-your `jobs` directory, ready to put some logic code into.
+your projects `./jobs` directory, ready to put some logic code into. 
 
 It looks like this:
 
@@ -33,20 +33,23 @@ export default EmailNewCustomerReport(async (ctx) => {
 });
 ```
 
-# What Can Job Functions Do?
-Pretty much anything you like.
+At the time specified inside your `@schedule` attribute, Keel will execute your job.
 
-So for example:
+# What Can Job Functions Do?
+Jobs can do anything that a function can do.
+
 - They have read and write access to your database - via the `Model API`
 - They can make requests to external services using `fetch`
 - They can import and use any third party npm packages of your choice
 
-One thing they **cannot** do though is receive an input. Note how the generated function signature does not specify
+Scheduled jobs **cannot** receive an input. Note how the generated function signature in the example above does not specify
 an input argument.
 
-By the way, we have **manual** jobs coming soon that you'll be able to fire whenever you want, manually,
-from the Keel console. **For these** you will be able to
-specify inputs in your Schema. (Because now there'll be a human firing the job who can provide the input data).
+Scheduled jobs also do not have access to the `identity` attribute inside the `ctx` argument of the function. This is because they are executed by Keel, and not a specific user.
+
+> **Manual** jobs are coming soon. 
+> 
+> These are jobs that can take inputs and which you are able to execute manually from the Keel console.
 
 # How to Develop, Test And Debug Your Job
 
