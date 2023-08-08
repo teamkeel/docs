@@ -21,9 +21,9 @@ describe('Markdown Link Checker', async () => {
         if (!filename.endsWith('.mdx')) continue;
 
         pages.set(
-            slash(filename.replace(contentDir, ''))
-                .replace(/^\.\/content/, '') // remove `/content`
-                .slice(0, -4), // remove `.md`
+            slash(filename)
+                .replace(contentDir, '') // remove `/pages`
+                .slice(0, -4), // remove `.mdx`
             await parseMarkdown(filename)
         );
     }
