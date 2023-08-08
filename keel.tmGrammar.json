@@ -21,6 +21,9 @@
     },
     {
       "include": "#message_block_definition"
+    },
+    {
+      "include": "#job_block_definition"
     }
   ],
   "repository": {
@@ -95,6 +98,9 @@
       },
       "patterns": [
         {
+          "include": "#double_comment"
+        },
+        {
           "begin": "\\s?({)",
           "beginCaptures": {
             "1": {
@@ -102,6 +108,9 @@
             }
           },
           "patterns": [
+            {
+              "include": "#double_comment"
+            },
             {
               "include": "#operation_definition"
             }
@@ -158,6 +167,9 @@
         }
       },
       "patterns": [
+        {
+          "include": "#double_comment"
+        },
         {
           "match": "\\s+([A-Za-z][\\w]*)\\s*\\n",
           "captures": {
@@ -336,6 +348,107 @@
         }
       }
     },
+    "job_block_definition": {
+      "begin": "^\\s*(job)\\s+([A-Za-z][\\w]*)\\s*({)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.job.keel"
+        },
+        "2": {
+          "name": "entity.name.type.job.keel"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#double_comment"
+        },
+        {
+          "include": "#job_inputs_block_definition"
+        },
+        {
+          "include": "#attribute_with_arguments"
+        }
+      ],
+      "end": "\\s*\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      }
+    },
+    "job_inputs_block_definition": {
+      "begin": "^\\s*(inputs)\\s+({)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.inputs.keel"
+        },
+        "2": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#double_comment"
+        },
+        {
+          "include": "#job_inputs_definition"
+        }
+      ],
+      "end": "\\s*\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      }
+    },
+    "job_inputs_definition": {
+      "patterns": [
+        {
+          "begin": "^\\s*(\\w+)\\s+([A-Za-z][\\w]*[?]?)",
+          "beginCaptures": {
+            "1": {
+              "name": "variable.job_inputs.keel"
+            },
+            "2": {
+              "name": "support.type.primitive.keel"
+            }
+          },
+          "patterns": [
+            {
+              "begin": "\\s+({)",
+              "beginCaptures": {
+                "1": {
+                  "name": "punctuation.definition.tag.keel"
+                }
+              },
+              "patterns": [
+                {
+                  "include": "#attribute_with_arguments"
+                },
+                {
+                  "include": "#attribute"
+                }
+              ],
+              "end": "(})",
+              "endCaptures": {
+                "0": {
+                  "name": "punctuation.definition.tag.keel"
+                }
+              }
+            }
+          ],
+          "end": "(\\n)",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.tag.keel"
+            }
+          }
+        }
+      ]
+    },
     "enum_block_definition": {
       "begin": "(enum)\\s+(\\w+)\\s+({)",
       "beginCaptures": {
@@ -424,6 +537,9 @@
             }
           },
           "patterns": [
+            {
+              "include": "#double_comment"
+            },
             {
               "include": "#attribute_with_arguments"
             },
