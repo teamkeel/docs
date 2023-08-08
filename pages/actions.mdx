@@ -12,7 +12,7 @@ model Product {
 }
 ```
 
-To find out how to use your Actions from your API's see the [API docs](/docs/apis).
+To find out how to use your Actions from your API's see the [API docs](/apis).
 
 import { Callout } from "nextra/components";
 
@@ -22,7 +22,7 @@ import { Callout } from "nextra/components";
 
 ## Action Types
 
-Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for operations and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/docs/functions) documentation. The table below describes the behaviour of each action type.
+Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for operations and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/functions) documentation. The table below describes the behaviour of each action type.
 
 | Type   | Behaviour                                                                      | Operation | Function |
 | ------ | ------------------------------------------------------------------------------ | --------- | -------- |
@@ -130,7 +130,7 @@ In the above schema, `myProfile` is valid even though it doesn't accept any inpu
 
 ### Validation
 
-For `get` operations, Keel will validate that you are filtering on at least one unique field. There are no restrictions on the inputs accepted by functions, but they must return a single record. Refer to the [Functions documentation](/docs/functions) for further information.
+For `get` operations, Keel will validate that you are filtering on at least one unique field. There are no restrictions on the inputs accepted by functions, but they must return a single record. Refer to the [Functions documentation](/functions) for further information.
 
 ## `create`
 
@@ -169,7 +169,7 @@ model Customer {
 }
 ```
 
-In this example we accept the `name` field as in input to the action but set the `identity` field based on the callers Identity. For more information on Identity see the [Identity docs](/docs/identity).
+In this example we accept the `name` field as in input to the action but set the `identity` field based on the callers Identity. For more information on Identity see the [Identity docs](/identity).
 
 ### Creating nested records
 
@@ -219,7 +219,7 @@ model Lesson {
 
 ### Validation
 
-For `create` operations, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/docs/functions).
+For `create` operations, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
 
 ## `update`
 
@@ -318,7 +318,7 @@ model Todo {
 
 ### Validation
 
-For `update` operations, Keel will validate that you are filtering on at least one unique field. For Functions there are no restrictions on what inputs you accept, just that your function updates and returns a single record. For more information see the [Function docs](/docs/functions).
+For `update` operations, Keel will validate that you are filtering on at least one unique field. For Functions there are no restrictions on what inputs you accept, just that your function updates and returns a single record. For more information see the [Function docs](/functions).
 
 ## `list`
 
@@ -343,7 +343,7 @@ The `listBooks` Operation in the above schema would allow for any of the followi
 - Find all books whose title ends with the text `"atsby"`
 - Find all books whose title is either `"Great Gatsby"` or `"Great Expectations"`
 
-For more info on how filtering works in `list` actions see the [API docs](/docs/apis).
+For more info on how filtering works in `list` actions see the [API docs](/apis).
 
 ### Filtering on multiple fields
 
