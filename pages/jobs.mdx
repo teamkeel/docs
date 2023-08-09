@@ -1,12 +1,11 @@
 # Jobs
 
 Jobs in Keel allow you to execute tasks in the background away from your normal workflow.
-This can be very useful if you have tasks that need to be run on a regular basis, or that take longer
-to run than usual. 
+This can be incredibly useful if you have tasks that need to be executed on a regular basis or take longer than usual to run.
 
-Jobs can be scheduled and run on a repeating, scheduled basis.
+Jobs can be scheduled and run on a recurring, scheduled basis.
 
-You can define a job in the schema, and implement it just like a [function](./functions). Job definitions are root level blocks, along with Models, Roles and APIs.
+You can define a job in your `schema.keel` file, and implement it just like a [function](./functions). Job definitions are root level blocks, along with Models, Roles and APIs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
@@ -16,7 +15,7 @@ job EmailNewCustomerReport {
 
 This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
 
-Running `keel generate` in the CLI will create a new jobs file in a directory called `./jobs`. The file created for us will look something like this.
+Running `keel generate` in the CLI will create a new jobs file in a directory called `./jobs`. The file created for the job we created above will look something like this.
 
 ```tsx filename="jobs/emailNewCustomerReport.ts"
 import { EmailNewCustomerReport } from "@teamkeel/sdk";
@@ -30,8 +29,8 @@ To implement this job, we can use the same generated [APIs](./functions/sdk) tha
 
 ## Scheduled jobs
 
-A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses [cron](https://devhints.io/cron) format to define the
-schedule by which then job is executed. Scheduled jobs take no inputs.
+A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [cron](https://devhints.io/cron) format to define the
+schedule by which a job is executed. Scheduled jobs take no inputs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
@@ -76,8 +75,3 @@ test("Test EmailNewCustomerReport updates new customer flag", async () => {
     expect(res.reportSent).toBeTruthy();
   });
 ```
-
-
-
-
-
