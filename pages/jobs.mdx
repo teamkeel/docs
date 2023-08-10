@@ -1,0 +1,77 @@
+# Jobs
+
+Jobs in Keel allow you to execute tasks in the background away from your normal workflow.
+This can be incredibly useful if you have tasks that need to be executed on a regular basis or take longer than usual to run.
+
+Jobs can be scheduled and run on a recurring, scheduled basis.
+
+You can define a job in your `schema.keel` file, and implement it just like a [function](./functions). Job definitions are root level blocks, along with Models, Roles and APIs.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+    @schedule("0 6 * * 5")
+}
+```
+
+This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
+
+Running `keel generate` in the CLI will create a new jobs file in a directory called `./jobs`. The file created for the job we created above will look something like this.
+
+```tsx filename="jobs/emailNewCustomerReport.ts"
+import { EmailNewCustomerReport } from "@teamkeel/sdk";
+
+export default EmailNewCustomerReport(async (ctx) => {
+  // your code here
+});
+```
+
+To implement this job, we can use the same generated [APIs](./functions/sdk) that are available to functions.
+
+## Scheduled jobs
+
+A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [cron](https://devhints.io/cron) format to define the
+schedule by which a job is executed. Scheduled jobs take no inputs.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @schedule("0 6 * * 5")
+}
+```
+
+The example above executes the `EmailNewCustomerReport` job at 6:00 every Friday.
+
+Jobs may need to be executed on more than one schedule. Because of this, it is possible to define more than one `@schedule` attribute for a job.
+
+```keel filename="schema.keel"
+job EmailNewCustomerReport {
+  @schedule("0 0 7 ? * 1,2,3,4 *")
+  @schedule("0 6 * * 5")
+}
+```
+
+The example above executes the `EmailNewCustomerReport` job at 7:00 every Monday to Thursday but on Fridays it will execute it at 6:00.
+
+## Manual Jobs
+
+> Manual jobs are coming soon. These are jobs that can take inputs and are run from the Keel console.
+
+## Testing
+
+To help you develop your jobs, Keel makes them available within [tests](./testing).
+
+```tsx filename="jobs/email-new-customer-report.test.ts"
+
+import { jobs, actions, models, resetDatabase } from "@teamkeel/testing";
+import { test, expect, beforeEach } from "vitest";
+
+beforeEach(resetDatabase);
+
+test("Test EmailNewCustomerReport updates new customer flag", async () => {
+    console.log("Test start")
+
+    await jobs.emailNewCustomerReport();
+
+    const res = await actions.getCustomer();
+    expect(res.reportSent).toBeTruthy();
+  });
+```

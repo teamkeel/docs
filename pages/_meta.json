@@ -12,22 +12,20 @@
   "what-is-keel": "What is Keel?",
   "local-environment": "Local Environment",
   "tutorial": "Tutorial",
-
   "-- docs": {
     "title": "Documentation",
     "type": "separator"
   },
-
   "models": "Models",
   "actions": "Actions",
   "identity": "Identity",
   "permissions": "Permissions",
   "functions": "Functions",
   "apis": "API's",
+  "jobs": "Jobs",
   "envvars": "Environment Variables",
   "secrets": "Secrets",
   "cli": "CLI",
-
   "website": {
     "title": "Homepage",
     "href": "https://keel.so",
