@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest"
   },
   "homepage": "https://docs.keel.so",
   "dependencies": {
@@ -18,6 +19,15 @@
   "devDependencies": {
     "@types/node": "20.2.5",
     "@types/react": "18.2.8",
-    "typescript": "^5.1.3"
+    "case": "^1.6.3",
+    "get-all-files": "^4.1.0",
+    "remark-frontmatter": "^4.0.1",
+    "remark-parse": "^10.0.2",
+    "remark-stringify": "^10.0.3",
+    "slash": "^5.1.0",
+    "typescript": "^5.1.3",
+    "unified": "^10.1.2",
+    "unist-util-visit": "^5.0.0",
+    "vitest": "^0.34.1"
   }
 }
