@@ -1,0 +1,214 @@
+# Testing
+
+The Keel testing framework allows you to write tests for all actions defined in your schema in TypeScript, in a completely typesafe manner! 
+
+## Getting started
+
+Take the following `.keel` schema:
+
+```keel filename="schema.keel"
+model Product {
+  fields {
+    title Text
+  }
+
+  actions {
+    get getProduct(id) {
+      @permission(expression: true)
+    }
+
+    create createProduct() with(title) {
+      @permission(expression: ctx.isAuthenticated)
+    }
+  }
+}
+```
+
+First thing you will need to do is to run our code generation facilities in order to dynamically generate TypeScript types for your schema so you can interact with our testing framework in a typesafe manner:
+
+```bash
+$ keel generate
+```
+
+Once we have generated the supporting TypeScript code for your schema, you can create a file at the root called `main.test.ts` with the following code:
+
+```typescript filename="main.test.ts"
+import { test, expect } from 'vitest';
+import { actions, models } from '@teamkeel/testing';
+
+test('a passing test', async () => {
+  // create the product in the database
+  const product = await models.product.create({
+    title: 'cool product',
+  });
+
+  // call the action
+  const fetchedRecord = await actions.getProduct({ id: product.id });
+
+  // assert that calling the action with the id returns the expected product
+  expect(fetchedRecord).toEqual(product);
+});
+```
+
+In order to run the test, in the same directory where your `.keel` schema file is, we can run:
+
+```bash
+keel test
+```
+
+`keel test` will run any test files within the current directory matching the pattern `*.test.ts`.
+
+## Diving deeper
+
+So what is happening here? We have written a test using the classical Arrange-Act-Assert (AAA) pattern. You may notice that the code imports from the `@teamkeel/testing` NPM package. 
+
+`@teamkeel/testing` is a dynamically generated NPM package (you won't find it on npmjs.org!) that was generated when you ran `keel generate`. It contains all of the TypeScript definitions of any models and their actions as you defined them in the schema.
+
+In the test above we are most interested in the following named exports from that package:
+
+### `actions`
+
+The `actions` export contains all of the actions defined in your schema, whether they are our built-in actions, or any custom implementations you may have written using the `@function` attribute!
+
+In the schema above, you would find that the `actions` export has two actions that are callable:
+
+```typescript
+import { actions } from '@teamkeel/testing';
+
+const product = await actions.createProduct({ title: 'a cool product' });
+const fetchedProduct = await actions.getProduct({ id: product.id });
+```
+
+### `models`
+
+The `models` export allows you to query the application's database directly using our completely typesafe query builder. `models` will contain every model defined in your schema file, and each entry in models will expose a database client:
+
+```typescript
+import { models } from '@teamkeel/testing';
+
+const product = await models.product.create({ title: 'a cool product' });
+```
+
+You can find out more about our built-in model API by visiting the [Model API documentation](/functions/sdk/modelApi).
+
+## Assertions
+
+As we use Vitest under the hood, you can leverage Vitest's impressive expectation and assertion APIs to write your tests. For more documentation on the Vitest assertion API, [visit their documentation](https://vitest.dev/api/expect.html).
+
+Keel provides a custom Vitest assertion that will help you write tests for your actions, which is detailed below:
+
+### `toHaveError`
+
+Asserts that the result of an action returned a certain type of error:
+
+```typescript filename="main.test.ts"
+import { actions } from '@teamkeel/testing';
+
+test("test not found error", async () => {
+  await expect(
+    actions.getProduct({ id: "non-existent" })
+  ).toHaveError({
+    code: "ERR_RECORD_NOT_FOUND",
+    message: "record not found",
+  });
+});
+```
+
+It is also possible to negate the `toHaveError` matcher like so:
+
+```typescript filename="main.test.ts"
+import { actions } from '@teamkeel/testing';
+
+test("it should exist", async () => {
+  await expect(
+    actions.getProduct({ id: "it-exists" })
+  ).not.toHaveError({
+    code: "ERR_RECORD_NOT_FOUND",
+    message: "record not found",
+  });
+});
+```
+
+A full list of all of the potential error codes returned by our actions can be found in the table below:
+
+| Error Code              | Description                                                                                                                              |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| `ERR_INVALID_INPUT`     | The input data to the action was incorrect in some way. The `message` field in the response of the action will provide the exact reason. |
+| `ERR_PERMISSION_DENIED` | The given user was not authorized to execute the action. Examine any `@permission` attributes that apply to the action.                  |
+| `ERR_RECORD_NOT_FOUND`  | Could not find any existing record in the database for the unique constraints provided to the action to find the record (usually `id`)   |
+| `ERR_INTERNAL`          | Internal Keel runtime error. This should not happen so we are very sorry! If it does, please contact us.                                 |
+
+## Authentication Helpers
+
+The `actions` export provides two special modifier operations that allow you to impersonate a particular user when executing an action:
+
+### `withIdentity`
+
+Given the following `.keel` schema that enforces that the `createProduct` action can only be executed by authenticated users:
+
+```keel filename="schema.keel"
+model Product {
+  fields {
+    title Text
+  }
+
+  actions {
+    create createProduct() with(title) {
+      @permission(expression: ctx.isAuthenticated)
+    }
+  }
+}
+```
+
+In your test, you can create an identity record using our built-in Model API and then assume that user's identity whilst executing the action:
+
+```typescript filename="main.test.ts"
+import { test, expect } from 'vitest';
+import { actions, models } from '@teamkeel/testing';
+
+test('a permission test', async () => {
+  // authenticated call will succeed
+  await expect(
+    actions.withIdentity(identity).createProduct({ title: "cool product" })
+  ).not.toHaveAuthorizationError();
+
+  // unauthenticated will not succeed
+  await expect(
+    actions.createProduct({ title: "cool product" })
+  ).toHaveAuthorizationError();
+});
+```
+
+### `withAuthToken`
+
+Alternatively, if you have a [JWT](https://jwt.io/), you can execute the action using that instead:
+
+```typescript filename="main.test.ts"
+import { test, expect } from 'vitest';
+import { actions, models } from '@teamkeel/testing';
+
+test('a token test', async () => {
+  const token = "XXX";
+
+  await expect(
+    actions.withAuthToken(token).createProduct({ title: "cool product" })
+  ).not.toHaveAuthorizationError();
+});
+```
+
+## CLI
+
+The test command can be run like so:
+
+```bash
+$ keel test
+```
+
+### Flags
+
+`keel test` has the following CLI arguments:
+
+| Flag              | Description                                                                                                 |
+|-------------------|-------------------------------------------------------------------------------------------------------------|
+| `--pattern`, `-p` | Runs only `test` cases matching the pattern. Accepts a simple string or regular expression. Uses Vitest's `--testNamePattern` internally. |
+| `--dir`, `-d`     | The path to the directory containing your schema and tests. Defaults to the current directory.              |
