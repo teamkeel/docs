@@ -138,6 +138,22 @@ A full list of all of the potential error codes returned by our actions can be f
 | `ERR_RECORD_NOT_FOUND`  | Could not find any existing record in the database for the unique constraints provided to the action to find the record (usually `id`)   |
 | `ERR_INTERNAL`          | Internal Keel runtime error. This should not happen so we are very sorry! If it does, please contact us.                                 |
 
+### `toHaveAuthorizationError`
+
+Asserts that the result of an action did not return an authorization error:
+
+```typescript filename="main.test.ts"
+import { actions } from '@teamkeel/testing';
+
+test("test authorization error", async () => {
+  await expect(
+    actions.getSecretProduct({ id: "secret" })
+  ).toHaveAuthorizationError();
+});
+```
+
+`toHaveAuthorizationError` can also be negated.
+
 ## Authentication Helpers
 
 The `actions` export provides two special modifier operations that allow you to impersonate a particular user when executing an action:
