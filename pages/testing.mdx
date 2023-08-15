@@ -1,6 +1,8 @@
 # Testing
 
-The Keel testing framework allows you to write tests for all actions defined in your schema in TypeScript, in a completely typesafe manner! 
+The Keel testing framework allows you to write tests for all actions defined in your schema with TypeScript, in a completely typesafe manner!
+
+We will run your tests against a short-lived local instance of our runtime specifically designed to enable users to write tests, so there are no nasty surprises when you come to deploy your schema! Data created during test runs will be stored in a local postgres instance on your computer, and will be destroyed at the end of the test run.
 
 ## Getting started
 
@@ -28,13 +30,13 @@ model Product {
 }
 ```
 
-First thing you will need to do is to run our code generation facilities in order to dynamically generate TypeScript types for your schema so you can interact with our testing framework in a typesafe manner:
+First thing you will need to do is to run Keel's code generation command in order to dynamically generate TypeScript types for your schema so you can interact with the Keel testing framework in a typesafe manner:
 
 ```bash
 $ keel generate
 ```
 
-Once we have generated the supporting TypeScript code for your schema, you can create a file at the root called `main.test.ts` with the following code:
+Once the supporting TypeScript code for your schema has been generated, you can create a file at the root called `main.test.ts` with the following code:
 
 ```typescript filename="main.test.ts"
 import { test, expect } from 'vitest';
@@ -54,7 +56,7 @@ test('a passing test', async () => {
 });
 ```
 
-In order to run the test, in the same directory where your `.keel` schema file is, we can run:
+To run the test, run the following command in the same folder where your `.keel` schema file is located:
 
 ```bash
 keel test
@@ -72,7 +74,7 @@ In the test above we are most interested in the following named exports from tha
 
 ### `actions`
 
-The `actions` export contains all of the actions defined in your schema, whether they are our built-in actions, or any custom implementations you may have written using the `@function` attribute!
+The `actions` export contains all of the actions defined in your schema, whether they are built-in actions, or any custom implementations you may have written using the `@function` attribute!
 
 In the schema above, you would find that the `actions` export has two actions that are callable:
 
@@ -93,13 +95,17 @@ import { models } from '@teamkeel/testing';
 const product = await models.product.create({ title: 'a cool product' });
 ```
 
-You can find out more about our built-in model API by visiting the [Model API documentation](/functions/sdk/modelApi).
+You can find out more about the built-in model API by visiting the [Model API documentation](/functions/sdk/modelApi).
+
+### `jobs`
+
+Although not explicitly mentioned in the sample schema above, it is also possible to test the execution of jobs. Visit the [Jobs Testing](/jobs#testing) documentation to find out more!
 
 ## Assertions
 
 As we use Vitest under the hood, you can leverage Vitest's impressive expectation and assertion APIs to write your tests. For more documentation on the Vitest assertion API, [visit their documentation](https://vitest.dev/api/expect.html).
 
-Keel provides a set of custom Vitest assertions that will help you write tests for your actions, which are detailed below:
+Keel provides a set of custom Vitest assertions that will help you write tests for your actions; they include:
 
 ### `toHaveError`
 
@@ -133,11 +139,11 @@ test("it should exist", async () => {
 });
 ```
 
-A full list of all of the potential error codes returned by our actions can be found in the table below:
+A full list of all of the potential error codes returned by actions can be found in the table below:
 
 | Error Code              | Description                                                                                                                              |
 |-------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| `ERR_INVALID_INPUT`     | The input data to the action was incorrect in some way. The `message` field in the response of the action will provide the exact reason. |
+| `ERR_INVALID_INPUT`     | The input data to the action was incorrect. The `message` field in the response of the action will provide the exact reason. |
 | `ERR_PERMISSION_DENIED` | The given user was not authorized to execute the action. Examine any `@permission` attributes that apply to the action.                  |
 | `ERR_RECORD_NOT_FOUND`  | Could not find any existing record in the database for the unique constraints provided to the action to find the record (usually `id`)   |
 | `ERR_INTERNAL`          | Internal Keel runtime error. This should not happen so we are very sorry! If it does, please contact us.                                 |
