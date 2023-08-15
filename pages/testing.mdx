@@ -17,6 +17,10 @@ model Product {
       @permission(expression: true)
     }
 
+    list listProducts() {
+      @permission(expression: true)
+    }
+
     create createProduct() with(title) {
       @permission(expression: ctx.isAuthenticated)
     }
@@ -154,11 +158,46 @@ test("test authorization error", async () => {
 
 `toHaveAuthorizationError` can also be negated.
 
-## Authentication Helpers
+## Helpers
+
+### Test Setup
+
+#### `resetDatabase`
+
+`@teamkeel/testing` exposes the `resetDatabase` method that can be used to clear the database between test cases:
+
+```typescript filename="main.test.ts"
+import { test, expect, beforeEach } from 'vitest';
+import { models, actions, resetDatabase } from '@teamkeel/testing';
+
+beforeEach(resetDatabase);
+
+test("first test", async () => {
+  const product = await models.product.create({
+    title: "hello"
+  });
+
+  const results = await actions.listProducts();
+
+  expect(results.length).toEqual(1);
+});
+
+test("second test", async () => {
+  const product = await models.product.create({
+    title: "world"
+  });
+
+  const results = await actions.listProducts();
+
+  expect(results.length).toEqual(1);
+});
+```
+
+### Authentication
 
 The `actions` export provides two special modifier operations that allow you to impersonate a particular user when executing an action:
 
-### `withIdentity`
+#### `withIdentity`
 
 Given the following `.keel` schema that enforces that the `createProduct` action can only be executed by authenticated users:
 
@@ -195,7 +234,7 @@ test('a permission test', async () => {
 });
 ```
 
-### `withAuthToken`
+#### `withAuthToken`
 
 Alternatively, if you have a [JWT](https://jwt.io/), you can execute the action using that instead:
 
