@@ -1,5 +1,12 @@
 # Testing
 
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="🚀">
+  Very soon, any tests you write and commit to your repository will be run as part of the deployment process.
+</Callout>
+
+
 The Keel testing framework allows you to write tests for all actions defined in your schema with TypeScript, in a completely typesafe manner!
 
 We will run your tests against a short-lived local instance of our runtime specifically designed to enable users to write tests, so there are no nasty surprises when you come to deploy your schema! Data created during test runs will be stored in a local postgres instance on your computer, and will be destroyed at the end of the test run.
@@ -273,3 +280,13 @@ $ keel test
 |-------------------|-------------------------------------------------------------------------------------------------------------|
 | `--pattern`, `-p` | Runs only `test` cases matching the pattern. Accepts a simple string or regular expression. Uses Vitest's `--testNamePattern` internally. |
 | `--dir`, `-d`     | The path to the directory containing your schema and tests. Defaults to the current directory.              |
+
+## FAQs
+
+1. Does this communicate with my Keel backend in the cloud?
+
+No, the test runner runs tests against a local instance of Postgres that is spun up for the tests and swiftly discarded.
+
+2. Help! It's not working!
+
+Please ensure you have followed the steps outlined in the [Local Environment](/local-environment) setup guide.
