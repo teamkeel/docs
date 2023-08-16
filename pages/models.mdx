@@ -87,12 +87,24 @@ Sometimes a field needs to be unique across all instances of a model. As an exam
 ```keel
 model Book {
   fields {
-    isbn Text @unique foo
+    isbn Text @unique
   }
 }
 ```
-
 Now we can be sure that no two books will have the same ISBN.
+
+### Composite Unique Fields
+At the model level, you can also specify uniqueness if you have a combination of multiple fields that need to be unique accross all instance of a model.
+
+```keel
+model Car {
+    fields {
+        vin Text
+        licensePlateNumber Text
+    }
+    @unique([vin, licensePlateNumber])
+}
+```
 
 ## Default values
 
@@ -161,7 +173,7 @@ model ProductTag {
 }
 ```
 
-The models `Product` and `Tag` don’t directly reference each other in this schema, that is done in the `ProductTag` model, which references both. In fact, even though we would talk about this as a many-to-many relationship, it’s actually implemented using **two one to many relationships**. 
+The models `Product` and `Tag` don’t directly reference each other in this schema, that is done in the `ProductTag` model, which references both. In fact, even though we would talk about this as a many-to-many relationship, it’s actually implemented using **two one to many relationships**.
 
 As the join model is just a normal model, it has all the normal built-in model fields. This means you can reference a specific product/tag relationship by its `id` field and know when it was created by using the `createdAt` field.
 
