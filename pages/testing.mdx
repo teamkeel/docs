@@ -1,9 +1,8 @@
 # Testing
 
+Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against operations, custom functions, and jobs defined in your schema. 
 
-The Keel testing framework allows you to write tests for all actions defined in your schema with TypeScript, in a completely typesafe manner!
-
-We will run your tests against a short-lived local instance of our runtime specifically designed to enable users to write tests, so there are no nasty surprises when you come to deploy your schema! Data created during test runs will be stored in a local postgres instance on your computer, and will be destroyed at the end of the test run.
+Tests run locally on your machine against a temporary database, so there are no nasty surprises when you come to deploy your schema!
 
 ## Getting started
 

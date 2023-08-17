@@ -67,11 +67,11 @@ import { test, expect, beforeEach } from "vitest";
 beforeEach(resetDatabase);
 
 test("Test EmailNewCustomerReport updates new customer flag", async () => {
-    console.log("Test start")
+  console.log("Test start")
 
-    await jobs.emailNewCustomerReport();
+  await jobs.emailNewCustomerReport();
 
-    const res = await actions.getCustomer();
-    expect(res.reportSent).toBeTruthy();
-  });
+  const res = await actions.getCustomer();
+  expect(res.reportSent).toBeTruthy();
+});
 ```
