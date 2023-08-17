@@ -109,7 +109,7 @@ Operations and Functions are both types of **Actions** that can be taken on the 
 
 ```keel
 model Todo {
-    operations {
+    actions {
         get todo(id)
         list allTodos(complete?, project.id?) {
             @where(todo.owner == ctx.identity)
@@ -119,10 +119,7 @@ model Todo {
         create createTodo() with (title, description?, project.id?) {
             @set(todo.owner = ctx.identity)
         }
-    }
-
-    functions {
-        update setCompletion(id) with (complete)
+        update setCompletion(id) with (complete) @function
     }
 }
 ```
@@ -139,7 +136,7 @@ The Todo model also defines some permission rules. These rules are defined using
 
 ```keel {9-12}
 model Todo {
-	operations {
+	actions {
         create createTodo() with (title, description?, project.id?) {
             @permission(expression: ctx.isAuthenticated)
             @set(todo.owner = ctx.identity)
@@ -178,7 +175,7 @@ model Project {
         tasks Todo[]
     }
 
-    operations {
+    actions {
         get getProject(id)
         list listProjects() {
             @where(project.owner == ctx.identity)
@@ -284,7 +281,7 @@ By adding a `?` on the end of the input we are saying that this field doesn't ha
 
 ```keel /dueDate?/ filename="schema.keel"
 model Todo {
-    operations {
+    actions {
         get todo(id)
         list allTodos(complete?, project.id?) {
             @where(todo.owner == ctx.identity)
@@ -307,7 +304,7 @@ We want to return multiple entries so this is a `list` operation. We want the us
 
 ```keel {3} filename="schema.keel"
 model Todo {
-    operations {
+    actions {
         list dueBy(dueDate)
     }
 }

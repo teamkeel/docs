@@ -14,7 +14,7 @@ model Product {
     title Text
   }
 
-  operations {
+  actions {
     get getProduct(id) {
       @permission(expression: true)
     }
@@ -213,7 +213,7 @@ model Product {
     title Text
   }
 
-  operations {
+  actions {
     create createProduct() with(title) {
       @permission(expression: ctx.isAuthenticated)
     }

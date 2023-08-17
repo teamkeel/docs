@@ -149,7 +149,7 @@ model Profile {
     username Text @unique
     bio Text
   }
-  operations {
+  actions {
     create createProfile() with (username, bio)
   }
 }
@@ -199,7 +199,7 @@ model Profile {
   fields {
     username Text
   }
-  operations {
+  actions {
     get getProfile(id)
   }
 }
@@ -247,7 +247,7 @@ model Profile {
     username Text @unique
     bio Text
   }
-  operations {
+  actions {
     update updateBio(id) with (bio)
   }
 }
@@ -311,7 +311,7 @@ model Book {
     genre Text
     releaseDate Date
   }
-  operations {
+  actions {
     list listBooks(title?, genre?, releaseDate?)
   }
 }

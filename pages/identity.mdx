@@ -36,7 +36,7 @@ model Post {
   fields {
     profile Profile
   }
-  operations {
+  actions {
     list myPosts() {
       @where(post.profile.identity == ctx.identity)
     }
@@ -55,7 +55,7 @@ model Profile {
   fields {
     identity Identity @unique
   }
-  operations {
+  actions {
     create createProfile() {
       @set(profile.identity = ctx.identity)
     }
@@ -79,7 +79,7 @@ model Post {
     profile Profile
   }
 
-  operations {
+  actions {
     get getPost(id)
     delete deletePost(id)
   }

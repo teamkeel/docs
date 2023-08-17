@@ -37,7 +37,7 @@ model Post {
   fields {
     category Category
   }
-  operations {
+  actions {
     create newPost() with (category)
   }
 }
@@ -96,7 +96,7 @@ model Profile {
     username Text @unique
     bio Text
   }
-  operations {
+  actions {
     create createProfile() with (username, bio)
   }
 }
@@ -136,7 +136,7 @@ model Profile {
   fields {
     username Text
   }
-  operations {
+  actions {
     get getProfile(id)
   }
 }
@@ -181,7 +181,7 @@ model Profile {
     username Text @unique
     bio Text
   }
-  operations {
+  actions {
     update updateBio(id) with (bio)
   }
 }
@@ -227,7 +227,7 @@ model Post {
   fields {
     published Boolean
   }
-  operations {
+  actions {
     update publishPost(id) {
       @set(post.published = true)
     }
@@ -273,7 +273,7 @@ model Book {
     genre Text
     releaseDate Date
   }
-  operations {
+  actions {
     list listBooks(title?, genre?, releaseDate?)
   }
 }

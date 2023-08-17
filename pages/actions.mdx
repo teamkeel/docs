@@ -6,7 +6,7 @@ As a simple example, the following schema has one action which lets you fetch a 
 
 ```keel
 model Product {
-  operations {
+  actions {
     get getProduct(id)
   }
 }
@@ -46,7 +46,7 @@ A `get` Action is for reading a single record, for example reading a record by i
 
 ```keel
 model Book {
-  operations {
+  actions {
     get getBook(id)
   }
 }
@@ -61,7 +61,7 @@ model Book {
   fields {
     isbn Text @unique
   }
-  operations {
+  actions {
     get getBook(isbn)
   }
 }
@@ -76,7 +76,7 @@ model Book {
   fields {
     isbn Text @unique
   }
-  operations {
+  actions {
     get getBook(id?, isbn?)
   }
 }
@@ -96,7 +96,7 @@ model Author {
   fields {
     books Book[]
   }
-  operations {
+  actions {
     get getAuthorByIsbn(books.isbn)
   }
 }
@@ -118,7 +118,7 @@ model Profile {
   fields {
     identity Identity @unique
   }
-  operations {
+  actions {
     get myProfile() {
       @where(profile.identity == ctx.identity)
     }
@@ -143,7 +143,7 @@ model Book {
     genre Text
   }
 
-  operations {
+  actions {
     create createBook() with (title, genre)
   }
 }
@@ -161,7 +161,7 @@ model Customer {
     name Text
     identity Identity
   }
-  operations {
+  actions {
     create newCustomer() with (name) {
       @set(customer.identity = ctx.identity)
     }
@@ -189,7 +189,7 @@ model Course {
     name Text
     lessons Lesson[]
   }
-  operations {
+  actions {
     create createCourse() with (name, lessons.title, lessons.date)
   }
 }
@@ -211,7 +211,7 @@ model Lesson {
     date Date
     course Course
   }
-  operations {
+  actions {
     create createLesson() with (title, date, course.id)
   }
 }
@@ -230,7 +230,7 @@ model Book {
   fields {
     title Text
   }
-  operations {
+  actions {
     update updateBook(id) with (title)
   }
 }
@@ -249,7 +249,7 @@ model Book {
     isbn Text @unique
     title Text
   }
-  operations {
+  actions {
     update updateBook(isbn) with (title)
   }
 }
@@ -265,7 +265,7 @@ model Book {
     title Text
     publishDate Date
   }
-  operations {
+  actions {
     update updateBook(id) with (title?, publishDate?)
   }
 }
@@ -280,7 +280,7 @@ model Book {
   fields {
     publishDate Date
   }
-  operations {
+  actions {
     update publishBook(id) {
       @set(book.publishDate = ctx.now)
     }
@@ -303,7 +303,7 @@ model Todo {
     startedAt Timestamp?
     completedAt Timestamp?
   }
-  operations {
+  actions {
    update startTodo(id) {
       @set(todo.status = Status.InProgress)
       @set(todo.startedAt = ctx.now)
@@ -329,7 +329,7 @@ model Book {
 	fields {
     title Text
   }
-  operations {
+  actions {
     list listBooks(title)
   }
 }
@@ -355,7 +355,7 @@ model Book {
     title Text
     publishDate Date
   }
-  operations {
+  actions {
     list listBooks(title, publishDate)
   }
 }
@@ -375,7 +375,7 @@ model Todo {
   fields {
     completed Boolean
   }
-  operations {
+  actions {
     list completedTodos() {
       @where(todo.completed == false)
     }
@@ -397,7 +397,7 @@ model Contestant {
     bronze Number
   }
 
-  operations {
+  actions {
     list listRankings(name?) {
       @orderBy(gold: desc, silver: desc, bronze: desc)
     }
@@ -420,7 +420,7 @@ model Post {
     likes Number
   }
 
-  operations {
+  actions {
     list listPosts() {
       @sortable(createdAt, likes)
     }
@@ -450,7 +450,7 @@ A `delete` Action is for deleting a single record. It's pretty much analogous to
 
 ```keel
 model Book {
-  operations {
+  actions {
     delete deleteBook(id)
   }
 }
