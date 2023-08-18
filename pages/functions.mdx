@@ -34,21 +34,6 @@ Functions have a default implementation that works out of the box, without you h
 
 Obviously this example is very simple, and in practice this kind of action wouldn't need to be annotated with the `@function` attribute in our schema, unless you require your action to do more than just query the database to find the product by it's ID.
 
-## Default behaviour
-
-### `list`
-
-### `delete`
-
-### `create`
-
-### `update`
-
-### `read` / `write`
-
-`read` and `write` actions do not have a default implementation. They are implemented by you!
-
-
 ## Hooks
 
 <Callout type="info" emoji="ℹ️">
@@ -86,7 +71,7 @@ export default CreateProduct({
 
 #### Return type
 
-`beforeWrite` expects the hook to return an object satisfying the type of the model the hook is defined for. 
+`beforeWrite` expects the hook to return the model object.
 
 In the case of the example, the return type is expected to be `Product`.
 
@@ -134,6 +119,39 @@ There are two ways you can use `beforeQuery`:
 #### Replacing the query entirely
 
 
+### `afterQuery`
+
+The `afterQuery` hook allows you to modify the response, or perform side effects using the data returned from the query.
+
+An example `afterQuery` hook might be:
+
+```typescript filename="ListPreviewProducts.ts"
+import { ListPreviewProducts, permissions } from "@teamkeel/sdk";
+
+export default ListPreviewProducts({
+  afterQuery: async (ctx, inputs, products) => {
+    return products.map(p => ({
+      ...p,
+      // truncate the title to 10 characters if not authenticated
+      title: ctx.isAuthenticated ? p.title : `${p.title.slice(0, 10)}...`
+    }))
+  }
+});
+```
+
+#### Arguments
+
+`afterQuery` receives two arguments.
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `data` - the data that was retrieved from the database
+
+#### Return type
+
+`afterQuery` expects the hook to return the model (or array of model in the case of a `list` action).
+
+In the example above, the expected return type will be `Promise<Product[]>`.
 
 ## Using the database
 
