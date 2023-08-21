@@ -228,6 +228,10 @@ import { test, expect } from 'vitest';
 import { actions, models } from '@teamkeel/testing';
 
 test('a permission test', async () => {
+  const identity = await models.identity.create({
+    email: 'user@example.com',
+  });
+
   // authenticated call will succeed
   await expect(
     actions.withIdentity(identity).createProduct({ title: "cool product" })
