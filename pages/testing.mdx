@@ -30,7 +30,7 @@ model Product {
 }
 ```
 
-First thing you will need to do is to run Keel's code generation command in order to dynamically generate TypeScript types for your schema so you can interact with the Keel testing framework in a typesafe manner:
+First thing you will need to do is to run Keel's code generation command in order to dynamically generate TypeScript types for your schema so you can interact with the Keel testing framework in a type-safe manner:
 
 ```bash
 $ keel generate
@@ -87,7 +87,7 @@ const fetchedProduct = await actions.getProduct({ id: product.id });
 
 ### `models`
 
-The `models` export allows you to query the application's database directly using our completely typesafe query builder. `models` will contain every model defined in your schema file, and each entry in models will expose a database client:
+The `models` export allows you to query the application's database directly using our completely type-safe query builder. `models` will contain every model defined in your schema file, and each entry in models will expose a database client:
 
 ```typescript
 import { models } from '@teamkeel/testing';

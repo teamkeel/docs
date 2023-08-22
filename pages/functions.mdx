@@ -37,7 +37,7 @@ Obviously this example is very simple, and in practice this kind of action would
 ## Hooks
 
 <Callout type="info" emoji="ℹ️">
-  If you have an existing schema that predates the introduction of **Hooks** please read the [Migration Guide](/function/hooks/migration-guide)
+  If you have an existing schema that predates the introduction of **Hooks** please read the [Migration Guide](/functions/hooks/migration-guide)
 </Callout>
 
 
@@ -53,7 +53,7 @@ An example might be where we want to change the value of the `title` of a `Produ
 import { CreateProduct } from "@teamkeel/sdk";
 
 export default CreateProduct({
-  beforeWrite: async (ctx, inputs, values) => {
+  beforeWrite: async (ctx, inputs) => {
     return {
       ...inputs,
       title: `${inputs.title} (${inputs.sku})`
@@ -239,161 +239,6 @@ In the example above, the expected return type will be `Promise<Product[]>`.
 The `@teamkeel/sdk` package is generated based on your schema and contains type-safe API's for interacting with your models. These API's are all available on the exported `models` object.
 
 See [Model API](/functions/sdk/modelApi) for full usage.
-
-### Reading a single record
-
-As shown in the simple example at the start of this page, we can read a single record by using the `findOne` model API.
-
-```tsx filename="functions/getProduct.ts"
-import { GetProduct, models } from "@teamkeel/sdk";
-
-export default GetProduct({
-  beforeQuery: async (ctx, inputs) => {
-    return await models.product.findOne({
-      id: inputs.id,
-    });
-  } 
-});
-```
-
-The return type of a **get** function is `Promise<Model | null>`, which conveniently matches the model API method `findOne`. So for a simple function like this we can just return the result of `findOne`.
-
-### Reading multiple records
-
-To find and return many records you can use `findMany` model API method. The following schema defines a `list` function which takes no inputs.
-
-```keel filename="schema.keel"
-model Product {
-  actions {
-    list latestProducts() @function
-  }
-}
-```
-
-Below is an example implementation of `latestProducts`.
-
-```tsx filename="functions/latestProducts.ts"
-import { ListProducts, models } from "@teamkeel/sdk";
-import sub from 'date-fns/sub';
-
-export default LatestProducts((ctx, inputs) => {
-  const oneWeekAgo = sub(ctx.now(), {
-    days: 7,
-  });
-
-  return models.product.findMany({
-    createdAt: {
-      after: oneWeekAgo,
-    },
-  });
-});
-```
-
-A few things to note in this example:
-
-- The use of the `@date-fns` package - you can use any 3rd party packages you like in your functions. Just install them as you normally (currently only `npm` is supported).
-- The use of `ctx.now()` to get the current date. The third argument to your functions is a `ctx` object which is very similar to the `ctx` available in schema expressions.
-- Using the `after` filter on the `createdAt` field in the `findMany` call. There are many filtering fields available when using `findMany` which are explained in more detail later on in this page.
-
-The `findMany` model API method returns `Promise<Model[]>`, which is also the expected return type of a **list** function, so we can return the result of that method directly.
-
-### Creating a new record
-
-To create a new record in the database you use the `create` model API method. The following schema defines a function for creating a new post.
-
-```keel filename="schema.keel"
-model Author {}
-
-model Post {
-  fields {
-    title Text
-    body Text
-    author Author
-  }
-
-  actions {
-    create createPost() with (title, body, author.id) @function
-  }
-}
-```
-
-A simple implementation of `createPost` might look something like this.
-
-```tsx filename="functions/createPost.ts"
-import { CreatePost, models } from "@teamkeel/sdk";
-
-export default CreatePost(async (ctx, inputs) => {
-  const { title, body, author } = inputs;
-
-  return models.post.create({
-    title,
-    body,
-    // we set authorId here, which is the auto-generated 
-    // foreign key for the author field in the model
-    authorId: author.id,
-  });
-});
-```
-
-The return type of `create` is `Promise<Model>`, which is also the expected return type of a **create** function.
-
-### Updating a record
-
-To update an existing record in the database you can use the `update` model API method. This accepts two arguments, an object containing filters that indicate which record should be updated, and an object containing the values to update.
-
-To illustrate how an `update` function might work, the following schema defines a `publishPost` function with just accepts the `id` of the post to publish.
-
-```keel filename="schema.keel"
-model Account {
-  fields {
-    identity Identity @unique
-  }
-}
-
-model Post {
-  fields {
-    published Boolean
-    publishedAt Timestamp
-    publishedBy Account
-  }
-
-  actions {
-    update publishPost(id) @function
-  }
-}
-```
-
-In the implementation for this function we need to do a few things:
-
-- Get the `Account` that is linked to the calling Identity
-- Build the where conditions object for the update
-- Build the values object for the update
-
-```tsx filename="functions/publishPost.ts"
-import { PublishPost, models } from "@teamkeel/sdk";
-
-export default PublishPost(async (ctx, inputs) => {
-  // first find the account of the authenticated user
-  const account = await models.account.findOne({
-    identityId: ctx.identity.id,
-  });
-
-  // the where conditions for the update is just the provided id
-  const where = inputs.where;
-
-  // the values we want to update
-  const values = {
-    published: true,
-    publishedAt: ctx.now(),
-    publishedById: account.id,
-  };
-
-  // update and return the record
-  return models.post.update(where, values);
-});
-```
-
-This example also shows how you can access the Identity of the person performing the action by using `ctx.identity`. 
 
 ### Custom database queries
 

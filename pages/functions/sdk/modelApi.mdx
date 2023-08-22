@@ -182,3 +182,33 @@ The `WhereConditions` type can be used with the `findMany` method to filter by a
 | onOrBefore          | Date                            | Find values where the date is equal to or before the search date         | `{ createdAt: { onOrBefore: new Date(2020, 1, 1) }}` |
 | after               | Date                            | Find values where the date is after the search date                      | `{ createdAt: { after: new Date(2020, 1, 1) }}`      |
 | onOrAfter           | Date                            | Find values where the date is equal to or after the search date          | `{ createdAt: { onOrAfter: new Date(2020, 1, 1) }}`  |
+
+## Nested Create / Update
+
+import { Callout } from "nextra/components";
+
+<Callout type="warning">
+  The Model API doesn't currently support creating or updating nested relations, but will in the near future.
+</Callout>
+
+Until then, you can create related models yourself using the Model API:
+
+```typescript filename="functions/createPost.ts"
+import { CreatePost, models } from '@teamkeel/sdk';
+
+export default CreatePost({
+  beforeWrite: async (ctx, inputs) => {
+    const {
+      author: { name }
+    } = inputs;
+
+    // create the new author prior to creating the post
+    const author = await models.author.create({ name });
+
+    return {
+      ...inputs,
+      authorId: author.id
+    }
+  }
+});
+```
