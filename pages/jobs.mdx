@@ -28,6 +28,13 @@ export default EmailNewCustomerReport(async (ctx) => {
 
 To implement this job, we can use the same generated [APIs](./functions/sdk) that are available to functions.
 
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="ℹ️">
+  Jobs in Keel have a max execution time of 15 minutes (due to Lambda max execution times)
+</Callout>
+
+
 ## Scheduled jobs
 
 A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [cron](https://devhints.io/cron) format to define the
