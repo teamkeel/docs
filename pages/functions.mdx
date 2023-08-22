@@ -115,9 +115,90 @@ There are two ways you can use `beforeQuery`:
 
 #### Extending the existing query
 
+<Callout type="warning" emoji="⚠️">
+  For `update` actions, we do not currently support extending the existing query.
+</Callout>
+
+By default, a query will be built up based on the `where` conditions passed in the `inputs` to the function.
+
+For example, given the following inputs to a `list` action:
+
+```json
+{
+  "where": {
+    "title": {
+      "startsWith": "star wars"
+    }
+  }
+}
+```
+
+If you define a `beforeQuery` hook, this will look like:
+
+```typescript filename="listProducts.ts"
+import { ListProducts } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: (ctx, inputs, query) => {
+    // some code
+  }
+});
+```
+
+The third parameter to the hook `query` is an instance of our `QueryBuilder` class with the `where` constraints from the inputs already applied. Without any additional mutation of the query object, the SQL that will be generated and run against the database will look something like:
+
+```sql
+SELECT * FROM product WHERE product.title LIKE 'star wars%'
+```
+
+So in your `beforeQuery` hook above, if you were to add the following code:
+
+```typescript filename="listProducts.ts"
+import { ListProducts } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: (ctx, inputs, query) => {
+    return query.where({
+      title: {
+        endsWith: 'phantom menace'
+      }
+    });
+  }
+});
+```
+
+The final SQL would be:
+
+```sql
+SELECT * FROM product WHERE product.title LIKE 'star wars%' AND product.title LIKE '%phantom menace'
+```
 
 #### Replacing the query entirely
 
+<Callout type="info">
+  `beforeQuery` hooks on `update` actions should use this approach.
+</Callout>
+
+Alternatively, the return type of `beforeQuery` also allows you to return a `Promise<T>` where `T` is the current model. So in the case of our example schema, and implementing a `list` action, this would be a `Promise<Product[]>`.
+
+You can use our [Model API](/functions/sdk/modelApi) to write your own custom query implementation, although you will have to handle all of the inputs to the action yourself (as shown in the example below), as the built-in behaviour will no longer take place:
+
+```typescript filename="listProducts.ts"
+import { ListProducts, models } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: async (ctx, inputs) => {
+    const products = await models.product.findMany({
+      where: {
+        ...inputs.where,
+        isPublished: true,
+      }
+    });
+
+    return products;
+  }
+});
+```
 
 ### `afterQuery`
 

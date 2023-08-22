@@ -13,6 +13,10 @@ model Post {
 	fields {
      title Text
   }
+
+  actions {
+    write createPost()
+  }
 }
 
 model Author {
@@ -35,17 +39,13 @@ Fields that have a `@default` value in the schema will have their default values
 For `@unique` fields, inserted data will be checked for uniqueness.
 
 ```tsx
-import { models, CreatePost } from "@teamkeel/sdk";
+import { models } from "@teamkeel/sdk";
 
-export default CreatePost(async (ctx, inputs) => {
-  const post = await models.post.create({
-    title: "a post about star wars",
-  });
-
-  console.log(post.title); // => a post about star wars
-
-  return post;
+const post = await models.post.create({
+  title: "a post about star wars",
 });
+
+console.log(post.title); // => a post about star wars
 ```
 
 The return type is `Promise<Model>`
@@ -60,23 +60,19 @@ The return type is `Promise<Model>`
 For `@unique` fields, updated data will be checked for uniqueness.
 
 ```tsx
-import { models, UpdatePost } from "@teamkeel/sdk";
+import { models } from "@teamkeel/sdk";
 
-export default UpdatePost(async (ctx, inputs) => {
-  const where = {
-    id: inputs.id,
-  };
+const where = {
+  id: "123",
+};
 
-  const values = {
-    title: inputs.title,
-  };
+const values = {
+  title: "a post about star wars",
+};
 
-  const post = await models.post.update(where, values);
+const post = await models.post.update(where, values);
 
-  console.log(`Updated ${post.id}'s title`);
-
-  return post;
-});
+console.log(`Updated ${post.id}'s title`);
 ```
 
 The return type is `Promise<Model>`
@@ -88,12 +84,10 @@ The return type is `Promise<Model>`
 - `where` - the conditions applied to the database query that will determine which records will be deleted
 
 ```jsx
-import { models, DeletePost } from "@teamkeel/sdk";
+import { models } from "@teamkeel/sdk";
 
-export default DeletePost((ctx, inputs) => {
-  return models.post.delete({
-    id: "123",
-  });
+const deletedId = models.post.delete({
+  id: "123",
 });
 ```
 
@@ -104,6 +98,8 @@ export default DeletePost((ctx, inputs) => {
 - `where` - an object where the keys are any unique field on a model and the values are the unique values you want to look up by
 
 ```jsx
+import { models } from "@teamkeel/sdk";
+
 const post = await models.post.findOne({
   id: "abc",
 });
@@ -123,12 +119,16 @@ Consists of four top level properties:
 
 - `limit` (`number`) - the number of rows to limit the result set by
   ```tsx
+  import { models } from "@teamkeel/sdk";
+
   const results = await models.post.findMany({
     limit: 5,
   });
   ```
 - `offset` (`number`) - the number of rows to offset by. Usually combined with `limit` and `orderBy` to return individual pages of data.
   ```tsx
+  import { models } from "@teamkeel/sdk";
+
   const results = await models.post.findMany({
     limit: 10,
     offset: 2,
@@ -139,6 +139,8 @@ Consists of four top level properties:
   ```
 - `where` (`Where`) - an object where the keys are one of the fields on the model and the values are objects conforming to the `WhereConditions` type. See the `WhereConditions` reference for a full table of the available options for different field types below.
   ```tsx
+  import { models } from "@teamkeel/sdk";
+
   const postsBeginningWithA = await models.post.findMany({
     {
       where: {
@@ -151,6 +153,8 @@ Consists of four top level properties:
   ```
 - `orderBy` (`OrderBy`) - an object used to define the sort order of the results returned from the database. The object must contain **_one_** property where the key is a known field name on the model, and the value must either be `asc`, `desc`.
   ```tsx
+  import { models } from "@teamkeel/sdk";
+
   const orderedByTitle = await models.post.findMany(
     orderBy: {
       title: 'asc'
