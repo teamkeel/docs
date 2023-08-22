@@ -1,6 +1,6 @@
 # Actions
 
-In Keel, models not only describe what your data looks like, but also how it behaves. This is done using **Actions**, which is a general term for two features in Keel: **Operations** and **Functions**. An operation is implemented by Keel purely based on what is written in your schema and requires no extra code to work. Functions are also defined in your schema but are implemented in code by you.
+In Keel, models not only describe what your data looks like, but also how it behaves. This is done using **Actions**, which is a general term for two features in Keel: **Built In Actions** and **Functions**. An built-in action is implemented by Keel purely based on what is written in your schema and requires no extra code to work. Functions are also defined in your schema but are implemented in code by you.
 
 As a simple example, the following schema has one action which lets you fetch a product by its `id`. As it is defined as an operation this schema requires no code to be written.
 
@@ -22,7 +22,7 @@ import { Callout } from "nextra/components";
 
 ## Action Types
 
-Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for operations and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/functions) documentation. The table below describes the behaviour of each action type.
+Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for built-in actions and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/functions) documentation. The table below describes the behaviour of each action type.
 
 | Type   | Behaviour                                                                      | Operation | Function |
 | ------ | ------------------------------------------------------------------------------ | --------- | -------- |
@@ -54,7 +54,7 @@ model Book {
 
 ### Using a unique field
 
-`get` operations support reading a record by any unique field.
+`get` built-actions support reading a record by any unique field.
 
 ```keel
 model Book {
@@ -130,7 +130,7 @@ In the above schema, `myProfile` is valid even though it doesn't accept any inpu
 
 ### Validation
 
-For `get` operations, Keel will validate that you are filtering on at least one unique field. There are no restrictions on the inputs accepted by functions, but they must return a single record. Refer to the [Functions documentation](/functions) for further information.
+For `get` built-in actions, Keel will validate that you are filtering on at least one unique field. There are no restrictions on the inputs accepted by functions, but they must return a single record. Refer to the [Functions documentation](/functions) for further information.
 
 ## `create`
 
@@ -219,7 +219,7 @@ model Lesson {
 
 ### Validation
 
-For `create` operations, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
+For `create` built-in actions, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
 
 ## `update`
 
@@ -318,7 +318,7 @@ model Todo {
 
 ### Validation
 
-For `update` operations, Keel will validate that you are filtering on at least one unique field. For Functions there are no restrictions on what inputs you accept, just that your function updates and returns a single record. For more information see the [Function docs](/functions).
+For `update` built-in actions, Keel will validate that you are filtering on at least one unique field. For Functions there are no restrictions on what inputs you accept, just that your function updates and returns a single record. For more information see the [Function docs](/functions).
 
 ## `list`
 
@@ -368,7 +368,7 @@ With this schema it would be possible to use the `listBooks` operation to do thi
 
 ### Using `@where`
 
-You can use the `@where` attribute in `list` operations to provide some additional filters that are applied on top of the inputs. As an example we could make a `list` operation that only returned completed Todo's.
+You can use the `@where` attribute in `list` built-in actions to provide some additional filters that are applied on top of the inputs. As an example we could make a `list` operation that only returned completed Todo's.
 
 ```keel
 model Todo {
@@ -385,7 +385,7 @@ model Todo {
 
 ### Using `@orderBy`
 
-You can use the `@orderBy` attribute in `list` operations to describe how the results are ordered.  
+You can use the `@orderBy` attribute in `list` actions to describe how the results are ordered.  
 By default, items are sorted by `createdAt`.
 
 ```keel
@@ -407,7 +407,7 @@ model Contestant {
 
 ### Using `@sortable`
 
-When you want the client to have control on the sorting order. You can use the `@sortable` attribute in `list` operations to select which fields are available to sort by. The sort order can then be controlled by passing `orderBy` in the request.
+When you want the client to have control on the sorting order. You can use the `@sortable` attribute in `list` built-in actions to select which fields are available to sort by. The sort order can then be controlled by passing `orderBy` in the request.
 
 import { Tab, Tabs } from "nextra-theme-docs";
 

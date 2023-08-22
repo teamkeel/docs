@@ -1,6 +1,6 @@
 # Testing
 
-Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against operations, custom functions, and jobs defined in your schema. 
+Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against built-in actions, custom functions, and jobs defined in your schema. 
 
 Tests run locally on your machine against a temporary database, so there are no nasty surprises when you come to deploy your schema!
 
@@ -74,7 +74,7 @@ In the test above we are most interested in the following named exports from tha
 
 ### `actions`
 
-The `actions` export contains all of the actions defined in your schema, whether they are operations or functions!
+The `actions` export contains all of the actions defined in your schema, whether they are built-in actions or functions!
 
 In the schema above, you would find that the `actions` export has two actions that are callable:
 
