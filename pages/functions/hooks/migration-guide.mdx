@@ -1,0 +1,91 @@
+# Migration Guide for Function Hooks
+
+If you have a schema that was authored prior to the introduction of the Action + Function Hooks syntax,
+luckily migrating your schema across to use the new syntax is pretty simple.
+
+## A new schema keyword
+
+Previously, you'd define `operations` and `functions` within separate blocks:
+
+
+```keel filename="schema.keel"
+model Post {
+  fields {
+    title Text
+  }
+
+  functions {
+    get getPost(id)
+  }
+
+  operations {
+    create createPost() with(title)
+  }
+}
+```
+
+Now both `operations` and `functions` are combined into a single `actions` block:
+
+```keel filename="schema.keel"
+model Post {
+  fields {
+    title Text
+  }
+
+  actions {
+    get getPost(id) {
+      @function
+    }
+    create createPost() with(title)
+  }
+}
+```
+
+You may also notice that the `getPost` function has been annotated with the `@function` attribute. 
+
+Any time you want to _write your own code_ for an action instead of using the built-in behaviour, apply the `@function` attribute, and run `keel generate` to create the corresponding `{name}.ts` file in your `functions/` directory.
+
+## Migrating your functions code
+
+Previously a function would look something like the below:
+
+```typescript
+import { CreatePost, models } from '@teamkeel/sdk';
+
+export default CreatePost(async (ctx, inputs) => {
+  const post = await models.post.create({
+    ...inputs
+  });
+
+  return post;
+})
+```
+
+Now most of the code above is written for you automatically! We have instead introduced the concept of **[Hooks](/functions#hooks)**, which allow you to "hook in" to the underlying default implementation.
+
+The example function above isn't doing anything special that the default implementation of the function isn't doing already, so it would become:
+
+```typescript
+import { CreatePost, models } from '@teamkeel/sdk';
+
+export default CreatePost();
+```
+
+But what if you wanted to modify some of the request inputs prior to inserting into the database? You could hook in to the `beforeWrite` hook to do that:
+
+```typescript
+import { CreatePost, models } from '@teamkeel/sdk';
+
+export default CreatePost({
+  beforeWrite: async (ctx, inputs) => {
+    return {
+      ...inputs,
+      title: `${inputs.title} (${inputs.subTitle})`
+    }
+  }
+})
+```
+
+## Getting help
+
+Please read over our **[Hooks](/functions#hooks)** guide, and if you have any questions, don't hesitate to reach out to us for a one-on-one session where we can help you migrate your Keel projects.
