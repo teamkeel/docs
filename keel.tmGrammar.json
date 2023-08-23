@@ -87,7 +87,7 @@
       }
     },
     "operations_block_definition": {
-      "begin": "^\\s*(operations|functions)",
+      "begin": "^\\s*(actions)",
       "beginCaptures": {
         "1": {
           "name": "keyword.operations.keel"
@@ -510,13 +510,13 @@
               }
             }
           ],
-          "end": "(\\))\\s*?(?:(returns)\\s*(\\()(.*)(\\)))?",
+          "end": "(\\))(?:\\s*?(with|returns)\\s*(\\()(.*)(\\)))?",
           "endCaptures": {
             "1": {
-              "name": "punctuation.definition.tag.keel"
+              "name": "punctuation.definition.paren.keel"
             },
             "2": {
-              "name": "keyword.returns.keel"
+              "name": "keyword.input.keel"
             },
             "3": {
               "name": "punctuation.definition.paren.keel"
@@ -530,32 +530,42 @@
           }
         },
         {
-          "begin": "\\s*({)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          },
           "patterns": [
             {
-              "include": "#double_comment"
-            },
-            {
-              "include": "#attribute_with_arguments"
+              "include": "#curly_block"
             },
             {
               "include": "#attribute"
             }
-          ],
-          "end": "(})",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
+          ]
         }
       ],
       "end": "\\n",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      }
+    },
+    "curly_block": {
+      "begin": "({)",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.tag.keel"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#double_comment"
+        },
+        {
+          "include": "#attribute_with_arguments"
+        },
+        {
+          "include": "#attribute"
+        }
+      ],
+      "end": "(})",
       "endCaptures": {
         "0": {
           "name": "punctuation.definition.tag.keel"
