@@ -59,6 +59,12 @@ job EmailNewCustomerReport {
   @schedule("0 6 * * 5")
   @permission(roles: [Onboarding])
 }
+
+role Onboarding {
+  emails {
+    onboarding@example.com
+  }
+}
 ```
 
 > Please note that even if a scheduled job has a permission defined, it still cannot take any inputs.
@@ -77,7 +83,7 @@ job EmailNewCustomerReport {
 }
 ```
 This example defines the `EmailNewCustomerReport` as a manual job. It takes two inputs, `joinedSince` an optional `Date` and `deliveryEmail`, a required `String`.
-It also declares permissions for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
+It also declares [permissions](./permissions) for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
 
 To execute a manual job, you will need to use the Keel console.
 
