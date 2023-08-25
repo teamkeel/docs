@@ -14,7 +14,8 @@
     "nextra": "latest",
     "nextra-theme-docs": "^2.8.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "rudder-sdk-js": "^2.40.4"
   },
   "devDependencies": {
     "@types/node": "20.2.5",
