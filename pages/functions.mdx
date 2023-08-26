@@ -79,7 +79,7 @@ In the case of the example, the return type is expected to be `Product`.
 
 The `afterWrite` hook allows you to perform side effects after the record has been written to the database. Common use cases include creating other models, and performing custom permission checks.
 
-An example `afterWrite` hook might be:
+An example `afterWrite` hook that performs some side effects might be:
 
 ```typescript filename="createProduct.ts"
 import { CreateProduct, models } from "@teamkeel/sdk";
@@ -116,7 +116,7 @@ There are two ways you can use `beforeQuery`:
 #### Extending the existing query
 
 <Callout type="warning" emoji="⚠️">
-  For `update` actions, we do not currently support extending the existing query.
+  For `update` actions, we do not currently support extending the existing query, so you should follow the _Replacing the query entirely_ section below.
 </Callout>
 
 By default, a query will be built up based on the `where` conditions passed in the `inputs` to the function.
@@ -202,12 +202,12 @@ export default ListProducts({
 
 ### `afterQuery`
 
-The `afterQuery` hook allows you to modify the response, or perform side effects using the data returned from the query.
+The `afterQuery` hook allows you to modify the response, perform custom permission checks, or perform side effects using the data returned from the query.
 
 An example `afterQuery` hook might be:
 
 ```typescript filename="ListPreviewProducts.ts"
-import { ListPreviewProducts, permissions } from "@teamkeel/sdk";
+import { ListPreviewProducts } from "@teamkeel/sdk";
 
 export default ListPreviewProducts({
   afterQuery: async (ctx, inputs, products) => {
@@ -219,6 +219,29 @@ export default ListPreviewProducts({
   }
 });
 ```
+
+An example `afterQuery` hook that performs some custom permissions logic might look like:
+
+```typescript filename="ListPreviewProducts.ts"
+import { ListPreviewProducts, permissions } from "@teamkeel/sdk";
+
+export default ListPreviewProducts({
+  afterQuery: async (ctx, inputs, products) => {
+    const hasUnpublishedProducts = products.some(p => !p.isPublished);
+
+    if (hasUnpublishedProducts && !ctx.isAuthenticated) {
+      // deny the request if any of the products returned are not published
+      // and the request is not authenticated
+      // permissions.deny() will throw an error and stop execution.
+      permissions.deny();
+    }
+
+    // otherwise, just return the products in the response.
+    return products;
+  }
+});
+```
+
 
 #### Arguments
 

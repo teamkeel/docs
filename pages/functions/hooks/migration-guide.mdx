@@ -1,6 +1,6 @@
 # Migration Guide for Function Hooks
 
-If you have a schema that was authored prior to the introduction of the Action + Function Hooks syntax,
+If you have a schema that was authored prior to the introduction of the Action and Function Hooks syntax,
 luckily migrating your schema across to use the new syntax is pretty simple.
 
 ## A new schema keyword
@@ -47,9 +47,23 @@ Any time you want to _write your own code_ for an action instead of using the bu
 
 ## Migrating your functions code
 
+
+### Introducing the Hooks
+
+The new Hooks API introduces four new lifecycle methods that can be used to modify the way functions work. A custom function no longer takes a callback function where you would write your implementation; instead the function receives an object with the following properties that you can configure:
+
+- `beforeWrite`: useful for when you want to modify the values due to be written to the database prior to insertion / update.
+- `afterWrite`: useful for when you want to perform side effects on the data that was successfully inserted/updated. Can be used to run custom permissions checks or create other data.
+- `beforeQuery`: can be used to extend the default query that will be executed against the database, or alternatively you can replace the query entirely with your own custom query.
+- `afterQuery`: can be used to run custom permissions checks on the data returned from the database, or to perform other side effects.
+
+You can read more about each hook in the **[Hooks Documentation](/functions#hooks)**.
+
+### An example migration
+
 Previously a function would look something like the below:
 
-```typescript
+```typescript filename="functions/createPost.ts"
 import { CreatePost, models } from '@teamkeel/sdk';
 
 export default CreatePost(async (ctx, inputs) => {
@@ -65,7 +79,7 @@ Now most of the code above is written for you automatically! We have instead int
 
 The example function above isn't doing anything special that the default implementation of the function isn't doing already, so it would become:
 
-```typescript
+```typescript filename="functions/createPost.ts"
 import { CreatePost, models } from '@teamkeel/sdk';
 
 export default CreatePost();
@@ -73,7 +87,7 @@ export default CreatePost();
 
 But what if you wanted to modify some of the request inputs prior to inserting into the database? You could hook in to the `beforeWrite` hook to do that:
 
-```typescript
+```typescript filename="functions/createPost.ts"
 import { CreatePost, models } from '@teamkeel/sdk';
 
 export default CreatePost({
@@ -86,9 +100,62 @@ export default CreatePost({
 })
 ```
 
+### FAQs
+
+Q: How can I migrate my function that requires creation of other relationship data (such as a foreign key) prior to insertion?
+
+A: Imagine the scenario where you have two models: `Author` and `Post`. A `Post` needs to be associated with an author in our example, and we want to make it possible to create the `Author` and `Post` at the same time. You could use a `beforeWrite` hook to create the author first, obtain the Author's ID and pass it in when creating the post:
+
+```typescript filename="functions/createPostAndAuthor.ts"
+import { CreatePostAndAuthor, models } from '@teamkeel/sdk';
+
+export default CreatePostAndAuthor({
+  beforeWrite: async (ctx, inputs) => {
+    // the input definition in the schema would include author.name
+    const {
+      author: { name }
+    } = inputs;
+
+    const author = await models.author.create({ name });
+
+    // return the values to be written to the database
+    // including the id of the author we just created
+    return {
+      title: inputs.title,
+      authorId: author.id,
+    }
+  }
+})
+```
+
+Q: How can I migrate my function that needs to create other data in the database after creating my model?
+
+A: You can use the `afterWrite` hook to perform side effects such as creating related data:
+
+```typescript filename="functions/createPost.ts"
+import { CreatePost, models } from '@teamkeel/sdk';
+
+export default CreatePost({
+  afterWrite: async (ctx, inputs, post) => {
+    // the post parameter is the value retrieved from the database
+    // including its ID.
+
+    await models.comments.create({
+      postId: post.id,
+      content: 'I found this really interesting!',
+      identityId: ctx.identity.id,
+    })
+  }
+})
+```
+
 ## Custom functions
 
-If you have any **[Custom Functions](/functions#custom-functions)** defined in your schema, then no action is required to migrate these, as `read` and `write` action types do not leverage the Hooks API. 
+If you have any **[Custom Functions](/functions#custom-functions)** defined in your schema, then no action is required to migrate these, as `read` and `write` action types do not leverage the Hooks API.
+
+## Console
+
+You won't be able to use some functionality within the [Console](https://console.keel.so) such as the _Schema Visualizer_ and _API Explorer_ until you have fixed your schemas and deployed the changes.
 
 ## Getting help
 
