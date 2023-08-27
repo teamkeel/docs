@@ -1,10 +1,12 @@
 # Local environment setup
 
-When developing your Keel app locally there are two things which you'll probably want to setup - our CLI and our VSCode extension. Our CLI lets you run your project and develop against your API's locally whilst our VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files.
+When developing your Keel app locally there are two things which you'll probably want to setup - our CLI and our VSCode extension. 
+
+Our CLI lets you run your project and develop against your API's locally whilst our VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files.
 
 ## Install the CLI
 
-The easiest way to install our CLI is via Brew.
+The easiest way to install our CLI is via [Homebrew](https://brew.sh/).
 
 ```bash
 $ brew tap teamkeel/homebrew-keel
@@ -25,7 +27,11 @@ import { Callout } from 'nextra/components'
   In the interim, linux users can install the CLI via Homebrew, and Windows users can do the same via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
 </Callout>
 
-### Node.js
+### Dependencies
+
+You will need to install the following dependencies in order to use the Keel CLI locally:
+
+#### Node.js
 Node.js is used for running your functions and tests. We require Node version 18 or higher.
 
 import { Tab, Tabs } from 'nextra-theme-docs'
@@ -61,12 +67,18 @@ import { Tab, Tabs } from 'nextra-theme-docs'
   </Tab>
 </Tabs>
 
-### Docker
+#### Docker
 Docker is used to run a local Postgres database. We only require that Docker is installed and running, you don't need to configure it in any way. On a Mac the easiest way to run Docker is by installing [Docker Desktop](https://docs.docker.com/desktop/). 
 
 As well as being installed Docker needs to be running, which you can check by running `docker ps` in your terminal. If you see an error that says "Cannot connect to the Docker daemon" then most likely Docker Desktop is not running.
 
 ## VSCode Extension
+
+Click the button below to install the Keel VSCode extension:
+
+import Install from '../components/VSCodePackageInstall'
+
+<Install />
 
 The Keel VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode.
 
