@@ -2,7 +2,7 @@
 
 This tutorial will walk you through the basics of Keel by building a backend for a Todo app.
 
-You'll cover modelling your data, creating an API with authentication and permissions, writing some custom code and then finally we'll connect it all up to a front end. All in less than 30 mins - let's go!
+We'll cover modelling your data, creating an API with authentication and permissions, writing some custom code and then finally we'll connect it all up to a front end. All in less than 30 mins - let's go!
 
 ## Setup
 
@@ -20,25 +20,25 @@ To start, create a new project on Keel by going to [console.keel.xyz](http://con
 Once you reach the final step of the onboading you should see the git URL of your new repo. The next step is to clone the repo to your local machine and install the VSCode extension.
 
 import { Tab, Tabs } from 'nextra-theme-docs'
- 
+
 <Tabs items={['Using git CLI', 'Using Github Desktop app']}>
   <Tab>
 Copy the command directly from the final step of the project setup e.g.
-    
+
 ```bash
 git clone git@github.com/{yourUsername}/{projectName}
 ```
   </Tab>
     <Tab>
 Click **add → Clone Repository** and then select the newly created repo
- 
+
 ![Clone repo using Github Desktop app](/tutorial-github-desktop.png)
   </Tab>
 </Tabs>
-    
+
 ### Installing VSCode exension
 
-The Keel VSCode extension provides sytax highlighting and inline validation of Keel schema files. You can install it by going to the **Extensions** tab in VSCode and searching for Keel. 
+The Keel VSCode extension provides sytax highlighting and inline validation of Keel schema files. You can install it by going to the **Extensions** tab in VSCode and searching for Keel.
 
 ![VSCode Extension](/vscode-extension.png)
 
@@ -47,14 +47,14 @@ import { Callout } from 'nextra/components'
 <Callout type="info" emoji="💡">
   The extension only works in the app version of VS Code and not in a browser.
 </Callout>
-    
+
 ### Review
 Once you've got the project set up locally you'll see two things in the project:
 
 - A `schema.keel` file
 - A `functions` directory
 
-We'll start by looking at the schema. 
+We'll start by looking at the schema.
 
 ## The Keel schema
 
@@ -135,7 +135,7 @@ All actions have an action type (e.g. `get` `list` etc), a name and a set of inp
 
 ### Permissions
 
-The Todo model also defines some permission rules. These rules are defined using the `@permission` attribute and describe who has permission to perform actions. Keel API's are secure-by-default, and you have to explicitly define permission rules in your schema.
+The Todo model also defines some permission rules. These rules are defined using the `@permission` attribute and describe who has permission to perform actions. Keel APIs are secure-by-default, and you have to explicitly define permission rules in your schema.
 
 ```keel {9-12}
 model Todo {
@@ -157,7 +157,7 @@ Permission can be defined inside a model or an action, and can use a logical exp
 
 If the `@permission` attribute is used directly inside a model then you must say which actions type it applies to, if defined inside an action this argument should not be provided.
 
-While more than one `@permission` can be defined on a model and its operations, **only one needs to be satisfied** in order to allow access to an action. 
+While more than one `@permission` can be defined on a model and its operations, **only one needs to be satisfied** in order to allow access to an action.
 
 For the Todo model we have two permissions rules:
 
@@ -202,7 +202,7 @@ Let's focus in on one field - `tasks`.
 
 The type of this field is `Todo[]`, which mean it's a relationship to the `Todo` model and there can be many todo entries linked to one project.
 
-If we look at the Todo model we can see that the `project` field has the type `Project?` which means it's an **optional** link to a project. 
+If we look at the Todo model we can see that the `project` field has the type `Project?` which means it's an **optional** link to a project.
 
 ```keel
 model Todo {
@@ -225,21 +225,21 @@ api Web {
 }
 ```
 
-At the bottom of the schema we have the API block. This is where you defined the APIs and which models they expose. In this example we're creating an API called `Web` and it exposes both the models we have in the schema. You can have as many API's as you want in your schema and every API is available to use in three flavours: GraphQL, JSON-HTTP, and JSON-RPC.
+At the bottom of the schema we have the API block. This is where you defined the APIs and which models they expose. In this example we're creating an API called `Web` and it exposes both the models we have in the schema. You can have as many APIs as you want in your schema and every API is available to use in three flavours: GraphQL, JSON-HTTP, and JSON-RPC.
 
-In this case we want everything in our schema exposed in a single API, but you may want to split things out and have a customer facing API and an admin API with different models in each. 
+In this case we want everything in our schema exposed in a single API, but you may want to split things out and have a customer facing API and an admin API with different models in each.
 
 ## Keel console
 
-Now you're got the hang of how a Keel schema works, let's pop back to the console and see what gets built from that schema.
+Now that you have got the hang of how a Keel schema works, let's pop back to the console and see what gets built from that schema.
 
-Click **Done** to close the new project flow and you'll land on your project overview. 
+Click **Done** to close the new project flow and you'll land on your project overview.
 
 ![Project overview in Keel console](/tutorial-console.png)
 
 Here you'll see the details of the commit that's currently live, the urls of your deployed API(s) and a live overview of traffic to your APIs.
 
-Opening up the **Schema visualiser** in the main navigation, you'll see a visual representation of the data model we just looked at in the schema file and how different models and fields relate to each other. 
+Opening up the **Schema visualiser** in the main navigation, you'll see a visual representation of the data model we just looked at in the schema file and how different models and fields relate to each other.
 
 ![Schema visualiser](/tutorial-schema.png)
 
@@ -343,7 +343,7 @@ Open up the API Explorer to see the docs for your new `dueBy` operation!
 
 Head to the **API explorer** section of the console to see the docs for your API. On the right has side you'll see the requests structure for each API protocol.
 
-Go to the **Run** tab to query your APIs directly the console. 
+Go to the **Run** tab to query your APIs directly the console.
 
 <Callout type="info" emoji="📖">
   If you're familiar with GraphQL you can use the built in GraphiQL playground from within the **API Explorer.**

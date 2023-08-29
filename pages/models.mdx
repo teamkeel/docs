@@ -15,7 +15,7 @@ model Product {
 
 This example defines a model called `Product` which has a number of fields, which are defined inside a `fields` block within the model definition. Each field has a **name** and a **type**. The type can be any of the built-in Keel types or one you’ve defined elsewhere in your schema, for example an enum or another model.
 
-All models have a few built-in fields by default - `id`, `createdAt`, and `updatedAt`, so although not something you are likely to do a lot it is valid to define a model with no fields block. This means the following is a valid model.
+All models have a few built-in fields by default - `id`, `createdAt`, and `updatedAt`, So, even though it's not a common practice, it's valid to define a model without a fields block. This means the following is a valid model.
 
 ```keel
 model Product {}
@@ -109,7 +109,7 @@ Now we can be sure that no two cars will have the same VIN and Licence Plate Num
 
 ## Default values
 
-Previously, we discussed how a models built-in fields have default values that are used when a record is created. You can also add default values to your own fields using the `@default` attribute. This attribute accepts a single argument, which is the value you want to use as the default
+Previously, we discussed how models built-in fields have default values that are used when a record is created. You can also add default values to your own fields using the `@default` attribute. This attribute accepts a single argument, which is the value you want to use as the default
 
 For example, the following schema specifies that if no value is provided for the `status` field when an order is created, then the default value `Placed` should be used.
 
