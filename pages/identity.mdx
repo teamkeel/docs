@@ -22,7 +22,7 @@ When writing an expression in your schema or writing a function, `ctx.identity` 
 
 ### Filtering records by Identity
 
-It is common to want to make API's that only return data owned by the caller. This can be done in a Keel app by filtering the returned records by the authenticated `Identity`. As an example in the following schema there is a `myPosts` action that only returns the posts created by a profile that is linked to the calling Identity.
+It is common to want to make APIs that only return data owned by the caller. This can be done in a Keel app by filtering the returned records by the authenticated `Identity`. As an example in the following schema there is a `myPosts` action that only returns the posts created by a profile that is linked to the calling Identity.
 
 ```keel {3,10,14}
 model Profile {

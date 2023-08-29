@@ -2,7 +2,7 @@
 
 The JSON API is a path-based JSON API, described by an [OpenAPI](https://www.openapis.org/) 3.1 spec, that accepts and returns plain JSON. Actions defined in your schema become JSON endpoints like `/api/json/<actionName>`.
 
-You can download the OpenAPI 3.1 spec for your JSON API from the **API explorer** page in the Keel console by clicking on the "API definitions" button in the top-right of the page. 
+You can download the OpenAPI 3.1 spec for your JSON API from the **API explorer** page in the Keel console by clicking on the "API definitions" button in the top-right of the page.
 
 ![Downloading an OpenAPI spec from the Keel console](/api-explorer-openapi-spec.png)
 
@@ -67,7 +67,7 @@ If an input is marked as optional in your Keel schema then it is valid to comple
 
 ### JSON schema validation
 
-Requests made to your JSON API's are validated against a [JSON schema](https://json-schema.org/) for that action. If the request does not pass validation the API will return an HTTP `400` along with a list of vaidation errors.
+Requests made to your JSON APIs are validated against a [JSON schema](https://json-schema.org/) for that action. If the request does not pass validation the API will return an HTTP `400` along with a list of vaidation errors.
 
 ```json filename="Example of a validation error"
 {
@@ -87,8 +87,8 @@ Requests made to your JSON API's are validated against a [JSON schema](https://j
 ## Creating a new record
 
 You can define an action for creating a new record in your Keel schema using the **create** action type. In the JSON API these actions accept the write inputs (the ones after `with`) and return the newly created record.
- 
-<Tabs items={['Keel schema', 'JSON request', 'JSON response', 'OpenAPI spec']}>
+
+<Tabs items={['Keel schema', 'JSON request', 'JSON response']}>
   <Tab>
 ```keel {7} filename="schema.keel"
 model Profile {
@@ -413,7 +413,7 @@ Authentication works in the JSON API by passing a bearer token as an `Authorizat
 // POST /api/json/authenticate
 {
   "emailPasswod": {
-    "email": "bob@disney.com", 
+    "email": "bob@disney.com",
     "password": "m1ck3ym0us3"
   }
 }
@@ -439,7 +439,7 @@ By default the `authenticate` endpoint tries to validate the provided credential
 // POST /api/json/authenticate
 {
   "emailPasswod": {
-    "email": "bob@disney.com", 
+    "email": "bob@disney.com",
     "password": "m1ck3ym0us3"
   },
   "createIfNotExists": true

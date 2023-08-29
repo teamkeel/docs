@@ -2,7 +2,7 @@
 
 Functions allow you to implement actions using code, but they are so much more than just "serverless functions". Your functions are deeply integrated into your app, meaning that inputs are validated, authentication and permissions are handled for you, and you have full access to your database.
 
-We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`. 
+We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`.
 
 ## A simple function
 
@@ -271,7 +271,7 @@ If you need more complex database operations you can use the [Database API](/fun
 
 We deploy your functions into an environment running Node.js 18.x, which means the Fetch API is available.
 
-One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel API's. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend. 
+One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel APIs. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend.
 
 The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function.
 
@@ -314,7 +314,7 @@ You can access request headers by using `ctx.headers`, which is a *read-only* ve
 export default MyFunction((inputs, api, ctx) => {
   // read a request header
   const reqHeader = ctx.headers.get("X-My-Custom-Header");
-  
+
   // write a response header
   ctx.response.headers.set("X-My-Other-Header", "1234");
 });
@@ -399,7 +399,7 @@ message CreateBooksResponse {
 }
 ```
 
-Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a model definition. Message fields can be other messages, models, enums, or built-in Keel types. 
+Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a model definition. Message fields can be other messages, models, enums, or built-in Keel types.
 
 import { Callout } from 'nextra/components'
 
@@ -441,7 +441,7 @@ For custom `read` or `write` functions you must implement any permissions logic 
 import { permissions } from "@teamkeel/sdk";
 
 export default CustomAction(async (ctx, input) => {
-  
+
   if (ctx.headers.get("X-custom-auth-header") == ctx.secrets.AUTH_KEY) {
     permissions.allow()
   } else {
@@ -452,7 +452,7 @@ export default CustomAction(async (ctx, input) => {
   if (item.owner != ctx.identity.id) {
     permissions.deny()
   }
-  
+
 });
 ```
 
