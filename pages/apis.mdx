@@ -1,4 +1,4 @@
-# API's
+# APIs
 
 Your Keel backend exposes three types of API - **GraphQL**, **JSON**, and **JSON-RPC**. When running Keel locally using `keel run` you can make requests to your API at `http://localhost:8000` and for deployed environments you'll find the domain on the **Overview page** in the console.
 
@@ -16,7 +16,7 @@ When running locally with `keel run` you can also access a [GraphiQL](https://gi
 
 **Endpoint:** `/api/json/<actionName`
 
-[OpenAPI](https://www.openapis.org/) is an open-source specification for describing JSON API's. It describes which endpoints are available and the data-type's of the requests and responses. There are many open source libraries for generating clients from an OpenAPI spec and you can download the OpenAPI (v3.1) definitions for your JSON API from the API Explorer in the console or from the `/api/json/openapi.json` endpoint of your Keel app.
+[OpenAPI](https://www.openapis.org/) is an open-source specification for describing JSON APIs. It describes which endpoints are available and the data-type's of the requests and responses. There are many open source libraries for generating clients from an OpenAPI spec and you can download the OpenAPI (v3.1) definitions for your JSON API from the API Explorer in the console or from the `/api/json/openapi.json` endpoint of your Keel app.
 
 [Read the JSON API docs](/apis/json)
 
@@ -24,13 +24,13 @@ When running locally with `keel run` you can also access a [GraphiQL](https://gi
 
 **Endpoint:** `/api/rpc`
 
-[JSON-RPC](https://www.jsonrpc.org/) is a lightweight [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) protocol. The JSON-RPC endpoint is `/api/rpc` and is compliant with the JSON-RPC 2.0 spec. 
+[JSON-RPC](https://www.jsonrpc.org/) is a lightweight [Remote Procedure Call](https://en.wikipedia.org/wiki/Remote_procedure_call) (RPC) protocol. The JSON-RPC endpoint is `/api/rpc` and is compliant with the JSON-RPC 2.0 spec.
 
 ## Which API should I use?
 
 We support these different types of endpoints to give you flexibility in how to connect to your Keel app. If you are building a web frontend and have used GraphQL before or want to be able to load lots of relational data in one request, then GraphQL may be a good choice.
 
-If you want a simpler option with a more standard request/response pattern then the JSON API might be more for you. 
+If you want a simpler option with a more standard request/response pattern then the JSON API might be more for you.
 
 import { Callout } from 'nextra/components'
 

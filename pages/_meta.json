@@ -21,7 +21,7 @@
   "identity": "Identity",
   "permissions": "Permissions",
   "functions": "Functions",
-  "apis": "API's",
+  "apis": "APIs",
   "jobs": "Jobs",
   "envvars": "Environment Variables",
   "secrets": "Secrets",

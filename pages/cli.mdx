@@ -36,7 +36,7 @@ import { Callout } from 'nextra/components'
 
 ## Running tests
 
-Keel supports writing tests with the [Vitest](https://vitest.dev/) framework. The `keel test` command runs your tests with a sandboxed database and a development server, so you can write tests against your API's.
+Keel supports writing tests with the [Vitest](https://vitest.dev/) framework. The `keel test` command runs your tests with a sandboxed database and a development server, so you can write tests against your APIs.
 
 <Callout type="info" emoji="🙌">
   Docs for how to write tests coming soon.
@@ -50,9 +50,8 @@ You can validate your Keel project using `keel validate` which report any schema
 
 ## Generating code
 
-The `@teamkeel/sdk` package that you use in your functions is generated from your schema files. When running a development server with `keel run` this package will be re-generated automatically but if you want to manually re-generate it you can use `keel generate`. 
+The `@teamkeel/sdk` package that you use in your functions is generated from your schema files. When running a development server with `keel run` this package will be re-generated automatically but if you want to manually re-generate it you can use `keel generate`.
 
 The `generate` command will also scaffold out any missing function files for you.
 
 ![The generate command](/cli-generate.png)
-

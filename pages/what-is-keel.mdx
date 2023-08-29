@@ -5,7 +5,7 @@ Keel is an all-in-one backend platform that is designed to give you *everything*
 - A fully-managed relational database
 - Scalable infrastructure
 - A great local development experience
-- Flexible and customisable API's
+- Flexible and customisable APIs
 - Authentication & Permissions
 - Multiple environments
 - Configuration and secret management
@@ -19,7 +19,7 @@ We also believe that whilst there are some things that absolutely require writin
 
 ## Schema
 
-In your Keel schema you define your data models, API's and permission rules. For many API actions you won't need to write any code, with the Keel runtime handling them for you based on your schema. When you do need to write custom code you get a type-safe SDK generated from your schema and full access to your database.
+In your Keel schema you define your data models, APIs and permission rules. For many API actions you won't need to write any code, with the Keel runtime handling them for you based on your schema. When you do need to write custom code you get a type-safe SDK generated from your schema and full access to your database.
 
 ## Database
 
@@ -33,15 +33,15 @@ We're not big fans of buzzwords, but we do think that there are many benefits to
 
 ## Local Development
 
-You can develop and run your Keel app locally using your favourite editor, although we do have a rather snazzy VSCode extension which provides inline validation, auto-completion, and go-to-definition support for Keel schema files.
+You can develop and run your Keel app locally using your favourite editor, although we do have a rather snazzy [VSCode extension](https://marketplace.visualstudio.com/items?itemName=teamkeel.vscode-keel) which provides inline validation, auto-completion, and go-to-definition support for Keel schema files.
 
-## Flexible API's
+## Flexible APIs
 
-The API's you build with Keel all support three API *flavours* out the box - [GraphQL](https://graphql.org/), JSON, and spec-compliant JSON-RPC. If you're familiar with GraphQL it can be a great choice for building frontend applications, but does come with some complexity. If you'd prefer something simpler then you also get JSON endpoints with OpenAPI definitions.
+The APIs you build with Keel all support three API *flavours* out the box - [GraphQL](https://graphql.org/), JSON, and spec-compliant JSON-RPC. If you're familiar with GraphQL it can be a great choice for building frontend applications, but does come with some complexity. If you'd prefer something simpler then you also get JSON endpoints with OpenAPI definitions.
 
 ## Authentication & Permissions
 
-Knowing who people are and what they are allowed to do is a critical part of any backend system. It's also a tricky thing to get right. You'll likely want to support multiple authentication methods for your customers, have different requirements for authentication for your team, and then you have to work out who is allowed to do what. Keel aims to make this as painless as possible by providing flexible authentication options and powerful way to define permissions that supports both role-based and row-based rules. 
+Knowing who people are and what they are allowed to do is a critical part of any backend system. It's also a tricky thing to get right. You'll likely want to support multiple authentication methods for your customers, have different requirements for authentication for your team, and then you have to work out who is allowed to do what. Keel aims to make this as painless as possible by providing flexible authentication options and powerful way to define [permissions](/permissions) that supports both role-based and row-based rules.
 
 ## Multiple Environments
 
