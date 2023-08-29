@@ -87,12 +87,25 @@ Sometimes a field needs to be unique across all instances of a model. As an exam
 ```keel
 model Book {
   fields {
-    isbn Text @unique foo
+    isbn Text @unique
   }
 }
 ```
-
 Now we can be sure that no two books will have the same ISBN.
+
+### Composite Unique Fields
+In your model, you can also set a combination of fields to be unique for each instance.
+
+```keel
+model Car {
+    fields {
+        vin Text
+        licensePlateNumber Text
+    }
+    @unique([vin, licensePlateNumber])
+}
+```
+Now we can be sure that no two cars will have the same VIN and Licence Plate Number.
 
 ## Default values
 
