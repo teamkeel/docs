@@ -53,10 +53,10 @@ An example might be where we want to change the value of the `title` of a `Produ
 import { CreateProduct } from "@teamkeel/sdk";
 
 export default CreateProduct({
-  beforeWrite: async (ctx, inputs) => {
+  beforeWrite: async (ctx, inputs, values) => {
     return {
-      ...inputs,
-      title: `${inputs.title} (${inputs.sku})`
+      ...values,
+      title: `${values.title} (${values.sku})`
     };
   }
 });
@@ -68,6 +68,7 @@ export default CreateProduct({
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
+- `values` - the values due to be written to the database.
 
 #### Return type
 
@@ -176,7 +177,7 @@ SELECT * FROM product WHERE product.title LIKE 'star wars%' AND product.title LI
 #### Replacing the query entirely
 
 <Callout type="info">
-  `beforeQuery` hooks on `update` actions should use this approach.
+  `beforeQuery` hooks on `update` actions should use this approach. The method signature for `update` differs slightly, as a third parameter `values` is passed, which contains the mutated values from any `beforeWrite` hooks that may be defined.
 </Callout>
 
 Alternatively, the return type of `beforeQuery` also allows you to return a `Promise<T>` where `T` is the current model. So in the case of our example schema, and implementing a `list` action, this would be a `Promise<Product[]>`.
