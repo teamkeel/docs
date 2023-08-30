@@ -34,23 +34,12 @@ export const Analytics = () => {
 };
 
 function trackPage() {
-  if (typeof window !== "undefined" && window.rudderanalytics) {
+  if (typeof window !== "undefined") {
     window.rudderanalytics.page();
-  } else {
-    console.warn("RudderStack is not initialized.");
   }
 }
 
 export async function rudderInitialize() {
-  // Check if environment variables are set
-  if (
-    !process.env.NEXT_PUBLIC_RS_WRITE_KEY &&
-    !process.env.NEXT_PUBLIC_RS_DATA_PLANE_URL
-  ) {
-    console.warn("RudderStack environment variables are not set.");
-    return;
-  }
-
   window.rudderanalytics = await import("rudder-sdk-js");
   window.rudderanalytics.load(
     process.env.NEXT_PUBLIC_RS_WRITE_KEY,
