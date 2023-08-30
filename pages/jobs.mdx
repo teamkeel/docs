@@ -37,7 +37,7 @@ import { Callout } from 'nextra/components'
 
 ## Scheduled jobs
 
-A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [cron](https://devhints.io/cron) format to define the
+A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [AWS EventBridge cron expression format](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html) to define the
 schedule by which a job is executed. Scheduled jobs take no inputs.
 
 ```keel filename="schema.keel"
