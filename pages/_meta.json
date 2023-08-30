@@ -26,6 +26,8 @@
   "envvars": "Environment Variables",
   "secrets": "Secrets",
   "cli": "CLI",
+  "testing": "Testing",
+  "release-notes": "Release Notes",
   "website": {
     "title": "Homepage",
     "href": "https://keel.so",
