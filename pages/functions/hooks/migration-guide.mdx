@@ -3,6 +3,14 @@
 If you have a schema that was authored prior to the introduction of the Action and Function Hooks syntax,
 luckily migrating your schema across to use the new syntax is pretty simple.
 
+## First up
+
+You will need to upgrade your Keel CLI to the latest version:
+
+```bash
+brew update && brew upgrade keel
+```
+
 ## A new schema keyword
 
 Previously, you'd define `operations` and `functions` within separate blocks:
@@ -46,6 +54,14 @@ You may also notice that the `getPost` function has been annotated with the `@fu
 Any time you want to _write your own code_ for an action instead of using the built-in behaviour, apply the `@function` attribute, and run `keel generate` to create the corresponding `{name}.ts` file in your `functions/` directory.
 
 ## Migrating your functions code
+
+With the up to date Keel CLI, you need to re-run Keel's code generator to get your project up to date:
+
+```
+keel generate
+```
+
+This will update any supporting JavaScript dependencies to the latest version, and regenerate Keel's SDK to reflect the hooks changes.
 
 
 ### Introducing the Hooks
