@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styled from "styled-components";
 
 const Wrap = styled.div`
@@ -40,9 +40,24 @@ const ExtIdentifier = styled.div`
 `;
 
 const Install: React.FC = () => {
+  const handleClick = useCallback((e) => {
+    const href = "vscode:extension/teamkeel.vscode-keel";
+
+    document.location = href;
+
+    setTimeout(() => {
+      // if the document still has focus after 500ms then it means
+      // that the vscode uri schema wasn't handled because vscode wasn't installed
+      // so link to the web marketplace page instead
+      if (document.hasFocus()) {
+        document.location =
+          "https://marketplace.visualstudio.com/items?itemName=teamkeel.vscode-keel";
+      }
+    }, 500);
+  }, []);
   return (
     <Wrap>
-      <Button href="vscode:extension/teamkeel.vscode-keel">
+      <Button onClick={handleClick}>
         <Logo>
           <img src="/vscode.png" alt="VSCode marketplace" />
         </Logo>
