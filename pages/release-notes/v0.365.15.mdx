@@ -1,0 +1,58 @@
+# Keel v0.365.15
+
+## Release Date
+
+31 August, 2023
+
+## Summary
+
+We are excited to announce the release of Keel `v0.365.15`. This update brings breaking changes to our Keel schema language, a new feature and bug fixes aimed at enhancing user experience and productivity.
+
+## Breaking Change
+
+We are excited to introduce the **Hooks API**, which is a complete revamp of functions. You will need to restructure your existing functions to use [Hooks](link to documentation). With **Hooks** we now write most of the implementation of your function for you, which should mean less code for you to write.
+
+**Hooks** allow you to extend the default behaviour of each action by hooking into several new lifecycle events:
+
+- `beforeWrite` : allows you to modify the values prior to writing to the database.
+- `afterWrite` : allows you to perform side effects once a record has been created or updated. Useful for creating related data, and performing custom permissions checks.
+- `beforeQuery` : allows you to extend the existing query that we build for you, or alternatively replace the query with a custom query entirely.
+- `afterQuery`: allows you to perform side effects on the data returned from the query, such as performing custom permissions checks on the data, or even modifying the data returned from the query to present it in a certain way.
+
+You will need to upgrade your Keel CLI version to see this change reflect and we have written a [Migration Guide](LINK) that you can follow to upgrade your existing Keel schemas.
+
+Once you have followed the **Migration Guide** [LINK] to update your schemas locally, you can push the commit, and we will rebuild your updated schema and deploy into production.
+
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="💡">
+Once you’ve updated your Keel CLI to the new version, any existing Keel schemas in your repo that leverage the old `functions` / `operations` keywords will be invalid.
+</Callout>
+
+## New Features
+
+We now have full support for OIDC external provides which changes the behaviour of authentication for the CLI. Here is what is included with this new feature:
+
+- The CLI now embeds a private key to use for `run` and `test` commands
+- ALL tokens must now be signed
+- Support for audience claims check for external issuers
+- Support for  he OIDC discovery spec for issuers
+- Cache responses for OIDC config, user info and JWKS based on response cache control headers
+
+## Bug Fixes
+- Fixed a bug in the Keel schema validation process that is causing the Keel validate and Keel run to throw a nil pointer error.
+
+## Next Steps
+
+To upgrade to Keel `v0.365.15`, please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+Read the migration Guide for Hooks:  (LINK)
+
+For any issues or feedback, please visit the support channel on our community discord or contact us at [help@keel.com](mailto:help@keel.com).
+
+Thank you for using Keel!
