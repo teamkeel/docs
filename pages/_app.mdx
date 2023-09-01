@@ -1,13 +1,13 @@
 import { useRouter } from "next/router";
 import Script from "next/script";
 import { useEffect } from "react";
-import { Analytics } from "../utils/analytics";
+import { Analytics, analyticsEnabled } from "../utils/analytics";
 
 export default function App({ Component, pageProps }) {
   return (
     <>
       <Component {...pageProps} />
-      <Analytics />
+      {analyticsEnabled() && <Analytics />}
     </>
   );
 }

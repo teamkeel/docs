@@ -77,7 +77,7 @@ model Order {
     status Text
   }
 
-  operations {
+  actions {
     update updateOrder(id) with (status)
   }
 
@@ -94,13 +94,10 @@ You can make a permission rule that will always pass by using the expression `tr
 
 ```keel {11-14}
 model Post {
-  operations {
+  actions {
     get getPost(id)
     list listPosts(createdAt)
-  }
-
-  functions {
-    create newPost() with (title)
+    create newPost() with (title) @function
   }
 
   @permission(
@@ -114,7 +111,7 @@ You can use the same approach to make a specific action public. For example the 
 
 ```keel {4}
 model Post {
-  operations {
+  actions {
     get getPost(id) {
       @permission(expression: true)
     }
@@ -134,7 +131,7 @@ model Post {
     author Identity
   }
 
-  operations {
+  actions {
     create createPost() with (body) {
       // set the author to the authenticated Identity
       @set(post.author = ctx.identity)
@@ -239,4 +236,4 @@ The important thing here is the **“for each”** part of the last two steps. B
 
 ## Functions
 
-Permission rules apply to both operations and functions, and you can add permission rules to specific functions too. The only exception to this is for `read` and `write` functions - schema defined permission rules do not apply to these functions and so you must implement any permissions logic in your code. See the docs on [custom functions](/functions#permissions) for more info.
+Permission rules apply to both built-in actions and functions, and you can add permission rules to specific functions too. The only exception to this is for `read` and `write` functions - schema defined permission rules do not apply to these functions and so you must implement any permissions logic in your code. See the docs on [custom functions](/functions#permissions) for more info.

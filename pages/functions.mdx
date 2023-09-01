@@ -6,12 +6,12 @@ We currently support TypeScript for writing functions and your function code sho
 
 ## A simple function
 
-Functions can use the same action types as operations, for example `get`, `list` and so on. To illustrate how functions work lets implement a simple `get` function.
+Functions can use the same action types as actions, for example `get`, `list` and so on. To make a built-in action a function, we apply the `@function` attribute. To illustrate how functions work lets implement a simple `get` function. 
 
 ```keel filename="schema.keel"
 model Product {
-  functions {
-    get getProduct(id)
+  actions {
+    get getProduct(id) @function
   }
 }
 ```
@@ -21,192 +21,248 @@ If we then run `keel generate` a function file will be created for us which will
 ```tsx filename="functions/getProduct.ts"
 import { GetProduct } from "@teamkeel/sdk";
 
-export default GetProduct(async (ctx, inputs) => {
-  // your code here
-});
+// To learn more about what you can do with hooks,
+// visit https://docs.keel.so/functions
+const hooks : GetProductHooks = {};
+
+export default GetProduct(hooks);
 ```
 
 The `@teamkeel/sdk` package is auto-generated based on your schema and contains wrapper functions for each of your schema-defined functions. These wrapper functions ensure that your code is correctly typed without having to explicitly declare types.
 
-To implement this function we can use the generated model APIs available from the `@teamkeel/sdk` package.
+Functions have a default implementation that works out of the box, without you having to write any extra code. For example, if we pass `id` in the inputs in the request to the action, the function will automatically query the database to find a product matching that `id`.
 
-```tsx filename="functions/getProduct.ts"
-import { GetProduct, models } from "@teamkeel/sdk";
+Obviously this example is very simple, and in practice this kind of action wouldn't need to be annotated with the `@function` attribute in our schema, unless you require your action to do more than just query the database to find the product by its ID.
 
-export default GetProduct((ctx, inputs) => {
-  return models.product.findOne({
-    id: inputs.id,
-  });
+## Hooks
+
+<Callout type="info" emoji="ℹ️">
+  If you have an existing schema that predates the introduction of **Hooks** please read the [Migration Guide](/functions/hooks/migration-guide)
+</Callout>
+
+
+**Hooks** allow you to modify the default behaviour of the function; for example you might want to add constraints to the query, run custom permission logic on the returned rows, create related data, or perform other side effects.
+
+### `beforeWrite`
+
+The `beforeWrite` hook allows you to modify the values that will be written to the database.
+
+An example might be where we want to change the value of the `title` of a `Product` to include the product's Stock Keeping Unit (SKU):
+
+```typescript filename="createProduct.ts"
+import { CreateProduct } from "@teamkeel/sdk";
+
+export default CreateProduct({
+  beforeWrite: async (ctx, inputs, values) => {
+    return {
+      ...values,
+      title: `${values.title} (${values.sku})`
+    };
+  }
 });
 ```
 
-That's it, our function will now work as expected. Obviously this example is very simple, and in practice this kind of action would be defined as an operation in our schema, but it illustrates the basics of how to implement a function.
+#### Arguments
 
-## Function arguments
-
-Your functions receive two arguments.
+`beforeWrite` receives two arguments.
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
+- `values` - the values due to be written to the database.
+
+#### Return type
+
+`beforeWrite` expects the hook to return the model object.
+
+In the case of the example, the return type is expected to be `Product`.
+
+### `afterWrite`
+
+The `afterWrite` hook allows you to perform side effects after the record has been written to the database. Common use cases include creating other models, and performing custom permission checks.
+
+An example `afterWrite` hook that performs some side effects might be:
+
+```typescript filename="createProduct.ts"
+import { CreateProduct, models } from "@teamkeel/sdk";
+
+export default CreateProduct({
+  afterWrite: async (ctx, inputs, data) => {
+    await models.productReviews.create({
+      productId: data.id,
+      rating: 10,
+      content: "We love it, and that's not just because we made it." 
+    });
+  }
+});
+```
+
+#### Arguments
+
+`afterWrite` receives two arguments.
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `data` - the data that was written to the database, including the `id`
+
+#### Return type
+
+`afterWrite` does not expect a value to be returned from the hook.
+
+### `beforeQuery`
+
+The `beforeQuery` hook allows you to modify the behaviour of the default query that is executed if no `beforeQuery` hook has been defined.
+
+There are two ways you can use `beforeQuery`:
+
+#### Extending the existing query
+
+<Callout type="warning" emoji="⚠️">
+  For `update` actions, we do not currently support extending the existing query, so you should follow the _Replacing the query entirely_ section below.
+</Callout>
+
+By default, a query will be built up based on the `where` conditions passed in the `inputs` to the function.
+
+For example, given the following inputs to a `list` action:
+
+```json
+{
+  "where": {
+    "title": {
+      "startsWith": "star wars"
+    }
+  }
+}
+```
+
+If you define a `beforeQuery` hook, this will look like:
+
+```typescript filename="listProducts.ts"
+import { ListProducts } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: (ctx, inputs, query) => {
+    // some code
+  }
+});
+```
+
+The third parameter to the hook `query` is an instance of our `QueryBuilder` class with the `where` constraints from the inputs already applied. Without any additional mutation of the query object, the SQL that will be generated and run against the database will look something like:
+
+```sql
+SELECT * FROM product WHERE product.title LIKE 'star wars%'
+```
+
+So in your `beforeQuery` hook above, if you were to add the following code:
+
+```typescript filename="listProducts.ts"
+import { ListProducts } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: (ctx, inputs, query) => {
+    return query.where({
+      title: {
+        endsWith: 'phantom menace'
+      }
+    });
+  }
+});
+```
+
+The final SQL would be:
+
+```sql
+SELECT * FROM product WHERE product.title LIKE 'star wars%' AND product.title LIKE '%phantom menace'
+```
+
+#### Replacing the query entirely
+
+<Callout type="info">
+  `beforeQuery` hooks on `update` actions should use this approach. The method signature for `update` differs slightly, as a third parameter `values` is passed, which contains the mutated values from any `beforeWrite` hooks that may be defined.
+</Callout>
+
+Alternatively, the return type of `beforeQuery` also allows you to return a `Promise<T>` where `T` is the current model. So in the case of our example schema, and implementing a `list` action, this would be a `Promise<Product[]>`.
+
+You can use our [Model API](/functions/sdk/modelApi) to write your own custom query implementation, although you will have to handle all of the inputs to the action yourself (as shown in the example below), as the built-in behaviour will no longer take place:
+
+```typescript filename="listProducts.ts"
+import { ListProducts, models } from "@teamkeel/sdk";
+
+export default ListProducts({
+  beforeQuery: async (ctx, inputs) => {
+    const products = await models.product.findMany({
+      where: {
+        ...inputs.where,
+        isPublished: true,
+      }
+    });
+
+    return products;
+  }
+});
+```
+
+### `afterQuery`
+
+The `afterQuery` hook allows you to modify the response, perform custom permission checks, or perform side effects using the data returned from the query.
+
+An example `afterQuery` hook might be:
+
+```typescript filename="ListPreviewProducts.ts"
+import { ListPreviewProducts } from "@teamkeel/sdk";
+
+export default ListPreviewProducts({
+  afterQuery: async (ctx, inputs, products) => {
+    return products.map(p => ({
+      ...p,
+      // truncate the title to 10 characters if not authenticated
+      title: ctx.isAuthenticated ? p.title : `${p.title.slice(0, 10)}...`
+    }))
+  }
+});
+```
+
+An example `afterQuery` hook that performs some custom permissions logic might look like:
+
+```typescript filename="ListPreviewProducts.ts"
+import { ListPreviewProducts, permissions } from "@teamkeel/sdk";
+
+export default ListPreviewProducts({
+  afterQuery: async (ctx, inputs, products) => {
+    const hasUnpublishedProducts = products.some(p => !p.isPublished);
+
+    if (hasUnpublishedProducts && !ctx.isAuthenticated) {
+      // deny the request if any of the products returned are not published
+      // and the request is not authenticated
+      // permissions.deny() will throw an error and stop execution.
+      permissions.deny();
+    }
+
+    // otherwise, just return the products in the response.
+    return products;
+  }
+});
+```
+
+
+#### Arguments
+
+`afterQuery` receives two arguments.
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `data` - the data that was retrieved from the database
+
+#### Return type
+
+`afterQuery` expects the hook to return the model (or array of model in the case of a `list` action).
+
+In the example above, the expected return type will be `Promise<Product[]>`.
 
 ## Using the database
 
-The `@teamkeel/sdk` package is generated based on your schema and contains type-safe APIs for interacting with your models. These APIs are all available on the exported `models` object.
+The `@teamkeel/sdk` package is generated based on your schema and contains type-safe API's for interacting with your models. These APIs are all available on the exported `models` object.
 
 See [Model API](/functions/sdk/modelApi) for full usage.
-
-### Reading a single record
-
-As shown in the simple example at the start of this page, we can read a single record by using the `findOne` model API.
-
-```tsx filename="functions/getProduct.ts"
-import { GetProduct, models } from "@teamkeel/sdk";
-
-export default GetProduct(async (ctx, inputs) => {
-  return models.product.findOne({
-    id: inputs.id,
-  });
-});
-```
-
-The return type of a **get** function is `Promise<Model | null>`, which conveniently matches the model API method `findOne`. So for a simple function like this we can just return the result of `findOne`.
-
-### Reading multiple records
-
-To find and return many records you can use `findMany` model API method. The following schema defines a `list` function which takes no inputs.
-
-```keel filename="schema.keel"
-model Product {
-  functions {
-    list latestProducts()
-  }
-}
-```
-
-Below is an example implementation of `latestProducts`.
-
-```tsx filename="functions/latestProducts.ts"
-import { ListProducts, models } from "@teamkeel/sdk";
-import sub from 'date-fns/sub';
-
-export default LatestProducts((ctx, inputs) => {
-  const oneWeekAgo = sub(ctx.now(), {
-    days: 7,
-  });
-
-  return models.product.findMany({
-    createdAt: {
-      after: oneWeekAgo,
-    },
-  });
-});
-```
-
-A few things to note in this example:
-
-- The use of the `@date-fns` package - you can use any 3rd party packages you like in your functions. Just install them as you normally (currently only `npm` is supported).
-- The use of `ctx.now()` to get the current date. The third argument to your functions is a `ctx` object which is very similar to the `ctx` available in schema expressions.
-- Using the `after` filter on the `createdAt` field in the `findMany` call. There are many filtering fields available when using `findMany` which are explained in more detail later on in this page.
-
-The `findMany` model API method returns `Promise<Model[]>`, which is also the expected return type of a **list** function, so we can return the result of that method directly.
-
-### Creating a new record
-
-To create a new record in the database you use the `create` model API method. The following schema defines a function for creating a new post.
-
-```keel filename="schema.keel"
-model Author {}
-
-model Post {
-  fields {
-    title Text
-    body Text
-    author Author
-  }
-
-  functions {
-    create createPost() with (title, body, author.id)
-  }
-}
-```
-
-A simple implementation of `createPost` might look something like this.
-
-```tsx filename="functions/createPost.ts"
-import { CreatePost, models } from "@teamkeel/sdk";
-
-export default CreatePost(async (ctx, inputs) => {
-  const { title, body, author } = inputs;
-
-  return models.post.create({
-    title,
-    body,
-    // we set authorId here, which is the auto-generated
-    // foreign key for the author field in the model
-    authorId: author.id,
-  });
-});
-```
-
-The return type of `create` is `Promise<Model>`, which is also the expected return type of a **create** function.
-
-### Updating a record
-
-To update an existing record in the database you can use the `update` model API method. This accepts two arguments, an object containing filters that indicate which record should be updated, and an object containing the values to update.
-
-To illustrate how an `update` function might work, the following schema defines a `publishPost` function with just accepts the `id` of the post to publish.
-
-```keel filename="schema.keel"
-model Account {
-  fields {
-    identity Identity @unique
-  }
-}
-
-model Post {
-  fields {
-    published Boolean
-    publishedAt Timestamp
-    publishedBy Account
-  }
-
-  functions {
-    update publishPost(id)
-  }
-}
-```
-
-In the implementation for this function we need to do a few things:
-
-- Get the `Account` that is linked to the calling Identity
-- Build the where conditions object for the update
-- Build the values object for the update
-
-```tsx filename="functions/publishPost.ts"
-import { PublishPost, models } from "@teamkeel/sdk";
-
-export default PublishPost(async (ctx, inputs) => {
-  // first find the account of the authenticated user
-  const account = await models.account.findOne({
-    identityId: ctx.identity.id,
-  });
-
-  // the where conditions for the update is just the provided id
-  const where = inputs.where;
-
-  // the values we want to update
-  const values = {
-    published: true,
-    publishedAt: ctx.now(),
-    publishedById: account.id,
-  };
-
-  // update and return the record
-  return models.post.update(where, values);
-});
-```
-
-This example also shows how you can access the Identity of the person performing the action by using `ctx.identity`.
 
 ### Custom database queries
 
@@ -222,7 +278,7 @@ The following example uses the special `Any` message type to allow any input and
 
 ```keel filename="schema.keel"
 model MyThing {
-  functions {
+  actions {
     read doSomething(Any) returns (Any)
   }
 }
@@ -318,7 +374,7 @@ model Book {
     title Text
     genre Genre
   }
-  functions {
+  actions {
     write createBooks(CreateBooksInput) returns (CreateBooksResponse)
   }
 }

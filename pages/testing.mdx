@@ -1,6 +1,6 @@
 # Testing
 
-Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against operations, custom functions, and jobs defined in your schema. 
+Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against built-in actions, custom functions, and jobs defined in your schema. 
 
 Tests run locally on your machine against a temporary database, so there are no nasty surprises when you come to deploy your schema!
 
@@ -14,7 +14,7 @@ model Product {
     title Text
   }
 
-  operations {
+  actions {
     get getProduct(id) {
       @permission(expression: true)
     }
@@ -30,7 +30,7 @@ model Product {
 }
 ```
 
-First thing you will need to do is to run Keel's code generation command in order to dynamically generate TypeScript types for your schema so you can interact with the Keel testing framework in a typesafe manner:
+First thing you will need to do is to run Keel's code generation command in order to dynamically generate TypeScript types for your schema so you can interact with the Keel testing framework in a type-safe manner:
 
 ```bash
 $ keel generate
@@ -74,7 +74,7 @@ In the test above we are most interested in the following named exports from tha
 
 ### `actions`
 
-The `actions` export contains all of the actions defined in your schema, whether they are operations or functions!
+The `actions` export contains all of the actions defined in your schema, whether they are built-in actions or functions!
 
 In the schema above, you would find that the `actions` export has two actions that are callable:
 
@@ -87,7 +87,7 @@ const fetchedProduct = await actions.getProduct({ id: product.id });
 
 ### `models`
 
-The `models` export allows you to query the application's database directly using our completely typesafe query builder. `models` will contain every model defined in your schema file, and each entry in models will expose a database client:
+The `models` export allows you to query the application's database directly using our completely type-safe query builder. `models` will contain every model defined in your schema file, and each entry in models will expose a database client:
 
 ```typescript
 import { models } from '@teamkeel/testing';
@@ -213,7 +213,7 @@ model Product {
     title Text
   }
 
-  operations {
+  actions {
     create createProduct() with(title) {
       @permission(expression: ctx.isAuthenticated)
     }

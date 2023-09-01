@@ -1,5 +1,9 @@
 # Database API
 
+<Callout type="info">
+  Keel provides an elegant, type-safe **[Model API](/functions/sdk/modelApi)** for interacting with your models; reach for that first before considering using the low level database API.
+</Callout>
+
 If you need to write more complex queries where you directly control the SQL being generated, we expose an instance of the type-safe JavaScript / TypeScript query builder [Kysely](https://kysely.dev/) via our SDK package:
 
 ```tsx

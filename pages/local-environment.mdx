@@ -4,7 +4,7 @@ When developing your Keel app locally there are two things which you'll probably
 
 ## Install the CLI
 
-The easiest way to install our CLI is via Brew.
+The easiest way to install our CLI is via [Homebrew](https://brew.sh/).
 
 ```bash
 $ brew tap teamkeel/homebrew-keel
@@ -25,7 +25,11 @@ import { Callout } from 'nextra/components'
   In the interim, linux users can install the CLI via Homebrew, and Windows users can do the same via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
 </Callout>
 
-### Node.js
+### Dependencies
+
+You will need to install the following dependencies in order to use the Keel CLI locally:
+
+#### Node.js
 Node.js is used for running your functions and tests. We require Node version 18 or higher.
 
 import { Tab, Tabs } from 'nextra-theme-docs'
@@ -72,8 +76,13 @@ As well as being installed Docker needs to be running, which you can check by ru
   You need [postgres](https://www.postgresql.org/download/) installed on your machine to run Keel locally.
 </Callout>
 
-## VSCode Extension
-The Keel [VSCode extension](https://marketplace.visualstudio.com/items?itemName=teamkeel.vscode-keel) provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode.
+Click the button below to install the Keel VSCode extension:
+
+import Install from '../components/VSCodePackageInstall'
+
+<Install />
+
+The Keel VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode.
 
 ![Keel VSCode extension](/vscode-extension.png)
 

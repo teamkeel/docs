@@ -61,7 +61,7 @@ model Person {
         name Text
     }
 
-    operations {
+    actions {
         create createPerson() with () {
             @set(person.name = ctx.env.PERSON_NAME)
         }

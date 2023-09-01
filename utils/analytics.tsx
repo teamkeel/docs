@@ -39,6 +39,10 @@ function trackPage() {
   }
 }
 
+export function analyticsEnabled() {
+  return process.env.NODE_ENV !== "development";
+}
+
 export async function rudderInitialize() {
   window.rudderanalytics = await import("rudder-sdk-js");
   window.rudderanalytics.load(
