@@ -88,3 +88,17 @@ The Keel VSCode extension provides inline validation, formatting, and syntax hig
 import Install from '../components/VSCodePackageInstall'
 
 <Install />
+
+### Autoformatting in the extension
+
+You can enable autoformatting of your Keel schema by opening your VSCode settings (`CMD` + `P` and then type and select "Preferences: Open User Settings (JSON)"), and add the following configuration:
+
+```json
+{
+  "[keel]": {
+    "editor.formatOnSave": true
+  }
+}
+```
+
+If you already have the top-level configuration value `editor.formatOnSave` set to `true`, then this will also work too.
