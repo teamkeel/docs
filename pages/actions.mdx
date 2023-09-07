@@ -1,6 +1,6 @@
 # Actions
 
-In Keel, models not only describe what your data looks like, but also how it behaves. This is done using **Actions**, which is a general term for two features in Keel: **Built In Actions** and **Functions**. An built-in action is implemented by Keel purely based on what is written in your schema and requires no extra code to work. Functions are also defined in your schema but are implemented in code by you.
+In Keel, models not only describe what your data looks like, but also how it behaves. This is done using **Actions**, which is a general term for two features in Keel: **Built-In Actions** and **Functions**. An built-in action is implemented by Keel purely based on what is written in your schema and requires no extra code to work. Functions are also defined in your schema but are implemented in code by you.
 
 As a simple example, the following schema has one action which lets you fetch a product by its `id`. As it is defined as an operation this schema requires no code to be written.
 
@@ -385,7 +385,7 @@ model Todo {
 
 ### Using `@orderBy`
 
-You can use the `@orderBy` attribute in `list` actions to describe how the results are ordered.  
+You can use the `@orderBy` attribute in `list` actions to describe how the results are ordered.
 By default, items are sorted by `createdAt`.
 
 ```keel

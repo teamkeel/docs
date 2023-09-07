@@ -154,7 +154,7 @@ Permissions can be defined inside a model or an action, and can use a logical ex
 
 If the `@permission` attribute is used directly inside a model then you must say which actions type it applies to, if defined inside an action this argument should not be provided.
 
-While more than one `@permission` can be defined on a model and its actions, **only one needs to be satisfied** in order to allow access to an action. 
+While more than one `@permission` can be defined on a model and its actions, **only one needs to be satisfied** in order to allow access to an action.
 
 For the Todo model we have two permissions rules:
 
@@ -300,7 +300,7 @@ model Todo {
 
 With due dates in place, we can start working on some list actions based on this field. Let's add an action that only lists todo items that are due today.
 
-We want to return multiple entries so this is a `list` operation. We want the user of this action to be able to specify the date date they want to filter by so they can see what todo's are due today or this week. To do that we can add `dueDate` as an input.
+We want to return multiple entries so this is a `list` operation. We want the user of this action to be able to specify the due date they want to filter by so they can see what todo's are due today or this week. To do that we can add `dueDate` as an input.
 
 ```keel {3} filename="schema.keel"
 model Todo {
@@ -344,6 +344,7 @@ Go to the **Run** tab to query your APIs directly the console.
 
 <Callout type="info" emoji="📖">
   If you're familiar with GraphQL you can use the built in GraphiQL playground from within the **API Explorer.**
+  You can also use a REST API client to test your JSON API without the Keel console if you wish.
 </Callout>
 
 ### Authenticating

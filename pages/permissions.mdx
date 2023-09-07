@@ -42,11 +42,11 @@ Some key things to understand are:
 
 ### Expressions
 
-If provided the `expression` argument is evaluated for every record being acted upon, and has the following in-scope identifiers:
+If provided the `expression` argument is evaluated for every record being acted upon and it has the following in-scope identifiers:
 
 - the record, available as the **lowerCamelCase** version of the model name
 - `ctx` - contains things like the authenticated identity, environment variables & secrets
-- any enums defined in your schema
+- any `enum` defined in your schema
 
 If the expression evaluates to true for **all records** being acted on then the rule passes.
 
@@ -69,7 +69,7 @@ role Developer {
 }
 ```
 
-You can then use these role names in permission rules. As an example the following schema allows anyone with the `Staff` role to update an order.
+You can then use these role names in permission rules. As an example, the following schema allows anyone with the `Staff` role to update an order:
 
 ```keel {10-13}
 model Order {
@@ -90,9 +90,9 @@ model Order {
 
 ## Public access
 
-You can make a permission rule that will always pass by using the expression `true`. The following schema allows public access to all actions in the `Post` model.
+You can make a permission rule that will always pass by using the expression `true`. The following schema allows public access to all actions in the `Post` model:
 
-```keel {11-14}
+```keel {9}
 model Post {
   actions {
     get getPost(id)
@@ -107,7 +107,7 @@ model Post {
 }
 ```
 
-You can use the same approach to make a specific action public. For example the following schema makes the `getPost` action public.
+You can use the same approach to make a specific action public. For example, the following schema makes the `getPost` action public:
 
 ```keel {4}
 model Post {

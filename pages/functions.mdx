@@ -6,7 +6,7 @@ We currently support TypeScript for writing functions and your function code sho
 
 ## A simple function
 
-Functions can use the same action types as actions, for example `get`, `list` and so on. To make a built-in action a function, we apply the `@function` attribute. To illustrate how functions work lets implement a simple `get` function. 
+Functions can use the same action types as actions, for example `get`, `list` and so on. To make a built-in action a function, we apply the `@function` attribute. To illustrate how functions work lets implement a simple `get` function.
 
 ```keel filename="schema.keel"
 model Product {
@@ -41,7 +41,7 @@ Obviously this example is very simple, and in practice this kind of action would
 </Callout>
 
 
-**Hooks** allow you to modify the default behaviour of the function; for example you might want to add constraints to the query, run custom permission logic on the returned rows, create related data, or perform other side effects.
+**Hooks** allow you to modify the default behaviour of a function; for example you might want to add constraints to a query, run custom permission logic on the returned rows, create related data, or perform other side effects.
 
 ### `beforeWrite`
 
@@ -64,7 +64,7 @@ export default CreateProduct({
 
 #### Arguments
 
-`beforeWrite` receives two arguments.
+The `beforeWrite` hook receives three arguments, namely:
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
@@ -90,7 +90,7 @@ export default CreateProduct({
     await models.productReviews.create({
       productId: data.id,
       rating: 10,
-      content: "We love it, and that's not just because we made it." 
+      content: "We love it, and that's not just because we made it."
     });
   }
 });
@@ -98,7 +98,7 @@ export default CreateProduct({
 
 #### Arguments
 
-`afterWrite` receives two arguments.
+`afterWrite` receives three arguments.
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
@@ -246,7 +246,7 @@ export default ListPreviewProducts({
 
 #### Arguments
 
-`afterQuery` receives two arguments.
+`afterQuery` receives three arguments.
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
@@ -274,7 +274,7 @@ We deploy your functions into an environment running Node.js 18.x, which means t
 
 One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel APIs. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend.
 
-The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function.
+The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function:
 
 ```keel filename="schema.keel"
 model MyThing {
@@ -284,7 +284,7 @@ model MyThing {
 }
 ```
 
-The function implementation calls the 3rd party API, passing the API token, and return its response.
+The function implementation calls the 3rd party API, pass the API token, and return its response.
 
 ```tsx filename="functions/doSomething.ts"
 import {DoSomething} from "@teamkeel/sdk";
@@ -323,11 +323,11 @@ export default MyFunction((inputs, api, ctx) => {
 
 ## Environment Variables and Secrets
 
-Any environment variables you've defined in your `keelconfig.yaml` file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
+Environment variables defined in your `keelconfig.yaml` file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
 
-In much the same way, any secrets you've defined in your `keelconfig.yaml` file will be available on `ctx.secrets`, which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
+In much the same way, any secret you define in your `keelconfig.yaml` file will be available on `ctx.secrets`, which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
 
-As an example if we have the following `keelconfig.yaml` file.
+As an example if we have the following `keelconfig.yaml` file
 
 ```yaml filename="keelconfig.yaml"
 environment:
@@ -338,7 +338,7 @@ secrets:
 	- name: MY_SECRET
 ```
 
-We could then access these in a function like so.
+We could then access these in a function like so
 
 ```tsx filename="functions/myFunction.ts"
 export default MyFunction(async (ctx, inputs) => {
