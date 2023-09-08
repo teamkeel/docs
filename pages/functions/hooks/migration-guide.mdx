@@ -1,9 +1,9 @@
 # Migration Guide for Function Hooks
 
 If you have a schema that was authored prior to the introduction of the Action and Function Hooks syntax,
-luckily migrating your schema across to use the new syntax is pretty simple.
+luckily migrating your schema across to use the new syntax is straightforwad.
 
-## First up
+## Start here
 
 You will need to upgrade your Keel CLI to the latest version:
 
@@ -11,7 +11,7 @@ You will need to upgrade your Keel CLI to the latest version:
 brew update && brew upgrade keel
 ```
 
-## A new schema keyword
+## A New Schema Keyword
 
 Previously, you'd define `operations` and `functions` within separate blocks:
 
@@ -49,7 +49,7 @@ model Post {
 }
 ```
 
-You may also notice that the `getPost` function has been annotated with the `@function` attribute. 
+You may also notice that the `getPost` function has been annotated with the `@function` attribute.
 
 Any time you want to _write your own code_ for an action instead of using the built-in behaviour, apply the `@function` attribute, and run `keel generate` to create the corresponding `{name}.ts` file in your `functions/` directory.
 
