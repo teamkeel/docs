@@ -117,7 +117,7 @@ model Todo {
         delete deleteTodo(id)
         update updateTodo(id) with (title?, description?, project.id?)
         create createTodo() with (title, description?, project.id?) {
-            @set(todo.owner = ctx.identity)
+            @set(todo.owner.id = ctx.identity.id)
         }
         update setCompletion(id) with (complete) @function
     }
@@ -139,7 +139,7 @@ model Todo {
 	actions {
         create createTodo() with (title, description?, project.id?) {
             @permission(expression: ctx.isAuthenticated)
-            @set(todo.owner = ctx.identity)
+            @set(todo.owner.id = ctx.identity.id)
         }
     }
 
@@ -183,7 +183,7 @@ model Project {
         delete deleteProject(id)
         create createProject() with (title) {
             @permission(expression: ctx.isAuthenticated)
-            @set(project.owner = ctx.identity)
+            @set(project.owner.id = ctx.identity.id)
         }
         update updateProject(id) with (title)
     }
@@ -290,7 +290,7 @@ model Todo {
         update updateTodo(id) with (title?, dueDate?, description?, project.id?)
         create createTodo() with (title, dueDate?, description?, project.id?) {
             @permission(expression: ctx.isAuthenticated)
-            @set(todo.owner = ctx.identity)
+            @set(todo.owner.id = ctx.identity.id)
         }
     }
 }
