@@ -24,7 +24,6 @@ In Keel, the **`in`** operator is commonly used in permission expressions to ver
 Imagine you have a model representing teams and another model representing users. Each team has a list of user identities associated with it. If you want to check if a specific user's identity is part of a team, you can use the **`in`** operator:
 
 ```keel
-
 @permission(
     actions: [get, list],
     expression: ctx.identity in team.users.identities

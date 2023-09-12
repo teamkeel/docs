@@ -8,26 +8,27 @@ We can define the ProfileImage model like this:
 model ProfileImage {
     fields {
         path Text @unique
-        user User
+        user User?
         team Team?
     }
 
-		actions {
+	    actions {
         get getImage(id) {
-          @where(ctx.identity == profileImage.user.identity)
+            @where(ctx.identity == profileImage.user.identity)
         }
         list listImages() {
-          @where(ctx.identity == profileImage.user.identity)
+            @where(ctx.identity == profileImage.user.identity)
         }
         delete deleteImage(id) {
-          @where(ctx.identity == profileImage.user.identity)
+            @where(ctx.identity == profileImage.user.identity)
         }
         write uploadImageToCloudinary(UploadImageInput) returns (
-           UploadImageResponse
-	        )
-			 }
+            UploadImageResponse
+        )
+    }
+
     @permission(
-        actions: [get, list, create, delete],
+        actions: [get, delete, list],
         expression: profileImage.user.identity == ctx.identity or ctx.identity in profileImage.team.members.user.identity
     )
 }

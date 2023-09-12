@@ -26,7 +26,7 @@ The name and email of the user with a type of `Text` which is mandatory by defau
 
 Now that we’ve defined the data that belongs to the user model, we need to then specify what [actions](https://docs.keel.so/actions) can be done on the user model and its respective permissions. In our Keel schema we can specify this using `actions` like so.
 
-```jsx
+```keel
 actions {
     get me() {
         @where(user.identity == ctx.identity)

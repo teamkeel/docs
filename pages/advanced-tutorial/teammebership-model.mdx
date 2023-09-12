@@ -6,16 +6,16 @@ Following the same process we used to define our User model, we need to define t
 
 ```keel
 model TeamMembership {
-    fields {
+  fields {
         user User
         team Team
     }
 
-		actions {
-        create createTeam() with (team.name, team.description, user.id) {
-            @permission(expression: ctx.isAuthenticated)
-					}
+	actions {
+    create createTeam() with (team.name, team.description, user.id) {
+      @permission(expression: ctx.isAuthenticated)
     }
+  }
 }
 ```
 
