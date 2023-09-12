@@ -1,0 +1,51 @@
+## Profile Image Model
+
+To build out the Document model for the application, we need to consider that based on our application requirement, a standalone user, user in a team, and a team can have a profile image document.
+
+We can define the ProfileImage model like this:
+
+```keel
+model ProfileImage {
+    fields {
+        path Text @unique
+        user User
+        team Team?
+    }
+
+		actions {
+        get getImage(id) {
+          @where(ctx.identity == profileImage.user.identity)
+        }
+        list listImages() {
+          @where(ctx.identity == profileImage.user.identity)
+        }
+        delete deleteImage(id) {
+          @where(ctx.identity == profileImage.user.identity)
+        }
+        write uploadImageToCloudinary(UploadImageInput) returns (
+           UploadImageResponse
+	        )
+			 }
+    @permission(
+        actions: [get, list, create, delete],
+        expression: profileImage.user.identity == ctx.identity or ctx.identity in profileImage.team.members.user.identity
+    )
+}
+
+message UploadImageInput {
+    base64Image Text
+    userId ID
+}
+
+message UploadImageResponse {
+    path Text
+}
+```
+
+In the model, we have specified a `path` field which takes in the image path/link, a user field which links to the `User` and optionally, the `Team` models respectively. We have defined the following operations for the model:
+
+- `getImage` - This takes in the `id` and returns the image with the corresponding ID
+- `listImages` - This returns all the images connected to the User or Team
+- `deleteImage` - This takes in the image id and deletes the record from the database.
+
+As you may have noticed, we are not using the `create` operation explicitly in the model, we are handling this with a function. Keel has support for executing operations with custom [functions](https://docs.keel.so/functions#custom-functions).

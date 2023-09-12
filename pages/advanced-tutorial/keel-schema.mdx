@@ -1,0 +1,31 @@
+## Building the Keel Schema
+
+Now that we have our local environment all set up, let’s build out our keel schema.
+
+In the root folder of the repo we cloned, we need to create a `schema.keel` file, this is where we will define our backend. Think of it as our backend blueprint.
+
+In the schema.keel file, we’ll define our data models for the app, actions that can be taken on those models and permission rules that specify who is allowed to perform the actions we have defined.
+
+## About the application
+
+The [application](https://saas-starter-ui.vercel.app/) we are building a backend for is a SAAS application that is similar to the popular project management tool called [Notion](https://www.notion.so/f6efbe86adff4a4b98d540d024638644?pvs=21) and has the following features:
+
+- A user can login or signup
+- A user can be part of a team or not
+- A user can have an individual account
+- A user and a team can have documents
+- Users/teams can upload a profile image
+- users/teams can change their team name
+
+So with these, we now know what we need to cater for on the backend with keel.
+
+## Thinking in Keel
+
+Everything in Keel is a model, which is built around your data. Models are defined in the a `.keel` file, they can be named anything and are also fully typed. We need to define the following models for our application based on the above information we know about our application:
+
+- User
+- Teams
+- TeamMembership
+- ProfileImage
+
+These four models will cater for a chunk of our application and from there build out the rest of the backend with the knowledge we get from building them out. Each of these models will have their specific actions, permissions and functions where necessary. Let’s build out the user model.

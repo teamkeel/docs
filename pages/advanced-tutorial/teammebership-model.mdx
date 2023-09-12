@@ -1,0 +1,24 @@
+## Team Membership Model
+
+The TeamMembership acts as a middleware between the Team and User models. Since Keel uses PostgreSQL for its database provisioning capabilities, think of this as a join table for a many to many relationship between the User and Team models.
+
+Following the same process we used to define our User model, we need to define the model fields and operations.
+
+```keel
+model TeamMembership {
+    fields {
+        user User
+        team Team
+    }
+
+		actions {
+        create createTeam() with (team.name, team.description, user.id) {
+            @permission(expression: ctx.isAuthenticated)
+					}
+    }
+}
+```
+
+This model holds just two fields, the `User` and `Team` Models as it is meant to act as a Join table for those models. We’ve only specified a `createTeam()` action here that takes in the team’s name, description and user Id.
+
+For permission, we’ve specified that this action can only be carried out by an authenticated user.

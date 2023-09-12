@@ -1,0 +1,38 @@
+## Team Model
+
+To build out the user model for the application, we need to consider that based on our application requirement, a user can be part of a team or not, a Team can create or own a document.  We can define the Team model like so:
+
+```keel
+model Team {
+    fields {
+        name Text
+        description Text?
+        members TeamMembership[]
+        documents Document[]
+    }
+
+	actions {
+        get getTeam(id)
+        list listTeams() {
+          @where(ctx.identity in team.members.user.identity)
+        }
+        delete deleteTeam(id) {
+          @where(ctx.identity in team.members.user.identity)
+        }
+        update updateTeam(id) with (name?, description?) {
+          @where(ctx.identity in team.members.user.identity)
+        }
+		 }
+
+    @permission(
+        actions: [get, list, update, delete],
+        expression: ctx.identity in team.members.user.identity
+    )
+}
+```
+
+The model consists of fields `name` with a type of `Text` which holds the name of the team, `description` which is optional but holds the team’s description, the `members` and `document` fields holds the TeamMembership and documents models respectively.  We have also defined CRUD operations for the model `get`, `list`, `delete` and `update`.  We won’t be creating a Team with this Model, instead we’ll be doing that in the TeamMembership model.
+
+We have also set the action to be carried out by a user with an existing Identity hence the `@where{}` condition. The `@where{}` condition helps us filter through the permission rules filter the results of the action and make sure we’ve only pulling what belongs to the specified user.
+
+Finally, for permissions, we defined all the actions in our model in an array with the `actions` argument and in the `expression` argument, we’ve used the `in` operator to check if the authenticated identity is in the array of identities with access to the model.

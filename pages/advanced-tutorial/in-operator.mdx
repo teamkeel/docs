@@ -1,0 +1,38 @@
+import { Callout } from 'nextra/components'
+
+## `in` Operator
+
+Before we work on the `Team` model, let’s talk a bit about Keel’s permission system, specifically the `in` operator. Permissions are crucial for any SAAS application and Keel caters for permissions out of the box.
+
+Within Keel's [permission](https://docs.keel.so/permissions#many-to-many-relationships) system, the `in` operator helps in determining if a specific value exists within a collection. This operator is especially useful when defining complex permission rules that involve checking membership or existence within arrays or lists of values.
+
+**Syntax:**
+
+```
+value in collection
+```
+
+**Parameters:**
+
+- **`value`**: The specific value or entity you're checking for.
+- **`collection`**: The collection (e.g., list of entities or values) you are searching within.
+
+In Keel, the **`in`** operator is commonly used in permission expressions to verify if a certain entity or value is part of a collection. This is particularly handy when you want to check relationships or memberships in models.
+
+**Example:**
+
+Imagine you have a model representing teams and another model representing users. Each team has a list of user identities associated with it. If you want to check if a specific user's identity is part of a team, you can use the **`in`** operator:
+
+```keel
+
+@permission(
+    actions: [get, list],
+    expression: ctx.identity in team.users.identities
+)
+```
+
+In this context, the permission will be granted if the current user's identity (**`ctx.identity`**) is found within the list of user identities associated with the team (**`team.users.identities`**).
+
+<Callout type="info" emoji="💡">
+  Please note that the `in` operator don’t filter through permissions. When used in a permission, they just return a permission error if the response data contains anything the user can’t access
+</Callout>

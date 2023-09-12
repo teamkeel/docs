@@ -1,0 +1,115 @@
+## Custom Function
+
+In Keel, you can create a [custom function](https://docs.keel.so/functions#custom-functions) and pass it as a `read` or `write` operation, in our case, we will be using the `write` operation since we are writing to the backend and creating a record in the database. The reason for doing this is that we want to upload our image to Cloudinary, then save the path to the Keel database and render the Image via the path on the frontend. This way we can harness Cloudinary lightning quick image uploads and not worry about managing media files ourselves.
+
+Since we have to use a function for this we have to generate this function by running the following command in the folder where your Keel Schema is placed:
+
+```bash
+keel generate
+```
+
+This command will automatically create a new folder for you with your function definition, It should look similar to this:
+
+```bash
+import { models, permissions, UploadImageToCloudinary } from '@teamkeel/sdk';
+
+export default UploadImageToCloudinary(async (ctx, input) => {
+
+});
+```
+
+Now let’s create the `uploadImageToCloudinary` function by pasting in the following:
+
+```ts
+import { models, permissions, UploadImageToCloudinary } from '@teamkeel/sdk';
+import { v2 as cloudinary } from 'cloudinary';
+
+export default UploadImageToCloudinary(async (ctx, input) => {
+
+  cloudinary.config({
+    cloud_name: ctx.secrets.CLOUD_NAME,
+    api_key: ctx.secrets.API_KEY,
+    api_secret: ctx.secrets.API_SECRET,
+  });
+
+  try {
+    const uploadResponse = await cloudinary.uploader.upload(input.base64Image, {
+      upload_preset: ctx.secrets.UPLOAD_PRESET,
+    });
+
+    const imagePath = uploadResponse.secure_url;
+
+    // Check if ctx.identity or ctx.identity.id is undefined, grant or deny permission if identity is available or unavailable respectively
+    if (!ctx.identity || !ctx.identity.id) {
+      throw new Error('No authenticated identity found') && permissions.deny();
+    } else {
+      permissions.allow();
+    }
+
+    // safely fetch the user
+    const user = await models.user.findOne({
+      id: input.userId,
+    });
+
+    // if a teamId is provided instead, pull the team image too
+    if (input.teamId) {
+    const team = await models.team.findOne({
+      id: input.teamId
+  })
+}
+
+    // Check if user is null
+    if (!user) {
+      throw new Error('User not found in database');
+    }
+
+    // Save this imagePath to Keel database
+    const imageRecord = await models.profileImage.create({
+      path: imagePath,
+      userId: input.userId,
+      teamId: input.teamId || null
+    });
+
+    return {
+      path: imageRecord.path,
+    };
+  } catch (error) {
+    console.error(error);
+    throw new Error(error);
+  }
+});
+```
+
+This function is responsible for the process of uploading images to Cloudinary from a Keel backend. Here's a breakdown:
+
+1. Initialization: The function imports necessary modules from the Keel SDK and Cloudinary's SDK.
+2. Cloudinary Configuration: It sets up Cloudinary with credentials sourced from the context's secrets, ensuring secure and authorized access.
+3. Image Upload: The function attempts to upload the provided base64 image to Cloudinary using a preset configuration.
+4. Authentication Check: Before proceeding, it checks if the current context has an authenticated identity. If not, it denies permission; otherwise, it grants permission for the subsequent operations.
+5. User & Team Retrieval: It fetches the user associated with the provided **`userId`**. If a **`teamId`** is also provided, it fetches the corresponding team.
+6. Image Record Creation: After successful image upload, it saves the image's URL path to the Keel database, associating it with the user and optionally, a team.
+7. Return: The function returns the path of the newly created image record.
+8. Error Handling: If any step fails, the function captures the error, logs it, and throws it for further handling.
+
+This function showcases how Keel seamlessly integrates with third-party services like Cloudinary, while also maintaining data integrity and user permissions within the application.
+
+## Function Messages
+
+Messages are used to handle response and input for custom functions, they are type-safe.
+
+According to the [Message](https://docs.keel.so/functions#custom-inputs-and-responses) docs:
+
+> Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a model definition. Message fields can be other messages, models, enums, or built-in Keel types.
+
+Just after our ProfileImage model, we have the `uploadImageInput` and `uploadImageResponse` messages like so:
+
+```keel
+message UploadImageInput {
+    base64Image Text
+    userId ID
+}
+
+message UploadImageResponse {
+    path Text
+}
+```

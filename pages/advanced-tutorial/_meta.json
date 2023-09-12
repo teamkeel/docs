@@ -1,0 +1,13 @@
+{
+  "setup": "Setup",
+  "keel-schema": "Building the Keel Schema",
+  "user-model": "User Model",
+  "in-operator": "in operator",
+  "team-model": "Team Model",
+  "teammebership-model": "Team Membership Model",
+  "document-model": "Document Model",
+  "profileimage-model": "Profile Image Model",
+  "custom-function": "Custom Function",
+  "secrets": "Using Secrets",
+  "deploy": "Deploy to Keel"
+}

@@ -1,0 +1,55 @@
+import { Callout } from 'nextra/components'
+
+## Prerequisites
+
+To follow along with this tutorial, you should have the following:
+
+- A GitHub account
+- VS Code *and* the Keel extension
+- A git client of any type (e.g command line, GitHub Desktop, VS Code Git)
+
+## Setting up the Keel project
+
+Before we start working on the project we need to a simple setup, we need to:
+
+- Create the keel project on the keel [console](http://console.keel.xyz/) and clone the project to our machine
+- Setup the VSCode extension
+- Install the Keel CLI
+
+To start, we need to create a new project on Keel by going to [console.keel.xyz](https://console.keel.xyz/start) and selecting a blank project which is the starting point for our SaaS app backend.
+
+![project_setup](/project-setup.gif)
+
+After creating the project, we need to clone the repo to our local machine and installing the VSCode extension.
+
+## Cloning the repo
+Once you reach the final step of the onboading you should see the git URL of your new repo. The next step is to clone the repo to your local machine and install the VSCode extension.
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+
+<Tabs items={['Using git CLI', 'Using Github Desktop app']}>
+  <Tab>
+Copy the command directly from the final step of the project setup e.g.
+
+```bash
+git clone git@github.com/{yourUsername}/{projectName}
+```
+  </Tab>
+    <Tab>
+Click **add → Clone Repository** and then select the newly created repo
+
+![Clone repo using Github Desktop app](/tutorial-github-desktop.png)
+  </Tab>
+</Tabs>
+
+## Installing VSCode exension
+
+The Keel VSCode extension provides sytax highlighting and inline validation of Keel schema files. You can install it by going to the **Extensions** tab in VSCode and searching for Keel.
+
+![VSCode Extension](/vscode-extension.png)
+
+<Callout type="info" emoji="💡">
+  The extension only works in the app version of VS Code and not in a browser.
+</Callout>
+
+Next up, we need to install the keel CLI to our local machine by following the instructions in the [CLI docs page](https://docs.keel.so/cli).
