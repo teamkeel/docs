@@ -31,7 +31,7 @@ or by running the CLI from your frontend project and referencing the Keel direct
 keel client -d ../myKeelApp
 ```
 
-This will generate a client for the first API in your project. If you have multiple APIs you can specify which API to generate for with the `-a apiName` flag 
+This will generate a client for the first API in your project. If you have multiple APIs you can specify which API to generate for with the `-a apiName` flag
 
 <Callout type="info">
 This client uses fetch so will only work in environments where fetch is available
@@ -41,22 +41,87 @@ This client uses fetch so will only work in environments where fetch is availabl
 
 First, import `APIClient` from the generated file and create a new instance with the deployed url of your project (or the [localhost](http://localhost) address if running locally)
 
-**N.B.** This endpoint url should include the API name path but not the protocol (e.g. json/rpc/gql)
+**N.B.** This `baseUrl` url should include the API name path but not the protocol (e.g. json/rpc/gql)
 
 ```ts
 import { APIClient } from "../keelClient";
 
 const client = new APIClient({
-  endpoint: "https://myproject.keelapps.xyz/web/",
+  baseUrl: "https://myproject.keelapps.xyz/web/",
 });
 ```
+
+### Navigating the Generated client
+
+The generated client is segmented into three parts, api, client, and ctx.
+
+#### api
+
+This includes all the actions that you have specified in your Keel schema. For example, if you have an action that lists all users, here is how you can use the generated client to execute this action on the client-side:
+
+```ts
+const client = new APIClient({
+  baseUrl: "https://myproject.keelapps.xyz/web/",
+});
+
+// use generated client to execute the action on the client-side
+const allUsers = await client.api.queries.listUsers()
+
+// log response from API to console
+console.log(response.data?.results)
+```
+
+You can also use `.api.mutations` if you have actions that mutate data. For example, if you have an action that deletes a user, you can use it like so:
+
+```ts
+const client = new APIClient({
+  baseUrl: "https://myproject.keelapps.xyz/web/",
+});
+
+// use generated client to execute the action on the client-side
+const response = await keel.api.mutations.createUser({ name: name, email: email});
+
+// log response from API to console
+console.log(response.data)
+```
+
+#### client
+
+These are the core client actions that serve as configuration options for the client. They remain consistent across every Keel schema. They include:
+
+- `setHeaders()`
+- `setHeader()`
+- `setBaseUrl()`
+- `setToken()`
+- `clearToken()`
+
+#### ctx
+
+This provides access to user authentication state. It includes the following options:
+
+- `isAuthenticated: boolean`
+- `token: string`
+
+**Usage:**
+```ts
+const client = new APIClient({
+  baseUrl: "https://myproject.keelapps.xyz/web/",
+});
+
+// returns a boolean that represents if a user is authenticated or not
+client.ctx.isAuthenticated
+
+// returns the bearer token if available
+client.ctx.token
+```
+
 
 ### Authenticating
 
 If your API requires authentication, use the `authenticate` action as normal and then store the returned token to be used for subsequent requests
 
 ```tsx
-const auth = await client.authenticate({
+const auth = await client.api.mutations.authenticate({
   emailPassword: {
     email: "me@keel.xyz",
     password: "topsecret",
@@ -69,7 +134,8 @@ if (auth.error) {
   return;
 }
 
-client._setToken(auth.data.token);
+// set an auth token for the keel client after authentication
+client.client.setToken(auth.data.token);
 
 console.log("Authenticated");
 ```
@@ -77,7 +143,7 @@ console.log("Authenticated");
 On logout remember to clear the token
 
 ```tsx
-client._clearToken();
+client.client.clearToken();
 ```
 
 ### Error handling
@@ -102,7 +168,7 @@ type ErrorObj = {
 };
 ```
 
-You can then check the presence of the error object to handle any errors 
+You can then check the presence of the error object to handle any errors
 
 ```tsx
 const myAction = await client.myAction({
@@ -111,10 +177,10 @@ const myAction = await client.myAction({
 
 if (myAction.error) {
   console.log("Failed", myAction.error.type);
-  return; 
+  return;
 }
 
 const { data } = myAction
 
-// Do things with the data 
+// Do things with the data
 ```
