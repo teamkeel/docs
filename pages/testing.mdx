@@ -1,6 +1,7 @@
 # Testing
+import { Callout } from 'nextra/components'
 
-Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against built-in actions, custom functions, and jobs defined in your schema. 
+Testing is built into the core of Keel. The testing package is generated from your project schema and gives full type safety for writing end-to-end tests against built-in actions, custom functions, and jobs defined in your schema.
 
 Tests run locally on your machine against a temporary database, so there are no nasty surprises when you come to deploy your schema!
 
@@ -64,9 +65,13 @@ keel test
 
 `keel test` will run any test files within the current directory matching the pattern `**/*.test.ts`.
 
+<Callout type="info" emoji="💡">
+ Should your application utilize secrets and you operate a separate testing environment, ensure you replicate those secrets in the test environment for proper functionality.
+</Callout>
+
 ## Diving deeper
 
-We have written a test using the classical Arrange-Act-Assert (AAA) pattern. You may notice that the code imports from the `@teamkeel/testing` NPM package. 
+We have written a test using the classical Arrange-Act-Assert (AAA) pattern. You may notice that the code imports from the `@teamkeel/testing` NPM package.
 
 `@teamkeel/testing` is a dynamically generated NPM package (you won't find it on npmjs.org!) that was generated when you ran `keel generate`. It contains all of the TypeScript definitions of any models and their actions as you defined them in the schema.
 
