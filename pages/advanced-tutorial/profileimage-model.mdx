@@ -6,13 +6,14 @@ We can define the ProfileImage model like this:
 
 ```keel
 model ProfileImage {
+
     fields {
         path Text @unique
         user User?
         team Team?
     }
 
-	    actions {
+    actions {
         get getImage(id) {
             @where(ctx.identity == profileImage.user.identity)
         }

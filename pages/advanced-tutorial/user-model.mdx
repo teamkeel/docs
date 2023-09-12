@@ -26,18 +26,33 @@ The name and email of the user with a type of `Text` which is mandatory by defau
 
 Now that we’ve defined the data that belongs to the user model, we need to then specify what [actions](https://docs.keel.so/actions) can be done on the user model and its respective permissions. In our Keel schema we can specify this using `actions` like so.
 
-```keel
-actions {
-    get me() {
-        @where(user.identity == ctx.identity)
+```keel {11-24}
+model User {
+
+  fields {
+        identity Identity @unique
+        name Text
+        email Text
+        teams TeamMembership[]
+        documents Document[]
     }
-    delete deleteUser(id)
-    create createUser() with (name, email) {
-        @set(user.identity = ctx.identity)
-        @permission(expression: ctx.isAuthenticated)
+
+  actions {
+        get me() {
+            @where(user.identity == ctx.identity)
+        }
+        list listUsers() {
+            @where(user.identity == ctx.identity)
+        }
+        delete deleteUser(id)
+        create createUser() with (name, email) {
+            @set(user.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+        update updateUser(id) with (name?, email?)
     }
-    update updateUser(id) with (name?, email?)
 }
+
 ```
 
 Just below the model fields, we have defined the following actions that allows us perform [CRUD](https://www.notion.so/Keel-Advanced-Tutorial-680f09ce60f14416bb27518d86a068fe?pvs=21) operations to the user model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
@@ -52,11 +67,36 @@ The `update updateUser()` actions will help us update a user name or email.
 
 Next, we need to set permissions for all the other actions in the model. We can do that by using [@permisson](https://docs.keel.so/permissions#permission-attribute) rule to define this in the keel schema.
 
-```keel
-@permission(
-    actions: [get, update, delete],
-    expression: user.identity == ctx.identity
-)
+```keel {25-28}
+model User {
+    fields {
+        identity Identity @unique
+        name Text
+        email Text
+        teams TeamMembership[]
+        documents Document[]
+    }
+
+    actions {
+        get me() {
+            @where(user.identity == ctx.identity)
+        }
+        list listUsers() {
+            @where(user.identity == ctx.identity)
+        }
+        delete deleteUser(id)
+        create createUser() with (name, email) {
+            @set(user.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+        update updateUser(id) with (name?, email?)
+    }
+
+    @permission(
+        actions: [get, update, delete],
+        expression: user.identity == ctx.identity
+    )
+}
 ```
 
 To use the permission rule, we defined all the actions in our model in an array with the `actions` argument and set the identity of all these actions to the logged in user with the `expression` argument.
