@@ -8,15 +8,15 @@ Let’s commit and push these using our git client.
 git commit -m "init" && git push origin main
 ```
 
-This will automatically trigger a build on our keel console:
+This will automatically trigger a build in the Keel console:
 
 ![build](/build.png)
 
-When the build is finished, head over to the in-built API explorer on the Keel console and explore the APIs.
+When the build is finished, head over to the built-in API explorer on the Keel console and test the APIs.
 
 ![api-explorer](/api-explorer.png)
 
-With the API explorer on the Keel console, you can interact with your API on the fly without needing to connect it to a UI. Here is how you can use the API explorer to test out the create new document endpoint.
+With the API explorer on the Keel console, you can interact with your API on the fly without needing to connect it to a UI. Here is how you can use the API explorer to test out the create new document endpoint:
 
 <video autoPlay loop muted>
 <source alt="api explorer demo" src="/demo.mp4" type="video/mp4"/>
@@ -24,7 +24,7 @@ With the API explorer on the Keel console, you can interact with your API on the
 
 <p align="center">Keel Console API explorer demo</p>
 
-In the above GIF, we created a new document and tied it to an already existing user. After creating the document, we went to the database explorer in the Keel console to make sure our document was created and saved to the database.
+In the above demo, we created a new document and tied it to an already existing user. After creating the document, we went to the database explorer in the Keel console to make sure our document was created and saved to the database.
 
 You can also interact with your API endpoint locally without the Keel console by running your Keel app using the following command:
 
@@ -32,11 +32,11 @@ You can also interact with your API endpoint locally without the Keel console by
 Keel run
 ```
 
-This will automatically start a local server you can connect to and make API requests to test your endpoints either with a UI or a HTTP requests client like postman.
+This will automatically start a local server you can connect to and make API requests to test your endpoints either with a UI or a HTTP requests client like Postman.
 
 ![Keel run in terminal](/keel-run.png)
 
-In the Keel console you can visualise your schema, If you click on “**Schema visualiser**” on the side bar of the keel console, you should see your Keel schema presented to you. For our project, our schema looks like this:
+In the Keel console you can visualise your schema, If you click on “**Schema visualiser**” on the side bar of the Keel console, you should see your Keel schema presented to you. For our project, our schema should look similar to this:
 
 ![schema.png](/schema.png)
 

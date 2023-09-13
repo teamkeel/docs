@@ -41,3 +41,5 @@ model Document {
 The Document model fields `title` and `content` which are of type text and meant to hold the title and content of the document. The field `owner` holds the **`Identity`** of the creator of the document. This ensures a direct linkage between a document and its originator, be it an individual user or a team.
 
 The field `user` directly reference the **`User`** model, this field establishes which specific user is tied to this document. Finally, An optional field, **`team`** provides a relationship to the **`Team`** model. It indicates that while a document can be a standalone entity associated with a user, it can also be tied to a specific team if the user that created it is in a team.
+
+We have also specificied several [actions](https://docs.keel.so/actions) that can be carried out on the model and finally, for permission, we’ve specified that these actions can only be carried out by the user identity that created the document or an identity that exists in the array of identities in a team.

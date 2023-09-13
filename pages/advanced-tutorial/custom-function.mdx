@@ -1,6 +1,8 @@
 ## Custom Function
 
-In Keel, you can create a [custom function](https://docs.keel.so/functions#custom-functions) and pass it as a `read` or `write` operation, in our case, we will be using the `write` operation since we are writing to the backend and creating a record in the database. The reason for doing this is that we want to upload our image to Cloudinary, then save the path to the Keel database and render the Image via the path on the frontend. This way we can harness Cloudinary lightning quick image uploads and not worry about managing media files ourselves.
+In Keel, you can create a [custom function](https://docs.keel.so/functions#custom-functions) and pass it as a `read` or `write` operation. In our case, we will be using the `write` operation since we are writing to the backend and creating a record in the database.
+
+The reason for doing this is that we want to upload our image to [Cloudinary(https://cloudinary.com), save the path to the Keel database and render the Image via the path on the frontend. This way we can harness Cloudinary lightning quick image uploads and not worry about managing media files ourselves.
 
 Since we have to use a function for this we have to generate this function by running the following command in the folder where your Keel Schema is placed:
 

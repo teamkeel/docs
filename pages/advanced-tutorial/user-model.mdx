@@ -1,12 +1,12 @@
 ## User Model
 
-To build out the user model for the application, we need to consider the following:
+To build out the User model for the application, we need to consider the following:
 
 - A user should have a name and an email
 - A user can be part of a team or not
 - A user can create a document
 
-To start we can describe the data for the user model with the following fields:
+To start we can describe the data for the User model with the following fields:
 
 ```keel
 model User {
@@ -20,11 +20,11 @@ model User {
 }
 ```
 
-The above defines the `identity` field as `Identity` which carries the user [identity](https://docs.keel.so/identity) and act as a mechanism for authentication. We have also made the Identity unique with the @unique rule which makes sure that every user is unique.
+The above defines the `identity` field as `Identity` which carries the user [identity](https://docs.keel.so/identity) and act as a mechanism for [authentication](https://docs.keel.so/apis/json#authentication) We have also made the Identity unique with the @unique rule which makes sure that every user is unique.
 
-The name and email of the user with a type of `Text` which is mandatory by default. We can make a field optional by using the `?` symbol.  In Keel, you can indicate a relationship between multiple models by referencing them as fields, in our case we are referencing the `TeamMembership` and `Document` model as a part of the user model since a user can belong to a team and also create a document.
+The name and email of the user with a type of `Text` which is mandatory by default. We can make a field optional by using the `?` symbol.  In Keel, you can indicate a relationship between multiple models by referencing them as fields, in our case we are referencing the `TeamMembership` and `Document` model as a part of the User model since a user can belong to a team and also create a document.
 
-Now that we’ve defined the data that belongs to the user model, we need to then specify what [actions](https://docs.keel.so/actions) can be done on the user model and its respective permissions. In our Keel schema we can specify this using `actions` like so.
+Now that we’ve defined the data that belongs to the User model, we need to specify what [actions](https://docs.keel.so/actions) can be done on the User model and its respective permissions. In our Keel schema we can specify this using `actions` like so.
 
 ```keel {11-24}
 model User {
@@ -55,7 +55,7 @@ model User {
 
 ```
 
-Just below the model fields, we have defined the following actions that allows us perform [CRUD](https://www.notion.so/Keel-Advanced-Tutorial-680f09ce60f14416bb27518d86a068fe?pvs=21) operations to the user model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
+Just below the model fields, we have defined the following actions that allow us perform [CRUD](https://www.notion.so/Keel-Advanced-Tutorial-680f09ce60f14416bb27518d86a068fe?pvs=21) operations to the User model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
 
 In the `createUser()` action, we have specified that a name and email  needs to be provided before a user can be created. We have also set the owner of the newly created record to be the identity of the logged in user and finally, we have provided a [permission](https://docs.keel.so/permissions) that this action can only be performed by an authenticated user. Permissions allow you define an authorization condition for an action to be carried out.
 
@@ -65,7 +65,7 @@ The `delete deleteUser()` action will help us delete a user account just incase 
 
 The `update updateUser()` actions will help us update a user name or email.
 
-Next, we need to set permissions for all the other actions in the model. We can do that by using [@permisson](https://docs.keel.so/permissions#permission-attribute) rule to define this in the keel schema.
+Next, we need to set permissions for all the other actions in the model. We can do that by using [@permisson](https://docs.keel.so/permissions#permission-attribute) attribute to define this in the keel schema.
 
 ```keel {25-28}
 model User {
