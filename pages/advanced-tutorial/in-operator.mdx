@@ -35,5 +35,5 @@ Imagine you have a model representing teams and another model representing users
 In this context, the permission will be granted if the current user's identity (**`ctx.identity`**) is found within the list of user identities associated with the team (**`team.users.identities`**).
 
 <Callout type="info" emoji="💡">
-  Please note that the `in` operator don’t filter through permissions. When used in a permission, they just return a permission error if the response data contains anything the user can’t access
+  Please note that the `in` operator doesn't filter through permissions. When used in a permission, they just return a permission error if the response data contains anything the user can’t access
 </Callout>
