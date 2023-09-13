@@ -1,3 +1,5 @@
+import { Callout } from 'nextra/components'
+
 ## User Model
 
 To build out the User model for the application, we need to consider the following:
@@ -10,7 +12,8 @@ To start we can describe the data for the User model with the following fields:
 
 ```keel
 model User {
-		fields {
+
+	fields {
         identity Identity @unique
         name Text
         email Text
@@ -30,11 +33,11 @@ Now that we’ve defined the data that belongs to the User model, we need to spe
 model User {
 
   fields {
-        identity Identity @unique
-        name Text
-        email Text
-        teams TeamMembership[]
-        documents Document[]
+      identity Identity @unique
+      name Text
+      email Text
+      teams TeamMembership[]
+      documents Document[]
     }
 
   actions {
@@ -55,11 +58,15 @@ model User {
 
 ```
 
-Just below the model fields, we have defined the following actions that allow us perform [CRUD](https://www.notion.so/Keel-Advanced-Tutorial-680f09ce60f14416bb27518d86a068fe?pvs=21) operations to the User model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
+Just below the model fields, we have defined the following actions that allow us perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations to the User model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
 
 In the `createUser()` action, we have specified that a name and email  needs to be provided before a user can be created. We have also set the owner of the newly created record to be the identity of the logged in user and finally, we have provided a [permission](https://docs.keel.so/permissions) that this action can only be performed by an authenticated user. Permissions allow you define an authorization condition for an action to be carried out.
 
 The `get me()` action will help us return the user’s identity in context just incase we need to pull the correct user details on the client-side.
+
+<Callout type="info" emoji="💡">
+  Action names don't carry any semantic relevance. The name of an action does not functional significance, what matters is the action type you use.
+</Callout>
 
 The `delete deleteUser()` action will help us delete a user account just incase we need to do that on the client-side.
 
@@ -69,12 +76,13 @@ Next, we need to set permissions for all the other actions in the model. We can 
 
 ```keel {25-28}
 model User {
-    fields {
-        identity Identity @unique
-        name Text
-        email Text
-        teams TeamMembership[]
-        documents Document[]
+
+  fields {
+      identity Identity @unique
+      name Text
+      email Text
+      teams TeamMembership[]
+      documents Document[]
     }
 
     actions {
@@ -99,6 +107,6 @@ model User {
 }
 ```
 
-To use the permission rule, we defined all the actions in our model in an array with the `actions` argument and set the identity of all these actions to the logged in user with the `expression` argument.
+In Keel, permissions are assigned to different action types by the action parameter of `@permissions`. How the permissions are implemented is defined by the expression parameter. Individual action permissions can be overridden by adding an `@permission` within the action definition, as demonstrated in createUser
 
 So we’ve built our User model which is based on the application requirements we specified above.

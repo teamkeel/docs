@@ -10,8 +10,12 @@ Within Keel's [permission](https://docs.keel.so/permissions#many-to-many-relatio
 
 **Syntax:**
 
-```
-value in collection
+```keel {3}
+model {
+  @permission(
+  expressions: value in collection
+  )
+}
 ```
 
 **Parameters:**

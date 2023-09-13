@@ -5,6 +5,7 @@ import { Callout } from 'nextra/components'
 To follow along with this tutorial, you should have the following:
 
 - A GitHub account
+- The [Keel CLI](https://docs.keel.so/cli)
 - VS Code *and* the Keel [extension](https://marketplace.visualstudio.com/items?itemName=teamkeel.vscode-keel)
 - A git client of any type (e.g command line, GitHub Desktop, VS Code Git)
 
@@ -48,12 +49,33 @@ Click **add → Clone Repository** and then select the newly created repo
 
 ## Installing VS Code extension
 
-The Keel VS Code extension provides sytax highlighting and inline validation of Keel schema files. You can install it by going to the **Extensions** tab in VSCode and searching for Keel.
+The Keel VS Code extension provides sytax highlighting and inline validation of Keel schema files. You can install it by going to the **Extensions** tab in VSCode and searching for [Keel](https://marketplace.visualstudio.com/items?itemName=teamkeel.vscode-keel).
 
-![VSCode Extension](/vscode-extension.png)
+![VS Code Extension](/vscode-extension.png)
 
 <Callout type="info" emoji="💡">
   The extension only works in the app version of VS Code and not in a browser.
 </Callout>
 
-Next up, we need to install the keel CLI to our local machine by following the instructions in the [CLI docs page](https://docs.keel.so/cli).
+## Installing the Keel CLI
+Next up, we need to install the keel CLI to our local machine, we can do this by running the following commands:
+
+### Homebrew
+
+The easiest way to install the Keel CLI is via [Homebrew](https://brew.sh/).
+
+```bash
+$ brew tap teamkeel/homebrew-keel
+$ brew install keel
+```
+
+You can check the installation by running `keel version` in your termimal.
+
+```bash
+$ keel version
+v0.366.0
+```
+
+<Callout type="info" emoji="💡">
+  Docker is NOT required to generate functions, so if you don't have a docker setup you can still complete the tutorial.
+</Callout>
