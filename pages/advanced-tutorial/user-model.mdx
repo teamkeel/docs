@@ -20,12 +20,17 @@ model User {
         teams TeamMembership[]
         documents Document[]
     }
+
 }
 ```
 
 The above defines the `identity` field as `Identity` which carries the user [identity](https://docs.keel.so/identity) and act as a mechanism for [authentication](https://docs.keel.so/apis/json#authentication) We have also made the Identity unique with the @unique rule which makes sure that every user is unique.
 
-The name and email of the user with a type of `Text` which is mandatory by default. We can make a field optional by using the `?` symbol.  In Keel, you can indicate a relationship between multiple models by referencing them as fields, in our case we are referencing the `TeamMembership` and `Document` model as a part of the User model since a user can belong to a team and also create a document.
+The name and email of the user with a type of `Text` which is mandatory by default. We can make a field optional by using the `?` symbol.
+<Callout type="info" emoji="💡">
+  At field level the `?` sets a field to be nullable
+</Callout>
+In Keel, you can indicate a relationship between multiple models by referencing them as fields, in our case we are referencing the `TeamMembership` and `Document` model as a part of the User model since a user can belong to a team and also create a document.
 
 Now that we’ve defined the data that belongs to the User model, we need to specify what [actions](https://docs.keel.so/actions) can be done on the User model and its respective permissions. In our Keel schema we can specify this using `actions` like so.
 
@@ -58,19 +63,19 @@ model User {
 
 ```
 
-Just below the model fields, we have defined the following actions that allow us perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations to the User model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations.
+Just below the model fields, we have defined the following actions that allow us perform [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) operations to the User model. All Keel models come with a built-in `id` property by default to serve as a means of reference to the model, hence why we are specifying it in some of the operations. Keel models also come with built-in `createdAt` and `UpdateAt` properties by default, so you can reference these in your actions without needing to manually specify them in your fields.
 
 In the `createUser()` action, we have specified that a name and email  needs to be provided before a user can be created. We have also set the owner of the newly created record to be the identity of the logged in user and finally, we have provided a [permission](https://docs.keel.so/permissions) that this action can only be performed by an authenticated user. Permissions allow you define an authorization condition for an action to be carried out.
 
 The `get me()` action will help us return the user’s identity in context just incase we need to pull the correct user details on the client-side.
 
 <Callout type="info" emoji="💡">
-  Action names don't carry any semantic relevance. The name of an action does not functional significance, what matters is the action type you use.
+  The name of an action does not functional significance, what matters is the action type you use. You can name your actions whatever you want.
 </Callout>
 
-The `delete deleteUser()` action will help us delete a user account just incase we need to do that on the client-side.
+The `delete deleteUser()` action will delete a user account
 
-The `update updateUser()` actions will help us update a user name or email.
+The `update updateUser()` actions will update a user name or email.
 
 Next, we need to set permissions for all the other actions in the model. We can do that by using [@permisson](https://docs.keel.so/permissions#permission-attribute) attribute to define this in the keel schema.
 
@@ -107,6 +112,8 @@ model User {
 }
 ```
 
-In Keel, permissions are assigned to different action types by the action parameter of `@permissions`. How the permissions are implemented is defined by the expression parameter. Individual action permissions can be overridden by adding an `@permission` within the action definition, as demonstrated in createUser
+In Keel, permissions are assigned to different action types by the action parameter of `@permissions`. How the permissions are implemented is defined by the expression parameter. If the specificied expression returns `true` then it passes.
+
+Additional action permissions can be included by adding an `@permission` within the action definition, as demonstrated in createUser
 
 So we’ve built our User model which is based on the application requirements we specified above.
