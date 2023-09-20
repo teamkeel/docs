@@ -16,17 +16,17 @@ model Document {
 
     actions {
         get getDocument(id, user.id) {
-            @where(document.owner == ctx.identity)
+            @permission(expression: ctx.identity == profileImage.user.identity)
         }
         list listDocuments(user.id?, team.id?) {
             @where(document.owner == ctx.identity or ctx.identity in document.team.members.user.identity)
         }
         delete deleteDocument(id, user.id?, team.id?) {
-            @permission(expression: ctx.isAuthenticated)
+            @permission(expression: document.user.identity == ctx.identity)
         }
         create createDocument() with (title, content, team.id?, user.id) {
             @permission(expression: ctx.isAuthenticated)
-            @set(document.owner = ctx.identity)
+            @set(document.user.identity.id = ctx.identity.id)
         }
         update updateDocument(id) with (title?, content?, team.id?, user.id?)
     }
@@ -38,7 +38,7 @@ model Document {
 }
 ```
 
-The Document model fields `title` and `content` which are of type text and meant to hold the title and content of the document. The field `owner` holds the **`Identity`** of the creator of the document. This ensures a direct linkage between a document and its originator, be it an individual user or a team.
+The Document model fields `title` and `content` which are of type text and meant to hold the title and content of the document.
 
 The field `user` directly reference the **`User`** model, this field establishes which specific user is tied to this document. Finally, An optional field, **`team`** provides a relationship to the **`Team`** model. It indicates that while a document can be a standalone entity associated with a user, it can also be tied to a specific team if the user that created it is in a team.
 

@@ -15,14 +15,12 @@ model ProfileImage {
 
     actions {
         get getImage(id) {
-            @where(ctx.identity == profileImage.user.identity)
+            @permission(expression: ctx.identity == profileImage.user.identity)
         }
         list listImages() {
             @where(ctx.identity == profileImage.user.identity)
         }
-        delete deleteImage(id) {
-            @where(ctx.identity == profileImage.user.identity)
-        }
+        delete deleteImage(id)
         write uploadImageToCloudinary(UploadImageInput) returns (
             UploadImageResponse
         )
