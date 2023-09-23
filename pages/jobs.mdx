@@ -5,7 +5,7 @@ This can be incredibly useful if you have tasks that need to be executed on a re
 
 Jobs can be scheduled and run on a recurring, scheduled basis.
 
-You can define a job in your `schema.keel` file, and implement it just like a [function](./functions). Job definitions are root level blocks, along with Models, Roles and APIs.
+You can define a job in your `schema.keel` file, and implement it just like a [function](/functions). Job definitions are root level blocks, along with Models, Roles and APIs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
@@ -16,7 +16,7 @@ job EmailNewCustomerReport {
 This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
 
 
-Running `keel generate` in the CLI will create a new jobs file in a directory called `./jobs`. The file created for the job we created above will look something like this.
+Running `keel generate` in the CLI will create a new jobs file in a directory called `/jobs`. The file created for the job we created above will look something like this.
 
 ```tsx filename="jobs/emailNewCustomerReport.ts"
 import { EmailNewCustomerReport } from "@teamkeel/sdk";
@@ -26,7 +26,7 @@ export default EmailNewCustomerReport(async (ctx) => {
 });
 ```
 
-To implement this job, we can use the same generated [APIs](./functions/sdk) that are available to functions.
+To implement this job, we can use the same generated [APIs](/functions/sdk) that are available to functions.
 
 import { Callout } from 'nextra/components'
 
@@ -90,7 +90,7 @@ job EmailNewCustomerReport {
 }
 ```
 This example defines the `EmailNewCustomerReport` as a manual job. It takes two inputs, `joinedSince` an optional `Date` and `deliveryEmail`, a required `String`.
-It also declares [permissions](./permissions) for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
+It also declares [permissions](/permissions) for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
 
 To execute a manual job, you will need to use the Keel console.
 
@@ -114,7 +114,7 @@ Within the `Run details` page, you can view the date and time of the run, it's s
 
 ## Permissions
 
-Jobs that are specified with permissions can be run manually from the Keel console. Permissions can be defined using [Roles](./permissions#roles), or using [expressions](./permissions#expressions).
+Jobs that are specified with permissions can be run manually from the Keel console. Permissions can be defined using [Roles](/permissions#roles), or using [expressions](/permissions#expressions).
 
 The power of expressions allow us to make permissions rules that are very flexible. The example below shows how to use expressions within permissions to give global access.
 to executing a job.
@@ -127,18 +127,15 @@ job EmailNewCustomerReport {
 
 ## Testing
 
-To help you develop your jobs, Keel makes them available within [tests](./testing).
+To help you develop your jobs, Keel makes them available within [tests](/testing).
 
 ```tsx filename="jobs/email-new-customer-report.test.ts"
-
-import { jobs, actions, models, resetDatabase } from "@teamkeel/testing";
+import { jobs, actions, resetDatabase } from "@teamkeel/testing";
 import { test, expect, beforeEach } from "vitest";
 
 beforeEach(resetDatabase);
 
-test("Test EmailNewCustomerReport updates new customer flag", async () => {
-  console.log("Test start")
-
+test("EmailNewCustomerReport updates new customer flag", async () => {
   await jobs.emailNewCustomerReport();
 
   const res = await actions.getCustomer();

@@ -1,0 +1,185 @@
+# Events
+
+Events and subscribers provide the ability to asynchronously execute code when an _event_ is triggered in your application.
+
+Keel currently supports three types of events at the model level; `create`, `update` and `delete` events. These events are fired when a model undergoes the relevant mutatation; whether it be due to an action or from using the [Model API](https://docs.keel.so/functions/sdk/modelApi) in a job, hook, custom function, or even in a subscriber.
+
+These event types can be configured to execute a _subscriber_. Similar to jobs, subscribers are Typescript functions which you provide your own implementation for. This means you can write custom code to respond to events that are triggered while your application is running.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info" emoji="ℹ️">
+The execution of a subscriber function (in response to an event) happens asynchronously.  This means that the subscriber function will run _after_ the execution of the action or function which triggered it.
+</Callout>
+
+## Subscribing to events
+
+Keel provides you the convenience of being able to subscribe to events with the `@on` attribute. Take the following schema as an example.
+
+```keel filename="schema.keel"
+model Member {
+  fields {
+    name Text
+    email Text
+    emailVerified Boolean @default(false)
+  }
+
+  actions {
+    create createMember() with (name, email)
+    update updateEmail(id) with (email) {
+        @set(member.emailVerified = false)
+    }
+  }
+
+  @on([create, update], verifyEmail)
+}
+```
+
+Here we have subscribed to the `create` and `update` event types on the `Member` model. When either of these events are fired, the `verifyEmail` function will be executed.
+
+Note that a subscriber function can respond to any number of event types, even those from a different model. Furthermore, an event can be listened to by any number of subscribers.
+
+<Callout type="info" emoji="ℹ️">
+Events are only fired *after* the completion of the action or function that triggered it. For example, a job might perform many mutations, but the events will only fire after the job has completed.
+</Callout>
+
+## Subscriber functions
+
+Subscriber functions defined in your schema, such as with `verifyEmail` in the above example, need to be implemented in a directory called `./subscribers`.
+
+Running `keel generate` with the CLI will create this file for you. The code generated for the `verifyEmail` subscriber function will look like this:
+
+```tsx filename="subscribers/verifyEmail.ts"
+import { VerifyEmail } from "@teamkeel/sdk";
+
+export default VerifyEmail(async (ctx, event) => {
+  // your code here
+});
+```
+
+## Arguments
+
+Subscriber functions receive two arguments, namely:
+
+- `ctx` - a context object which contains [environment variables](/envvars) and [secrets](/secrets)
+- `event` - the details of the event that occurred, including a payload of the mutated model
+
+Continuing with our example, if a `create` event type is triggered on the `Member` model, the following Typescript definition of the `event` argument in the subscriber function would be generated:
+
+```tsx
+export interface MemberCreatedEvent = {
+  // The unique name of this event, as a string literal
+  eventName: "member.created"
+  // The timestamp at which the event occured
+  occurredAt: DateTime,
+  // The identity that triggered the event, if any
+  identityId?: string,
+  // The targeted model which was mutated
+  target: {
+     // The id of the mutated model
+     id: string,
+     // The name of the model type
+     type: "Member",
+     // The model's data at the time of the event
+     data: Member
+  }
+}
+```
+
+The `event.target.data` property provides the full model's data to the subscriber function. Take note of how the value of the `data` property differs based on the event type:
+
+ - `create` - provides the newly persisted model
+ - `update` - provides the persisted model after it has been updated
+ - `delete` - provides the model at the time it was deleted
+
+## Discerning between events
+
+Because a subscriber function can respond to various types of events, you will likely need a way to discriminate between these event types within the code of your function. 
+
+The `event` argument is a [union type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types) and the `eventName` property is a [string literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).  These bits of Typescript magic let us safely switch across the different event types.  
+
+Below we demonstrate this by providing an example implementation for the `verifyEmail` subscriber function.
+
+```tsx filename="subscribers/verifyEmail.ts"
+import { VerifyEmail } from "@teamkeel/sdk";
+
+export default VerifyEmail(async (ctx, event) => {
+  switch (event.eventName) {
+    case "member.created":
+      // Welcome member and verify their email address.
+      await sendWelcomeMail(event.target.email);
+      break;
+
+    case "member.updated":
+      // Verify their email address if it was changed.
+      if (!member.emailVerified) {
+        await sendVerifyMail(event.target.email);
+      }
+      break;
+
+    default:
+      break;
+  }
+})
+```
+
+## Failed subscribers
+
+An exception thrown in your subscriber function will not cause the action, job, or whatever call that triggered the event, to fail. Therefore, subscribers will fail silently. You can, however, discover failed subscriber functions by inspecting trace data in the Keel console.
+
+Also note that a failure in one subscriber function will not stop other events from being processed.
+
+<Callout type="info" emoji="ℹ️">
+Events will fire regardless of whether the action or function that triggered the event succeeds or fails. It all depends on what changes eventually persisted in the database. When a rollback occurs, due to some failure in a `write` custom function, for example, then no events will fire because no changes would have been committed.
+</Callout>
+
+## Testing
+
+Events and subscribers can be a crucial part of your application, and so Keel has made it possible for you to test their behaviour by providing supporting for them in [tests](/testing). 
+
+<Callout type="info" emoji="ℹ️">
+Events in tests are sychronous. This means that you can always expect all subscriber functions to have completed executing before your action or function call returns.  This has been done to make testing events easier.
+</Callout>
+
+```tsx filename="subscribers.test.ts"
+import { subscribers } from "@teamkeel/testing";
+import { test, expect } from "vitest";
+
+test("Email is verified on member creation", async () => {
+  // This will trigger a create event and execute the verifyEmail subscriber function
+  const member = await actions.createMember({ name: "Mary", "mary@keel.so" })
+
+  // Check that emailVerified was set to true by the verifyEmail subscriber function
+  const updated = await models.members.findOne({ id: member.id });
+  expect(updated.emailVerified).toBeTruthy();
+});
+```
+
+It is also possible to simply run your subscriber function directly, without the need to trigger an event. This is a useful way to isolate and test just the subscriber's implementation.
+
+```tsx filename="subscribers.test.ts"
+import { subscribers } from "@teamkeel/testing";
+import { test, expect } from "vitest";
+
+test("verifyEmail subscriber", async () => {
+  const member = await actions.createMember({ name: "Mary", "mary@keel.so" })
+
+  // The event that will be passed into the subscriber function
+  const event = {
+    eventName: "member.created" as const,
+    occurredAt: new Date(),
+    target: {
+      id: mary.id,
+      type: "Member",
+      data: member,
+    },
+  };
+
+  // Execute the subscriber function
+  await subscribers.verifyEmail(event);
+
+  // Check that emailVerified was set to true by the verifyEmail subscriber function
+  const updated = await models.members.findOne({ id: member.id });
+  expect(updated.emailVerified).toBeTruthy();
+});
+```
