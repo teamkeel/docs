@@ -24,6 +24,7 @@
   "functions": "Functions",
   "apis": "APIs",
   "jobs": "Jobs",
+  "events": "Events",
   "envvars": "Environment Variables",
   "secrets": "Secrets",
   "cli": "CLI",
