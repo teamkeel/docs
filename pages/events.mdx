@@ -163,7 +163,7 @@ Events in tests are synchronous. This means that you can always expect all subsc
 </Callout>
 
 ```tsx filename="subscribers.test.ts"
-import { subscribers } from "@teamkeel/testing";
+import { actions, models } from "@teamkeel/testing";
 import { test, expect } from "vitest";
 
 test("Email is verified on member creation", async () => {
@@ -179,7 +179,7 @@ test("Email is verified on member creation", async () => {
 It is also possible to simply run your subscriber function directly, without the need to trigger an event. This is a useful way to isolate and test just the function's implementation.
 
 ```tsx filename="subscribers.test.ts"
-import { subscribers } from "@teamkeel/testing";
+import { subscribers, models } from "@teamkeel/testing";
 import { test, expect } from "vitest";
 
 test("verifyEmail subscriber", async () => {
