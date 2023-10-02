@@ -129,7 +129,7 @@ An exception thrown in your subscriber function will not cause the action, job, 
 
 Also note that a failure in one subscriber function will not stop other events from being processed.
 
-If a subscriber function fails to execute, then the event will return to the queue and will be reprocessed again after 80 seconds.  This will repeat for 3 attempts, afterwhich the event will be deleted.
+If a subscriber function fails to execute, then the event will return to the queue and will be reprocessed again after 80 seconds. Executing a subscriber function will undergo three attempts, after which the event will be deleted.
 
 <Callout type="info" emoji="ℹ️">
 Events will fire regardless of whether the action or function that triggered the event succeeds or fails. It all depends on what changes eventually persisted in the database. When a rollback occurs, due to some failure in a `write` custom function, for example, then no events will fire because no changes would have been committed.
@@ -145,14 +145,14 @@ However, this also makes it possible to end up with an unintentional never-endin
 
 The following table lists the current limits and quotas for events and subscribers.
 
-| Description                                                |  Threshold |
-| ---------------------------------------------------------- | ---------- |
-| Maximum subscriber function execution time                 | 70 seconds |
-| Maximum number of concurrently executing events            | 10         |
-| Number of retry attempts for a failing subscriber function | 3 attempts |
-| Backoff duration betweeen retry attempts                   | 80 seconds |
-| Event chain depth limit                                    | 15         |
-| Event message size                                         | 256 kB     |
+| Description                                                    |  Threshold |
+| -------------------------------------------------------------- | ---------- |
+| Maximum subscriber function execution time                     | 70 seconds |
+| Maximum number of concurrently executing events                | 10         |
+| Number of execution attempts for a failing subscriber function | 3 attempts |
+| Backoff duration betweeen retry attempts                       | 80 seconds |
+| Event chain depth limit                                        | 15         |
+| Maximum event message size                                     | 256 kB     |
 
 ## Testing
 
