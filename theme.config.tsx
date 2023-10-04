@@ -1,9 +1,10 @@
 import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { useRouter } from "next/router";
+import Logo from "./components/logo";
 
 const config: DocsThemeConfig = {
-  logo: <img className="logo" src="/logo.svg" style={{ height: 32 }} />,
+  logo: <Logo height={32} />,
   project: {},
   footer: {
     text: <span>© Planko Ltd {new Date().getFullYear()}</span>,
