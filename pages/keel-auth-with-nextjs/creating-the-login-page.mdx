@@ -132,7 +132,7 @@ const H2 = styled.h2`
 
 Now, your `page.tsx` file should look like this:
 
-```tsx
+```tsx {3, 42-104 }
 'use client';
 import { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
@@ -243,6 +243,6 @@ export default HomePage;
 
 With these styling, our application should look similar to this:
 
-![Screenshot 2023-10-06 at 9.56.04 AM.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ef7c2b80-6ed4-43fd-bf92-849a0817bb8b/190821dc-1603-49d8-980d-519e414bca61/Screenshot_2023-10-06_at_9.56.04_AM.png)
+![Styled app](/guide-app-styled.png)
 
 The next thing we need to do is to handle what happens when we try to sign up, this is where Keel comes in.
