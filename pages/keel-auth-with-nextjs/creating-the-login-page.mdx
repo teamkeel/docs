@@ -1,0 +1,248 @@
+## Creating the Login Page
+
+With the Keel client in our application, let’s build out our application and interact with the APIs.
+
+First, in our `page.tsx` file, we need to create the login form for our application, we can do this by first defining a simple form in React for this like so:
+
+```tsx
+'use client';
+import { useState } from 'react';
+
+function HomePage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  return (
+    <div>
+        <div>
+          <form onSubmit={handleLogin}>
+            <h2>Sign Up</h2>
+            <div>
+              <input
+                type="email"
+                value={email}
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <input
+                type="password"
+                value={password}
+                placeholder="Password"
+                required
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <button type="submit">Sign Up</button>
+            </div>
+          </form>
+        </div>
+        </div>
+  );
+}
+
+export default HomePage;
+```
+
+The above code basically just renders a simple form that allows us to input our password and email address for authentication. And `onSubmit` we want the form to fire `handleLogin` function that we’ll create to handle the authentication.
+
+Next up, let’s style our application a bit.
+
+For styling, we’ll be using [styled-components](https://styled-components.com/).  We can install it in our application by running the following commands:
+
+```bash
+npm i styled-components
+npm install --save @types/styled-components
+```
+
+The command above will install `styled-components` and type definitions for `styled-components` since we are using Typescript.
+
+The next thing we need to do is to import `styled-components` in the `page.tsx` file like so:
+
+```tsx
+import styled, { keyframes } from 'styled-components';
+```
+
+With `styled-components` imported and installed, paste the following at the bottom of your `page.tsx` file, just before the export expression
+
+```tsx
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+`;
+
+const slideIn = keyframes`
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  animation: ${slideIn} 0.5s ease-in-out;
+  &:focus {
+    outline: none;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const Button = styled.button`
+  background-color: #4caf50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: white;
+    color: black;
+    border: 1px solid #4caf50;
+  }
+`;
+
+const H2 = styled.h2`
+  color: #333;
+  margin-bottom: 20px;
+`;
+```
+
+Now, your `page.tsx` file should look like this:
+
+```tsx
+'use client';
+import { useState } from 'react';
+import styled, { keyframes } from 'styled-components';
+
+function HomePage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  return (
+    <div>
+        <Container>
+          <form onSubmit={handleLogin}>
+            <H2>Sign Up</H2>
+            <div>
+              <Input
+                type="email"
+                value={email}
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Input
+                type="password"
+                value={password}
+                placeholder="Password"
+                required
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <Button type="submit">Sign Up</Button>
+            </div>
+          </form>
+        </Container>
+    </div>
+  );
+}
+
+const Container = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+`;
+
+const slideIn = keyframes`
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  animation: ${slideIn} 0.5s ease-in-out;
+  &:focus {
+    outline: none;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
+  }
+`;
+
+const Button = styled.button`
+  background-color: #4caf50; /* Green */
+  border: none;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+  border-radius: 5px;
+
+  &:hover {
+    background-color: white;
+    color: black;
+    border: 1px solid #4caf50;
+  }
+`;
+
+const Message = styled.p`
+  margin: 5px 0;
+  animation: ${slideIn} 0.5s ease-in-out;
+`;
+
+const H2 = styled.h2`
+  color: #333;
+  margin-bottom: 20px;
+`;
+
+export default HomePage;
+```
+
+With these styling, our application should look similar to this:
+
+![Screenshot 2023-10-06 at 9.56.04 AM.png](https://prod-files-secure.s3.us-west-2.amazonaws.com/ef7c2b80-6ed4-43fd-bf92-849a0817bb8b/190821dc-1603-49d8-980d-519e414bca61/Screenshot_2023-10-06_at_9.56.04_AM.png)
+
+The next thing we need to do is to handle what happens when we try to sign up, this is where Keel comes in.

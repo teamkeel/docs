@@ -13,6 +13,11 @@
   "local-environment": "Getting Started",
   "tutorial": "Tutorial",
   "advanced-tutorial": "Advanced Tutorial",
+  "-- guides": {
+    "title": "Guides",
+    "type": "separator"
+  },
+  "keel-auth-with-nextjs": "Keel Auth with NextJS",
   "-- docs": {
     "title": "Documentation",
     "type": "separator"
