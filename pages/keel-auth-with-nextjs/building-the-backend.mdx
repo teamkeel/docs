@@ -2,7 +2,7 @@ import { Callout } from 'nextra/components'
 
 ## Building the Backend with Keel
 
-Our application is simple, we want to be able to create a new user, assign a role to that user and see it reflected in the database. To do this, we need to define our schema in a `schema.keel` file like so:
+For the final application, we want to be able to create a new user, assign a role to that user and see it reflected in the database. To do this, we need to define our schema in a `schema.keel` file like so:
 
 ```keel
 enum UserRole {
@@ -30,7 +30,7 @@ In our schema, we have created an [enum](https://docs.keel.so/models#enums) for 
 
 Our [model](https://docs.keel.so/models) `User` has the following fields:
 
-- [Identity](https://docs.keel.so/identity): holds the logged-in user identity
+- `[Identity](https://docs.keel.so/identity)`: holds the logged-in user identity
 - `name`: holds the name of the user
 - `role`: holds the `UserRole` enum and we have specified the default option for the field to be `Customer`
 
