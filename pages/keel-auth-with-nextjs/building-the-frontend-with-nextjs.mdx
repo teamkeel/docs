@@ -1,10 +1,10 @@
 import { Callout } from 'nextra/components'
 
-## Bootstraping the Frontend with NextJS
+## Bootstraping the Frontend with Next.js
 
 With our backend deployed on Keel and our API endpoints ready, we can now build our front end.
 
-First, we need to scaffold a NextJS application interactively with the create-next-app CLI tool by running the following command
+First, we need to scaffold a Next.js application interactively with the create-next-app CLI tool by running the following command
 
 ```bash
 npx create-next-app@latest
@@ -14,7 +14,7 @@ npx create-next-app@latest
  Make sure to select typescript and app router for routing as extra options while going through the interactive install.
 </Callout>
 
-After the application has been created, please run the following command to start the NextJS development server
+After the application has been created, please run the following command to start the Next.js development server
 
 ```bash
 npm run dev
@@ -36,7 +36,7 @@ npm i @teamkeel/client-react
 
 The above command will install the Keel client react package as a dependency in our application.
 
-Since we are using the NextJS 13 [app router](https://nextjs.org/docs/app/building-your-application/routing#the-app-router) for routing in our application and server components [do not support context](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#using-context-providers), we can use this package by creating a `keelcontext.ts` file in the `utils` folder we created earlier and pasting the following configuration options for the Keel client react package we installed.
+Since we are using the Next.js 13 [app router](https://nextjs.org/docs/app/building-your-application/routing#the-app-router) for routing in our application and server components [do not support context](https://nextjs.org/docs/app/building-your-application/rendering/composition-patterns#using-context-providers), we can use this package by creating a `keelcontext.ts` file in the `utils` folder we created earlier and pasting the following configuration options for the Keel client react package we installed.
 
 ```tsx
 import { keel } from '@teamkeel/client-react';
@@ -77,6 +77,6 @@ export default function RootLayout({
 
 Make sure the content of the `baseUrl` attribute matches the API endpoint generated in the Keel console.
 
-We've successfully set up our Keel client and API endpoint in our NextJS application.
+We've successfully set up our Keel client and API endpoint in our Next.js application.
 
 Now, we can conveniently utilize our API endpoints throughout the application as needed.
