@@ -8,7 +8,7 @@ A role-based permission rule allows anyone who has one of the given role to perf
 model MyModel {
   @permission(
     roles: [Staff],
-    actions: [get, create, update, delete],
+    actions: [get, create, update, delete]
   )
 }
 ```
@@ -19,7 +19,7 @@ A row-based permission rule is based on the data being acted on and uses an expr
 model MyModel {
   @permission(
     expression: post.author.identity == ctx.identity,
-    actions: [update],
+    actions: [update]
   )
 }
 ```
@@ -83,7 +83,7 @@ model Order {
 
   @permission(
     roles: [Staff],
-    actions: [update],
+    actions: [update]
   )
 }
 ```
@@ -102,7 +102,7 @@ model Post {
 
   @permission(
     expression: true,
-    actions: [get, list, create],
+    actions: [get, list, create]
   )
 }
 ```
@@ -145,7 +145,7 @@ model Post {
   // Any authenticated user can create
   @permission(
     expression: ctx.isAuthenticated,
-    actions: [create],
+    actions: [create]
   )
 
   // Only the author of a post can update
@@ -182,7 +182,7 @@ model Task {
 
   @permission(
     expression: task.project.user.identity == ctx.identity,
-    actions: [update],
+    actions: [update]
   )
 }
 ```
