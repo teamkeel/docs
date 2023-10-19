@@ -2,7 +2,7 @@
 
 Events and subscribers provide the ability to asynchronously execute code when an _event_ is triggered in your application.
 
-Keel currently supports three types of events at the model level; `create`, `update` and `delete` events. These events are fired when a model undergoes the relevant mutatation; whether it be due to an action or from using the [Model API](https://docs.keel.so/functions/sdk/modelApi) in a job, hook, custom function, or even in a subscriber.
+Keel currently supports three types of events at the model level; `create`, `update` and `delete` events. These events are fired when a model undergoes the relevant mutation; whether it be due to an action or from using the [Model API](https://docs.keel.so/functions/sdk/modelApi) in a job, hook, custom function, or even in a subscriber.
 
 These event types can be configured to execute a _subscriber_. Similar to jobs, subscribers are Typescript functions which you provide your own implementation for. This means you can write custom code to respond to events that are triggered while your application is running.
 
@@ -94,9 +94,9 @@ The `event.target.data` property provides the full model's data to the subscribe
 
 ### Discerning between events
 
-Because a subscriber function can respond to various types of events, you will likely need a way to discriminate between these event types within the code of your function. 
+Because a subscriber function can respond to various types of events, you will likely need a way to discriminate between these event types within the code of your function.
 
-The `event` argument is a [union type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types) and the `eventName` property is a [string literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).  These bits of Typescript magic let us safely switch across the different event types.  
+The `event` argument is a [union type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types) and the `eventName` property is a [string literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).  These bits of Typescript magic let us safely switch across the different event types.
 
 Below we demonstrate this by providing an example implementation for the `verifyEmail` subscriber function.
 
@@ -137,9 +137,9 @@ Events will fire regardless of whether the action or function that triggered the
 
 ### Event chaining
 
-Because a subscriber function is able to mutate data using the Model API, it is therefore also able to trigger events itself.  This makes it possible to create a chain of events, which is a powerful feature of events and subscribers.  
+Because a subscriber function is able to mutate data using the Model API, it is therefore also able to trigger events itself.  This makes it possible to create a chain of events, which is a powerful feature of events and subscribers.
 
-However, this also makes it possible to end up with an unintentional never-ending circuit of execution of events.  In order to protect you from run-away executions like this, which could be very costly, we have introduced a depth limit of 15 for event chaining.  
+However, this also makes it possible to end up with an unintentional never-ending circuit of execution of events.  In order to protect you from run-away executions like this, which could be very costly, we have introduced a depth limit of 15 for event chaining.
 
 ## Quotas
 
@@ -156,7 +156,7 @@ The following table lists the current limits and quotas for events and subscribe
 
 ## Testing
 
-Events could form a crucial part of your application, and so Keel has made it possible for you to test their behaviour by providing support for events and subscribers in [tests](/testing). 
+Events could form a crucial part of your application, and so Keel has made it possible for you to test their behaviour by providing support for events and subscribers in [tests](/testing).
 
 <Callout type="info" emoji="ℹ️">
 Events in tests are synchronous. This means that you can always expect all subscriber functions to have completed executing before your action or function call returns.  This makes testing events easier.
