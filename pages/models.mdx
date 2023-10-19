@@ -69,13 +69,13 @@ Now you can be sure that the `status` field of an order can only be one of the v
 
 ## Repeated Fields
 
-Some fields can be marked as repeated, meaning they contain a list of values rather than a single value. To mark a field as repeated, add `[]` after its type. A field can be repeated if its type is `Text`, `Number`, an enum, or another model.
+Some fields can be marked as repeated, meaning they contain a list of values rather than a single value. To mark a field as repeated, add `[]` after its type. A field can be repeated if its type is another model or a message.
 
 ```keel
 model Product {
   fields {
     title Text
-    tags Text[]
+    orders Order[]
   }
 }
 ```
