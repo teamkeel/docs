@@ -96,7 +96,7 @@ const response = await keel.api.mutations.authenticate({
  });
 ```
 
-To create an authentication function, we call the built-in **`authenticate`** function, and pass in an **`emailPassword`** object with your email and password. Utilize the **`createIfNotExists`** option: if set to `true`, it will authenticate a non-existing user as a new one; if `false`, it will deny login access to users not in the database. Essentially, this mechanism enables you to implement both sign-up and log-in features with a single option.
+To authenticate with Keel, use the built-in **`authenticate`** function, providing an **`emailPassword`** object with your email and password. Utilize the **`createIfNotExists`** option: if set to `true`, it will authenticate a non-existing user as a new one; if `false`, it will deny login access to users not in the database. Essentially, this mechanism enables you to implement both sign-up and log-in features with a single option.
 
 ```tsx
 setIsLoggedIn(true);
