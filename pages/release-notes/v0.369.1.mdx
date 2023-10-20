@@ -1,0 +1,67 @@
+# Keel v`0.369.1`
+
+## Release Date
+
+20/10/2023 - October 20th, 2023
+
+## Summary
+
+We are excited to announce the release of Keel `v0.369.1`. This update brings some new features and bug fixes aimed at enhancing developer experience and productivity with Keel.
+
+## ⚒️New Features  and Bug Fixes
+
+### `@set` Support for Backlinks, Relationships, and Nested Data Creation
+
+- Introduced **`@set`** support for context backlinks on both create and update operations.
+- Full relationship traversal is now supported on both create and update operations.
+- Nested data creation is supported, including for repeated associations.
+
+### Data Migration Using `@default` Attribute
+
+- Introduced a way to update existing rows with the value in the **`@default`** attribute during migrations.
+- Auditing and events are now correctly performed during migrations.
+- Improved migration error messages for better clarity.
+- Enhanced migration SQL generation and apply steps tracing.
+
+### Expression Support for Unique Relationship Lookups and Model Operands
+
+- Relationships in expressions are now considered for uniqueness.
+- Support added for the RHS of a **`in`** or **`not in`** when it's the many side of a relationship and the operand is a model.
+
+### Enhanced Support for Model Operands in Expressions
+
+- Improved support for using model operands in expressions.
+- Fixed a bug in expressions with **`not in`** and relationships.
+
+### Backlinks, One-to-One Relationships, and Validation Improvements
+
+- Introduced backlinks support, providing functionality, flexibility, and ease to the Keel schema.
+- Added support for one-to-one relationships on both sides.
+- Fixed multiple bugs related to multiple relationships between models.
+- Consolidated and improved relationship schema validations.
+
+### Relationship Validation Improvements
+
+- Fixed a case when combining a single-sided relationship (1:1 and 1:M) with dual-sided relationships.
+- Enhanced validation messages in context, message, and written style.
+
+## Keel Client Fixes
+
+- Resolved an issue with the client not handling action types correctly.
+
+## Keel CLI Version Command Changes
+
+- Removed the **`keel version`** command.
+- Introduced **`keel -v`** or **`keel --version`** as a replacement.
+
+## Next Steps
+
+To upgrade to Keel v0.369.1 please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.com](mailto:help@keel.com)**.**
+
+Thank you for using Keel!
