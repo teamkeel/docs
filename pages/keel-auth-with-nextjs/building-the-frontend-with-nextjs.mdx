@@ -50,6 +50,7 @@ With this setup, we can now make use of the `useKeel` hook and `KeelProvider` in
 The next thing we need to do is to make the following additions to our `layout.tsx` file and initialize our Keel provider like so:
 
 ```tsx
+'use client'
 // import the Keel Provider
 import { KeelProvider } from '@/utils/keelContext'
 
@@ -62,7 +63,7 @@ export default function RootLayout({
 }) {
   return (
 		// initialize keel provider
-    <KeelProvider baseUrl='https://staging--keel-nextjs-auth-demo-wFTfCx.keelapps.xyz/api/'>
+    <KeelProvider baseUrl='https://your-keel-api-endpoint.com'>
     <html lang="en">
       <body className={inter.className}>{children}</body>
     </html>
