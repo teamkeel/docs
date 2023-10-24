@@ -1,0 +1,152 @@
+
+import { Callout } from 'nextra/components'
+
+To wrap up our application, we need to update our `page.tsx` file with the following:
+
+```tsx {7, 10, 15, 21-36, 50-81}
+'use client';
+
+import { useState } from 'react';
+import styled, { keyframes } from 'styled-components';
+
+//import Modal
+import { Modal } from '@/components/Modal';
+
+// import UserRole enum from Keel Client
+import { UserRole } from '@/utils/keelClient';
+
+function HomePage() {
+
+  //Add to the existing state objects
+  const [role, setRole] = useState<UserRole>(UserRole.Customer);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+	// Create user function
+  const handleCreateUser = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    try {
+			// Call the Keel-generated createUser function from the Keel Client
+      const response = await keel.api.mutations.createUser({ name: name, role: role });
+      if (response && !response.error) {
+        setMessage(`User ${response.data?.name} with a ${response.data?.role} role has been created successfully!`);
+        setIsModalOpen(true);
+      } else {
+        setMessage('Failed to create user.' + response.error?.message);
+      }
+    } catch (error) {
+      setMessage(`${error}`);
+    }
+  };
+
+// UX improvement to clear the input field after the modal is closed
+  const closeModalAndClearInput = () => {
+    setIsModalOpen(false);
+    setName('');
+    setRole(UserRole.Customer);
+  };
+
+  return (
+    <div>
+      {!isLoggedIn ? (
+        <Container>{/*your existing login form*/}</Container>
+      ) : (
+    // create user form
+        <Container>
+          <form onSubmit={handleCreateUser}>
+            <H2>Create User</H2>
+            <div>
+              <label>
+                Name
+                <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+              </label>
+            </div>
+            <div>
+              <label>
+                Role
+                <Select value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
+                  {Object.values(UserRole).map((roleValue) => (
+                    <option key={roleValue} value={roleValue}>
+                      {roleValue}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+            </div>
+            <div>
+              <Button type="submit">Create User</Button>
+            </div>
+          </form>
+        </Container>
+      )}
+      {isModalOpen && <Modal message={message} onClose={closeModalAndClearInput} />}
+    </div>
+  );
+}
+// rest of your styling
+
+
+//style the select tag
+const Select = styled.select`
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+  background-color: #fff;
+  appearance: none; // this will remove the default arrow in some browsers
+  animation: ${slideIn} 0.5s ease-in-out;
+
+  &:focus {
+    outline: none;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.5);
+  }
+
+  option {
+    color: #333;
+    background-color: #fff;
+  }
+`;
+
+export default HomePage
+```
+
+<Callout type="info" emoji="💡">
+ This code has been truncated to reduce repeated code, read the code comments to know the new additions to the previous code.
+</Callout>
+
+In this update to our application, we have imported the `userRole` enum we created earlier in our Keel schema and created a state object for it with a default state of `Customer`. We then set state for our Modal component and finally, we created a `handleCreateUser` function that is responsible for creating a new user when the new user form is submitted.
+
+```jsx
+const handleCreateUser = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    try {
+      const response = await keel.api.mutations.createUser({ name: name, role: role });
+      if (response && !response.error) {
+        setMessage(`User ${response.data?.name} with a ${response.data?.role} role has been created successfully!`);
+        setIsModalOpen(true);
+      } else {
+        setMessage('Failed to create user.' + response.error?.message);
+      }
+    } catch (error) {
+      setMessage(`${error}`);
+    }
+  };
+```
+
+The `handleCreateUser` form is responsible for calling the `createUser` endpoint from our Keel backend and passing the form details to the endpoint. If the user is created correctly, the modal is opened and a message containing the user name and role we’ve set is displayed. Otherwise, an error with the response error is displayed.
+
+With all of these in place, Here is a demo of our entire application flow:
+
+<video autoPlay loop muted>
+<source alt="project demo" src="/guide-demo.mov" type="video/mp4"/>
+</video>
+
+We have successfully built a simple backend for an application with Keel, set up Keel client package, set up authentication and consumed Keel-generated APIs in a Next.js application.
+
+You can also find the complete and hosted application here: https://keel-nextjs-auth.vercel.app/

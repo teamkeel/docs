@@ -1,0 +1,61 @@
+import { Callout } from 'nextra/components'
+
+## Building the Backend with Keel
+
+For the final application, we want to be able to create a new user, assign a role to that user and see it reflected in the database. To do this, we need to define our schema in a `schema.keel` file like so:
+
+```keel
+enum UserRole {
+    Customer
+    Vendor
+}
+
+model User {
+    fields {
+        identity Identity
+        name Text
+        role UserRole @default(UserRole.Customer)
+    }
+
+    actions {
+        create createUser() with (name, role) {
+            @set(user.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+    }
+}
+```
+
+In our schema, we have created an [enum](https://docs.keel.so/models#enums) for the user roles. Enums in Keel are a named set of values, which are useful when you want very specific options in a particular field.
+
+Our [model](https://docs.keel.so/models) `User` has the following fields:
+
+- `[Identity](https://docs.keel.so/identity)`: holds the logged-in user identity
+- `name`: holds the name of the user
+- `role`: holds the `UserRole` enum and we have specified the default option for the field to be `Customer`
+
+For [actions](https://docs.keel.so/actions), we have a single `create` action called `createUser` which allows you to create a new user with a name and a role. We have also set the identity of the user to be the logged-in user identity.
+For [Permission](https://docs.keel.so/permissions), we have specified that the `createUser` action can be carried out by any authenticated user.
+
+Now that we have defined our schema, all we need to do is head over to the [Keel console](https://console.keel.xyz), create a new project by selecting a blank project in the Keel console and deploy our backend on Keel by making a push to the generated GitHub repository.
+
+With your backend deployed on Keel, head over to the API explorer tab and grab your API endpoint. For the purpose of this tutorial, we’ll be using the JSON API.
+
+![API explorer](/guide-auth-api-explorer.png)
+
+<Callout type="info" emoji="💡">
+ Keel provides APIs for you in three formats, namely:
+- [JSON](https://docs.keel.so/apis/json)
+- [GraphQL](https://docs.keel.so/apis/graphql)
+- [JSON-RPC](https://www.jsonrpc.org/)
+</Callout>
+
+### Generating the Keel Client
+
+As well as using the APIs directly in three forms, we can generate a typescript client for our frontend project so that we can easily work with your APIs with full end-to-end type safety. We can do that by running the following command in the folder where our Keel schema is present:
+
+```bash
+keel client
+```
+
+The above command will automatically create a new file called `keelClient.ts` in the root folder, we’ll need this file when working on the front end.

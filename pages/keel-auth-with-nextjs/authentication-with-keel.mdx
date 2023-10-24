@@ -1,0 +1,113 @@
+To authenticate with Keel, we need to call the authenticate endpoint, pass in our username and password and tell the application what to do when authentication is successful.
+
+For every authentication request, Keel returns a JWT (JSON Web Token). This token will act as a security mechanism to call other endpoints in our API. Let’s implement this.
+
+Add the following to your `page.tsx` file:
+
+```tsx {9, 21-28, 31-32}
+'use client';
+import { useState } from 'react';
+import { useKeel } from '@/utils/keelContext';
+import styled, { keyframes } from 'styled-components';
+
+function HomePage() {
+
+// initialize keel client
+const keel = useKeel();
+
+// Form state
+const [email, setEmail] = useState('');
+const [password, setPassword] = useState('');
+const [message, setMessage] = useState('');
+const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+// handle user login
+const handleLogin = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    try {
+	// Call the Keel authenticate function
+      const response = await keel.api.mutations.authenticate({
+        emailPassword: {
+          email,
+          password,
+        },
+        createIfNotExists: true,
+      });
+
+      if (response && response.data && response.data.token) {
+	 // Set the Keel client token
+        keel.client.setToken(response.data.token);
+        setIsLoggedIn(true);
+        setMessage('Logged in successfully!');
+      } else {
+        setMessage('Failed to log in' + response.error?.message);
+      }
+    } catch (error) {
+      setMessage('Login error');
+    }
+  };
+
+  return (
+    <div>
+        <Container>
+          <form onSubmit={handleLogin}>
+            <H2>Sign Up</H2>
+            <div>
+              <Input
+                type="email"
+                value={email}
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Input
+                type="password"
+                value={password}
+                placeholder="Password"
+                required
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <Button type="submit">Sign Up</Button>
+            </div>
+          </form>
+        </Container>
+        </div>
+  );
+}
+
+// existing CSS
+
+export default HomePage;
+```
+
+In this snippet, we've initialized the Keel client with `useKeel()`, created state objects to manipulate our form state and finally created a `handleLogin` function to help us with authentication. The most important aspect of the `handleLogin` function is:
+
+```tsx
+const response = await keel.api.mutations.authenticate({
+        emailPassword: {
+          email: email,
+          password: password,
+        },
+        createIfNotExists: true,
+ });
+```
+
+To authenticate with Keel, use the built-in **`authenticate`** function, passing in an emailPassword object containing your email and password. Utilize the **`createIfNotExists`** option: if set to `true`, it will authenticate a non-existing user as a new one; if `false`, it will deny login access to users not in the database. Essentially, this mechanism enables you to implement both sign-up and log-in features with a single option.
+
+```tsx
+setIsLoggedIn(true);
+```
+
+We added a state object called `isLoggedIn` that helps us check if a user is logged in or not. This will help control what part of our page is shown when a user is logged in or not
+
+```tsx
+keel.client.setToken(response.data.token);
+```
+
+Here, we are setting a bearer token for the rest of our application with the token that is returned when authentication is successful. We need this token to perform API calls to the rest of our endpoints.
+
+The next thing we need to do is to create the UI that allows us to create a new user, assign a role to that user and see it reflected in the database. We need to also make sure that you can only see this UI when you’re logged in.
