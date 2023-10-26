@@ -1,22 +1,18 @@
 # 26 October, 2023
 
-## Version
+*Version `0.365`*
 
-0.370
+## Watch mode for client generation
 
-## Features
+Run `keel client --watch` to generate your [Keel Client](https://docs.keel.so/keel-auth-with-nextjs/building-the-backend#generating-the-keel-client) in real time!
 
-### Watch mode for client generation
-
-We have added a watch mode to the `keel client` generation command using the `--watch` flag.  Run `keel client --watch` to generate your [Keel Client](https://docs.keel.so/keel-auth-with-nextjs/building-the-backend#generating-the-keel-client) in real time.
-
-This will continuously watch for changes to your Keel schema files and subsequently regenerate the client code when changes are made.
+We have added a watch mode to the `keel client` generation command using the `--watch` flag which will continuously detect changes to your Keel schema files and subsequently regenerate your client code.
 
 ![The generate command](/release-notes/0-370-keel-client-watch.png)
 
-### Looking up models with composite keys
+## Looking up models with composite keys
 
-[Composite unique fields}(https://docs.keel.so/models#composite-unique-fields) can now be used as inputs for `get`, `update` and `delete` actions. This provides a lot of convenience when you already have your own "real-world" unique identifiers for models and don't necessary always need or want to look up by `id`.
+[Composite unique fields](https://docs.keel.so/models#composite-unique-fields) can now be used as inputs for `get`, `update` and `delete` actions. This provides a lot of convenience when you already have your own "real-world" unique identifiers for models and don't necessary always need or want to look up by `id`.
 
 Take the following example below where we update a `Product` by looking up using its composite unique fields.
 
@@ -36,7 +32,7 @@ model Product {
 }
 ```
 
-### Looking up models using relationships
+## Looking up models using relationships
 
 We have further extended the `get`, `update`, and `delete` actions to support a smart way to look up models using relationships.  Let's amend the example schema above to demonstrate this.
 
