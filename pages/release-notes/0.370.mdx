@@ -4,15 +4,15 @@ These changes have been released with version `0.370` of the CLI.
 
 ## Watch mode for client generation
 
-Run `keel client --watch` to generate your [Keel Client](https://docs.keel.so/keel-auth-with-nextjs/building-the-backend#generating-the-keel-client) in real time!
+Run `keel client --watch` to generate your [Keel Client](/building-the-backend#generating-the-keel-client) in real time!
 
 We have added a watch mode to the `keel client` generation command using the `--watch` flag which will continuously detect changes to your Keel schema files and subsequently regenerate your client code.
 
-![The generate command](/release-notes/0-370-keel-client-watch.png)
+![The generate command](/release-notes/0-370-keel-client-watch.svg)
 
 ## Looking up models with composite keys
 
-[Composite unique fields](https://docs.keel.so/models#composite-unique-fields) can now be used to lookup a model with the `get`, `update` and `delete` Action types. 
+[Composite unique fields](/models#composite-unique-fields) can now be used to lookup a model with the `get`, `update` and `delete` Action types. 
 
 This provides a lot of convenience when you already have *real-world*, unique identifiers for your models and don't necessarily always need or want to look them up by `id`. Take the following example below where we update a `Product` by looking up its composite unique fields.
 
@@ -60,7 +60,8 @@ model Product {
 ## Fixes and Improvements
 
  - `keel init` will now generate files in non-empty directories, but won't overwrite any existing files.
- - A faster experience when running `keel geneate` as we now pull NPM dependencies when we really need to.
+ - A faster experience when running `keel generate` as we now pull NPM dependencies when we really need to.
+ - `keel generate` not blocking if secrets are not set.
  - `keel generate` will politely amend, rather than overwrite, the `tsconfig.json` file if it exists.
  - General improvements to how we pipe output to the terminal when running `keel test` and `keel generate`.
 
