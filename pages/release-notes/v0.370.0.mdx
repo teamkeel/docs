@@ -1,0 +1,82 @@
+# Keel v0.370.0
+
+## Release Date
+
+26 October 2023
+
+## Features
+
+### Watch mode for client generation
+
+We have added a watch mode to the `keel client` generation command using the `--watch` flag.  Run `keel client --watch` to generate your [Keel Client](https://docs.keel.so/keel-auth-with-nextjs/building-the-backend#generating-the-keel-client) in real time.
+
+This will continuously watch for changes to your Keel schema files and subsequently regenerate the client code when changes are made.
+
+![The generate command](/release-notes/0-370-keel-client-watch.png)
+
+### Looking up models with composite keys
+
+[Composite unique fields}(https://docs.keel.so/models#composite-unique-fields) can now be used as inputs for `get`, `update` and `delete` actions. This provides a lot of convenience when you already have your own "real-world" unique identifiers for models and don't necessary always need or want to look up by `id`.
+
+Take the following example below where we update a `Product` by looking up using its composite unique fields.
+
+```keel
+model Product {
+    fields {
+        name Text
+        supplierCode Text
+        supplierSku Text
+    }
+
+    @unique([supplierSku, supplierCode])
+
+    actions {
+        update updateProduct(supplierSku, supplierCode) with (name)
+    }
+}
+```
+
+### Looking up models using relationships
+
+We have further extended the `get`, `update`, and `delete` actions to support a smart way to look up models using relationships.  Let's amend the example schema above to demonstrate this.
+
+```keel
+model Supplier {
+    fields {
+        code @unique
+    }
+}
+model Product {
+    fields {
+        name Text
+        supplierCode Text
+        supplierSku Text
+    }
+
+    @unique([supplierSku, supplier])
+
+    actions {
+        update updateProduct(supplierSku, supplier.code) with (name)
+    }
+}
+```
+
+## Fixes and Improvements
+
+ - `keel init` will now generate files in non-empty directories, but won't overwrite any existing files.
+ - A faster experience when running `keel geneate` as we now only pull NPM dependencies when we really need to.
+ - `keel generate` will politely amend, rather than overwrite, the `tsconfig.json` file if it already exists.
+ - General improvements to how we pipe output to the terminal when running `keel test` and `keel generate`.
+
+
+## Next Steps
+
+To upgrade to Keel v0.370.0 please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.com](mailto:help@keel.com)**.**
+
+Thank you for using Keel!
