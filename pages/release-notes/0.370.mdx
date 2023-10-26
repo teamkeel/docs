@@ -1,6 +1,6 @@
 # 26 October, 2023
 
-*Version `0.365`*
+These changes are shipped with version `0.365` of the CLI.
 
 ## Watch mode for client generation
 
@@ -12,9 +12,9 @@ We have added a watch mode to the `keel client` generation command using the `--
 
 ## Looking up models with composite keys
 
-[Composite unique fields](https://docs.keel.so/models#composite-unique-fields) can now be used as inputs for `get`, `update` and `delete` actions. This provides a lot of convenience when you already have your own "real-world" unique identifiers for models and don't necessary always need or want to look up by `id`.
+[Composite unique fields](https://docs.keel.so/models#composite-unique-fields) can now be used to lookup a model with the `get`, `update` and `delete` Action types. 
 
-Take the following example below where we update a `Product` by looking up using its composite unique fields.
+This provides a lot of convenience when you already have *real-world*, unique identifiers for your models and don't necessarily always need or want to look them up by `id`. Take the following example below where we update a `Product` by looking up its composite unique fields.
 
 ```keel
 model Product {
@@ -34,7 +34,7 @@ model Product {
 
 ## Looking up models using relationships
 
-We have further extended the `get`, `update`, and `delete` actions to support a smart way to look up models using relationships.  Let's amend the example schema above to demonstrate this.
+We have further extended the `get`, `update`, and `delete` Action types to support an even smarter way to look up models using relationships.  We amend the previous example to demonstrate this.
 
 ```keel
 model Supplier {
@@ -42,10 +42,10 @@ model Supplier {
         code @unique
     }
 }
+
 model Product {
     fields {
         name Text
-        supplierCode Text
         supplierSku Text
     }
 
@@ -60,8 +60,8 @@ model Product {
 ## Fixes and Improvements
 
  - `keel init` will now generate files in non-empty directories, but won't overwrite any existing files.
- - A faster experience when running `keel geneate` as we now only pull NPM dependencies when we really need to.
- - `keel generate` will politely amend, rather than overwrite, the `tsconfig.json` file if it already exists.
+ - A faster experience when running `keel geneate` as we now pull NPM dependencies when we really need to.
+ - `keel generate` will politely amend, rather than overwrite, the `tsconfig.json` file if it exists.
  - General improvements to how we pipe output to the terminal when running `keel test` and `keel generate`.
 
 
