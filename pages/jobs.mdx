@@ -3,18 +3,17 @@
 Jobs in Keel allow you to execute tasks in the background away from your normal workflow.
 This can be incredibly useful if you have tasks that need to be executed on a regular basis or take longer than usual to run.
 
-Jobs can be scheduled and run on a recurring, scheduled basis.
+Jobs can be scheduled to run regularly, triggered manually via the console, or both.
 
 You can define a job in your `schema.keel` file, and implement it just like a [function](/functions). Job definitions are root level blocks, along with Models, Roles and APIs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
-    @schedule("0 6 * * 5")
+    @schedule("0 6 ? * 5 *")
 }
 ```
 
 This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
-
 
 Running `keel generate` in the CLI will create a new jobs file in a directory called `/jobs`. The file created for the job we created above will look something like this.
 
@@ -31,7 +30,7 @@ To implement this job, we can use the same generated [APIs](/functions/sdk) that
 import { Callout } from 'nextra/components'
 
 <Callout type="info" emoji="ℹ️">
-  Jobs in Keel have a max execution time of 15 minutes (due to Lambda max execution times). Jobs that reach the max execution time will be marked as failed. This time will be longer in the future
+  Jobs in Keel have a max execution time of 15 minutes. Jobs that reach the max execution time will be marked as failed.
 </Callout>
 
 
@@ -42,7 +41,7 @@ schedule by which a job is executed. Scheduled jobs take no inputs.
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
-  @schedule("0 6 * * 5")
+  @schedule("0 6 ? * 5 *")
 }
 ```
 
@@ -52,8 +51,8 @@ Jobs may need to be executed on more than one schedule. Because of this, it is p
 
 ```keel filename="schema.keel"
 job EmailNewCustomerReport {
-  @schedule("0 0 7 ? * 1,2,3,4 *")
-  @schedule("0 6 * * 5")
+  @schedule("0 7 ? * MON-THU *")
+  @schedule("0 6 ? * 5 *")
 }
 ```
 
@@ -94,9 +93,7 @@ It also declares [permissions](/permissions) for users with the `Onboarding` rol
 
 To execute a manual job, you will need to use the Keel console.
 
-Jobs are available in the left menu on your console. Once you select the menu item, the jobs page will list all of the jobs defined within your project on one tab, and the job run history in another.
-
-![Jobs on the left menu of the console](/jobs-sidebar.png)
+The jobs page will list all of the jobs defined within your project on one tab, and the job run history in another.
 
 With the `All Jobs` tab selected, you can see all of the jobs defined within your project, schedules that are defined for them, the date and time of the last run and the date and time of the next scheduled run, if any.
 Clicking on a job row will display further details about that job.
@@ -125,6 +122,10 @@ job EmailNewCustomerReport {
 }
 ```
 
+<Callout type="info" emoji="ℹ️">
+  Permission expression `true` for a job means that anyone with access to your project can trigger the job. Jobs are never publicly accessible.
+</Callout>
+
 ## Testing
 
 To help you develop your jobs, Keel makes them available within [tests](/testing).
@@ -144,5 +145,5 @@ test("EmailNewCustomerReport updates new customer flag", async () => {
 ```
 
 <Callout type="info" emoji="ℹ️">
-  Currently, you get 512MB of disk space by default when running a job.
+  There is 512MB of disk space available when running a job.
 </Callout>
