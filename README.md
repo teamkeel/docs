@@ -13,7 +13,7 @@
 ---
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Documentation
@@ -45,6 +45,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://youtube.com/c/tejaskumar"><img src="https://avatars.githubusercontent.com/u/9947422?v=4?s=100" width="100px;" alt="Tejas Kumar"/><br /><sub><b>Tejas Kumar</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=TejasQ" title="Documentation">📖</a> <a href="https://github.com/teamkeel/docs/commits?author=TejasQ" title="Code">💻</a> <a href="https://github.com/teamkeel/docs/commits?author=TejasQ" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://mei.st/"><img src="https://avatars.githubusercontent.com/u/1284492?v=4?s=100" width="100px;" alt="Jay Meistrich"/><br /><sub><b>Jay Meistrich</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=jmeistrich" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>

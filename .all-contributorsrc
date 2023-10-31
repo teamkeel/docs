@@ -20,6 +20,15 @@
         "code",
         "test"
       ]
+    },
+    {
+      "login": "jmeistrich",
+      "name": "Jay Meistrich",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1284492?v=4",
+      "profile": "http://mei.st/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
