@@ -7,6 +7,10 @@ export const EditThisPageButton = () => {
   const router = useRouter();
 
   useEffect(() => {
+    if (window.location.pathname === "/") {
+      currentPage.current = "index";
+      return;
+    }
     currentPage.current = window.location.pathname;
     router.events.on("routeChangeComplete", () => {
       currentPage.current = window.location.pathname;
