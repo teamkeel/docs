@@ -56,6 +56,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "adaam2",
+      "name": "Adam Bull",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2907389?v=4",
+      "profile": "https://adaam.co.uk/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,

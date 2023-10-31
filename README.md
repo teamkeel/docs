@@ -13,7 +13,7 @@
 ---
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Documentation
@@ -49,6 +49,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="https://sheddy.xyz/"><img src="https://avatars.githubusercontent.com/u/26572907?v=4?s=100" width="100px;" alt="Shedrack akintayo"/><br /><sub><b>Shedrack akintayo</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=hacktivist123" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/dave-new-a7bb2117"><img src="https://avatars.githubusercontent.com/u/6212830?v=4?s=100" width="100px;" alt="Dave New"/><br /><sub><b>Dave New</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=davenewza" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/tomfrew"><img src="https://avatars.githubusercontent.com/u/845195?v=4?s=100" width="100px;" alt="tomfrew"/><br /><sub><b>tomfrew</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=tomfrew" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://adaam.co.uk/"><img src="https://avatars.githubusercontent.com/u/2907389?v=4?s=100" width="100px;" alt="Adam Bull"/><br /><sub><b>Adam Bull</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=adaam2" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>
