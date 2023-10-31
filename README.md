@@ -13,7 +13,7 @@
 ---
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-10-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-11-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Documentation
@@ -56,6 +56,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
       <td align="center" valign="top" width="14.28%"><a href="http://www.dblooman.com/"><img src="https://avatars.githubusercontent.com/u/1492067?v=4?s=100" width="100px;" alt="David Blooman"/><br /><sub><b>David Blooman</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=dblooman" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/murej"><img src="https://avatars.githubusercontent.com/u/4493568?v=4?s=100" width="100px;" alt="Jure"/><br /><sub><b>Jure</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=murej" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/fluffyemily"><img src="https://avatars.githubusercontent.com/u/12613048?v=4?s=100" width="100px;" alt="Emily Toop"/><br /><sub><b>Emily Toop</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=fluffyemily" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/louisaspicer"><img src="https://avatars.githubusercontent.com/u/20270031?v=4?s=100" width="100px;" alt="Louisa Spicer"/><br /><sub><b>Louisa Spicer</b></sub></a><br /><a href="https://github.com/teamkeel/docs/commits?author=louisaspicer" title="Documentation">📖</a></td>
     </tr>
   </tbody>
   <tfoot>
