@@ -65,6 +65,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "jonbretman",
+      "name": "Jon Bretman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1671025?v=4",
+      "profile": "https://www.jonbretman.co.uk/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
