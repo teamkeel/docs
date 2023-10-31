@@ -74,6 +74,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "dblooman",
+      "name": "David Blooman",
+      "avatar_url": "https://avatars.githubusercontent.com/u/1492067?v=4",
+      "profile": "http://www.dblooman.com/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
