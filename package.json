@@ -21,6 +21,7 @@
   "devDependencies": {
     "@types/node": "20.2.5",
     "@types/react": "18.2.8",
+    "all-contributors-cli": "^6.26.1",
     "case": "^1.6.3",
     "get-all-files": "^4.1.0",
     "remark-frontmatter": "^4.0.1",
