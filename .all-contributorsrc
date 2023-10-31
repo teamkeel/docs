@@ -38,6 +38,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "davenewza",
+      "name": "Dave New",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6212830?v=4",
+      "profile": "https://www.linkedin.com/in/dave-new-a7bb2117",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
