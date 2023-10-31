@@ -92,6 +92,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "fluffyemily",
+      "name": "Emily Toop",
+      "avatar_url": "https://avatars.githubusercontent.com/u/12613048?v=4",
+      "profile": "https://github.com/fluffyemily",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
