@@ -29,6 +29,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "hacktivist123",
+      "name": "Shedrack akintayo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/26572907?v=4",
+      "profile": "https://sheddy.xyz/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
