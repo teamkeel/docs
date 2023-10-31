@@ -1,0 +1,27 @@
+{
+  "projectName": "docs",
+  "projectOwner": "teamkeel",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "TejasQ",
+      "name": "Tejas Kumar",
+      "avatar_url": "https://avatars.githubusercontent.com/u/9947422?v=4",
+      "profile": "https://youtube.com/c/tejaskumar",
+      "contributions": [
+        "doc",
+        "code",
+        "test"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "linkToUsage": true
+}
