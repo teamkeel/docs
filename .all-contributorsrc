@@ -110,6 +110,15 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "lovettbarron",
+      "name": "Andrew Lovett-Barron",
+      "avatar_url": "https://avatars.githubusercontent.com/u/202041?v=4",
+      "profile": "https://andrewlb.com/",
+      "contributions": [
+        "doc"
+      ]
     }
   ],
   "contributorsPerLine": 7,
