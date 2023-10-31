@@ -2,6 +2,7 @@ import React from "react";
 import { DocsThemeConfig, useConfig } from "nextra-theme-docs";
 import { useRouter } from "next/router";
 import Logo from "./components/logo";
+import { EditThisPageButton } from "./components/EditThisPageButton";
 
 const config: DocsThemeConfig = {
   logo: <Logo height={32} />,
@@ -13,7 +14,8 @@ const config: DocsThemeConfig = {
     component: () => null,
   },
   feedback: {
-    useLink: () => `mailto:help@keel.so`,
+    useLink: () => null,
+    content: EditThisPageButton,
   },
   sidebar: {
     // Makes collapsible menus collapsed by default
