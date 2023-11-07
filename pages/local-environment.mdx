@@ -66,22 +66,18 @@ import { Tab, Tabs } from 'nextra-theme-docs'
 </Tabs>
 
 ### Docker
-Docker is used to run a local Postgres database. We only require that Docker is installed and running, you don't need to configure it in any way.
 
-On a Mac the easiest way to run Docker is by installing [Docker Desktop](https://docs.docker.com/desktop/).
+Docker is used by the CLI to run an instance of PostgreSQL. We only require that Docker is installed and running.  You do not need to configure it in any way, nor do you need to install PostgreSQL itself.
 
-As well as being installed Docker needs to be running, which you can check by running `docker ps` in your terminal. If you see an error that says "Cannot connect to the Docker daemon" then most likely Docker Desktop is not running.
+There are a few ways to get Docker installed and running on your local machine, however Docker Desktop is the easiest way to get started. Follow the [installation instructions for Docker Desktop](https://docs.docker.com/desktop/) to get set up.
 
-<Callout type="info" emoji="ℹ️">
-  You need [postgres](https://www.postgresql.org/download/) installed on your machine to run Keel locally.
-</Callout>
+Please also make sure that Docker is running. You can test this by running `docker ps` in your terminal. 
 
 ## VSCode Extension
 
 <Callout type="info" emoji="ℹ️">
   This extension only works in the desktop version of VSCode and not in the browser.
 </Callout>
-
 
 The Keel VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode, or click the button below:
 
