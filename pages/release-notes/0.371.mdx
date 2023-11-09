@@ -2,25 +2,27 @@
 
 These changes have been released with version `0.371` of the CLI.
 
-## A job schedule syntax for humans
+## A job schedule syntax for humans 
 
 Up to now we have supported the classic crontab syntax for defining job schedules, which, at least for some of us, isn't the easiest to read and reason about. For example, the job schedule below will run every 30 minutes from 10am to 2pm.
 
-```keel filename="Syntax for robots"
+```keel filename="Schedule syntax for robots"
 job EmailReport {
   @schedule("*/30 10-14 * * *")
 }
 ```
 
-This release ships support for a *human-readable syntax* which lets you express schedules in written English. For example, let's write the same schedule definition above, but in this new format.
+This release ships support for a **human-readable syntax** which lets you express schedules in written English. For example, let's write the same schedule definition above, but in this new format.
 
-```keel filename="Syntax for humans"
+```keel filename="Schedule syntax for humans"
 job EmailReport {
   @schedule("every 30 minutes from 10am to 2pm")
 }
 ```
 
-It's really flexible and even supports days of the week.
+**Hooray 🙌! **
+
+It's really flexible, and even supports days of the week.
 
 ```keel
 job EmailReport {
