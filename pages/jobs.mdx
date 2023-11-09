@@ -1,23 +1,24 @@
 # Jobs
 
-Jobs in Keel allow you to execute tasks in the background away from your normal workflow.
-This can be incredibly useful if you have tasks that need to be executed on a regular basis or take longer than usual to run.
+Jobs allow you to execute tasks in the background, either manually or on a schedule. Jobs are Keel's answer to the collection of random scripts that every team ends up with and that one cron job which everyone forgets about but actually keeps the business running.
 
-Jobs can be scheduled to run regularly, triggered manually via the console, or both.
+Jobs are written as normal **TypeScript functions** and have full access to your database. You can view job runs from the Keel console along with full **traces and logs** for easy debugging. You can limit who can run each job with **role-based permission rules**. Jobs can also accept inputs, making it possible to build **simple but powerful internal tools**.
 
-You can define a job in your `schema.keel` file, and implement it just like a [function](/functions). Job definitions are root level blocks, along with Models, Roles and APIs.
+## Getting Started
 
-```keel filename="schema.keel"
+Jobs are defined in your schema, with the implementation written in a TypeScript function.
+
+```keel filename="A simple scheduled job"
 job EmailNewCustomerReport {
-    @schedule("0 6 ? * 5 *")
+    @schedule("every weekday at 9am")
 }
 ```
 
-This example defines a job called `EmailNewCustomerReport` that is scheduled to run every Friday.
+This example defines a scheduled job called `EmailNewCustomerReport` that will run every weekday (Monday-Friday) at 9am.
 
-Running `keel generate` in the CLI will create a new jobs file in a directory called `/jobs`. The file created for the job we created above will look something like this.
+To scaffold out the code for this job you can run `keel generate`, which will create a new file in the `./jobs` directory called **emailNewCustomerReport.ts**. This file will look something like this:
 
-```tsx filename="jobs/emailNewCustomerReport.ts"
+```ts filename="jobs/emailNewCustomerReport.ts"
 import { EmailNewCustomerReport } from "@teamkeel/sdk";
 
 export default EmailNewCustomerReport(async (ctx) => {
@@ -25,110 +26,143 @@ export default EmailNewCustomerReport(async (ctx) => {
 });
 ```
 
-To implement this job, we can use the same generated [APIs](/functions/sdk) that are available to functions.
+Your job code can do whatever you want - call 3rd party API's or use packages from npm. You can also interact with the database in the same way you would in functions, using the [APIs](/functions/sdk) available in the `@teamkeel/sdk` package.
 
-import { Callout } from 'nextra/components'
+### Limitations
 
-<Callout type="info" emoji="ℹ️">
-  Jobs in Keel have a max execution time of 15 minutes. Jobs that reach the max execution time will be marked as failed.
-</Callout>
+The following limitations currently apply to jobs:
 
+- Jobs have 512MB of disk space available to them
+- A job can only run for 15 minutes, after this period it will be killed and marked as failed
 
 ## Scheduled jobs
 
-A scheduled job is a job that has a `@schedule` attribute inside it. This attribute uses the [AWS EventBridge cron expression format](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html) to define the
-schedule by which a job is executed. Scheduled jobs take no inputs.
+A job can be scheduled by using the `@schedule` attribute, which accepts a string that defines the schedule. The schedule string can either be a simple **human-readable** expression or for more complex cases a unix-style **cron** expression.
 
-```keel filename="schema.keel"
+### Defining a schedule
+
+The **human-readable form** starts with the word `every` and then either describes a time interval (e.g. `every 10 minutes`), or a day and time (e.g. `every monday at 9am`). The interval form also allows for a time-range, for example `every 2 hours from 8am to 6pm`. Although the syntax of these expressions is very simple they support a lot of common scheduling patterns and have the benefit of being much easier to read than cron.
+
+```keel filename="A scheduled job using human-readable expression"
 job EmailNewCustomerReport {
-  @schedule("0 6 ? * 5 *")
+  @schedule("every monday at 9am")
 }
 ```
 
-The example above executes the `EmailNewCustomerReport` job at 6:00 every Friday.
+These are the formats the human-readable schedule format accepts:
 
-Jobs may need to be executed on more than one schedule. Because of this, it is possible to define more than one `@schedule` attribute for a job.
+- `every N minutes`
+- `every N hours`
+- `every N minutes from T to T`
+- `every N hours from T to T`
+- `every D at T`
 
-```keel filename="schema.keel"
+Where `N` is an integer, `T` is a 12-hour time, and `D` is a day of the week. `D` can also be `day` for everyday or `weekday` for Monday-Friday.
+
+In the format `every D at T` both `D` and `T` can be a list of values, for example `every monday and tuesday at 9am, 12pm, and 3pm`. The values must be comma-separated but the word `and` is also allowed to improve readability.
+
+---
+
+The **cron form** uses unix-style crontab, with five fields corresponding to minute, hour, day-of-month, month, and day-of-week. An example being `0 9 * * 1`, which would trigger every Monday at 9am. Cron allows for very complex scheduling, for example `*/5 6-8,15-17 * 1 1,3,5`, which would trigger every five minutes between 6am and 8am on Mondays, Wednesdays, and Fridays in January.
+
+```keel filename="A scheduled job using cron syntax"
 job EmailNewCustomerReport {
-  @schedule("0 7 ? * MON-THU *")
-  @schedule("0 6 ? * 5 *")
+  @schedule("0 9 * * 1")
 }
 ```
 
-The example above executes the `EmailNewCustomerReport` job at 7:00 every Monday to Thursday but on Fridays it will execute it at 6:00.
+The table below shows examples of the human-readable form with the equivalent cron syntax.
 
-Scheduled jobs can also take a `@permission` attribute. If a job has both a permission and a schedule defined, they can be run both on the schedule and from the Keel console.
+| Human-readable                                       | Cron                   |
+| :--------------------------------------------------- | :--------------------- |
+| `"every 10 minutes"`                                 | `"*/10 * * * *"`       |
+| `"every 30 minutes from 10am to 2pm"`                | `"*/30 10-14 * * *"`   |
+| `"every 2 hours"`                                    | `"0 */2 * * *"`        |
+| `"every 2 hours from 9am to 3pm"`                    | `"0 9,11,13,15 * * *"` |
+| `"every monday at 9am"`                              | `"0 9 * * 1"`          |
+| `"every tuesday and thursday at 8am, 12pm, and 5pm"` | `"0 8,12,17 * * 2,4"`  |
 
-```keel filename="schema.keel"
-job EmailNewCustomerReport {
-  @schedule("0 6 * * 5")
-  @permission(roles: [Onboarding])
-}
+### Validation
 
-role Onboarding {
-  emails {
-    onboarding@example.com
-  }
-}
-```
+Keel will check your job's schedule at build time to make sure it is valid. Examples of validation errors are:
 
-> Please note that even if a scheduled job has a permission defined, it still cannot take any inputs.
+- Having more than one `@schedule` attribute per job definition
+- A schedule that doesn't divide evenly into the time-unit e.g. `every 5 hours` would be an error because 24 does not divide evently by 5
+- Invalid cron syntax e.g. `0 9am * * *` would result in the error `invalid value '9am' for the hours field`
 
 ## Manual jobs
 
-A manual job is a job that can be executed from the Keel console. This type of job can accept inputs and requires specific permissions to be defined. This allows you to control which users in your system have the permission to execute them
+To be able to manually run a job from the console you must define a permission rule that specifies which members of your team are allowed to run the job. The following schema defines a `DoImportantThing` job which anyone with access to your Keel project can run.
 
-```keel filename="schema.keel"
-job EmailNewCustomerReport {
-  inputs {
-    joinedSince Date?
-    deliveryEmail Text
-  }
-  @permission(roles: [Onboarding])
-}
-```
-This example defines the `EmailNewCustomerReport` as a manual job. It takes two inputs, `joinedSince` an optional `Date` and `deliveryEmail`, a required `String`.
-It also declares [permissions](/permissions) for users with the `Onboarding` role, which means that only users who have been assigned that role will be able to execute them.
-
-To execute a manual job, you will need to use the Keel console.
-
-The jobs page will list all of the jobs defined within your project on one tab, and the job run history in another.
-
-With the `All Jobs` tab selected, you can see all of the jobs defined within your project, schedules that are defined for them, the date and time of the last run and the date and time of the next scheduled run, if any.
-Clicking on a job row will display further details about that job.
-
-![All jobs](/all-jobs.png)
-
-With the `Run history` tab selected, you can see all of the job runs that have been executed, along with the date and time of the last run, the status of the run and who executed it. Clicking
-on a run row will display further details about the run. Job status's can be either `Running`, `Successful` or `Failed`.
-
-![Job run history](/run-history.png)
-
-Within the `Job Details` page, you can view any schedule that has been defined, next run details and the run history for that job.
-
-Within the `Run details` page, you can view the date and time of the run, it's status, how long it took to run the job, who ran it, links to the build that executed the job and a full trace of the run to enable debugging if something went wrong.
-
-## Permissions
-
-Jobs that are specified with permissions can be run manually from the Keel console. Permissions can be defined using [Roles](/permissions#roles), or using [expressions](/permissions#expressions).
-
-The power of expressions allow us to make permissions rules that are very flexible. The example below shows how to use expressions within permissions to give global access.
-to executing a job.
-
-```keel filename="schema.keel"
-job EmailNewCustomerReport {
+```keel filename="A job that can be run by anyone with access to your project"
+job DoImportantThing {
   @permission(expression: true)
 }
 ```
 
-<Callout type="info" emoji="ℹ️">
-  Permission expression `true` for a job means that anyone with access to your project can trigger the job. Jobs are never publicly accessible.
+It's valid to add a `@permission` attribute to a job that **also uses `@schedule`**, which means the job will both run on the schedule and can be manually run from the console. Manual runs will not affect the scheduled runs in any way.
+
+### Permissions
+
+The previous example shows how to create a job that anyone with access to your project can run, but what if you only want to allow certain people in your team to be able to run a job? This is where **role-based permissions** are really useful.
+
+The `BigDataImport` job defined in the following schema can only be run by someone with the `Developer` role, which is assigned to two members of the team - Sally and Barry.
+
+```keel filename="A job with a role-based permission rule"
+job BigDataImport {
+  @permission(roles: [Developer])
+}
+
+role Developer {
+  emails {
+    "sally@corp.com"
+    "barry@corp.com"
+  }
+}
+```
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="🔐">
+  The expression `true` when used in a job permission rule means that anyone
+  with **access to your project** can trigger the job. **Jobs are never publicly
+  accessible**.
 </Callout>
+
+### Inputs
+
+Manual jobs can accept inputs which are provided when the job is run, allowing you to easily create internal tools for your whole team from simple functions. Any inputs defined in a job will be displayed as a form that is shown when trying to run the job in the console.
+
+The following schema defines a `RefundOrder` job that accepts the order ID as an input.
+
+```keel filename="A job that accepts inputs"
+job RefundOrder {
+  inputs {
+    orderId ID
+  }
+  @permission(expression: true)
+}
+```
+
+<Callout type="warning" emoji="💬">
+  Whilst it is fine to have a scheduled job that also defines permissions for
+  manual running, it is **not valid** to specify inputs for a job that is
+  scheduled.
+</Callout>
+
+## Jobs in the Console
+
+From the **Jobs** page in the console you can see all the jobs defined in your project, when they last ran, and if applicable their schedule.
+
+![All jobs](/all-jobs.png)
+
+The **Run history** tab shows all previous job runs. For each job you can see when it ran, if it ran successfully, and if manually executed who ran it. Clicking on an individual run row will show you the full trace and logs for that run, which can be useful for debugging failed jobs.
+
+![Job run history](/run-history.png)
 
 ## Testing
 
-To help you develop your jobs, Keel makes them available within [tests](/testing).
+To help you develop your jobs, Keel makes them available within [tests](/testing). When calling a job from your test make sure to `await` it.
 
 ```tsx filename="jobs/email-new-customer-report.test.ts"
 import { jobs, actions, resetDatabase } from "@teamkeel/testing";
@@ -143,7 +177,3 @@ test("EmailNewCustomerReport updates new customer flag", async () => {
   expect(res.reportSent).toBeTruthy();
 });
 ```
-
-<Callout type="info" emoji="ℹ️">
-  There is 512MB of disk space available when running a job.
-</Callout>
