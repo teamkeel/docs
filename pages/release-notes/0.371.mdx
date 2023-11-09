@@ -1,0 +1,47 @@
+# 9 November, 2023
+
+These changes have been released with version `0.371` of the CLI.
+
+## A job schedule syntax for humans
+
+Up to now we have supported the classic crontab syntax for defining job schedules, which, at least for some of us, isn't the easiest to read and reason about. For example, the job schedule below will run every 30 minutes from 10am to 2pm.
+
+```keel filename="Syntax for robots"
+job EmailReport {
+  @schedule("*/30 10-14 * * *")
+}
+```
+
+This release ships support for a *human-readable syntax* which lets you express schedules in written English. For example, let's write the same schedule definition above, but in this new format.
+
+```keel filename="Syntax for humans"
+job EmailReport {
+  @schedule("every 30 minutes from 10am to 2pm")
+}
+```
+
+It's really flexible and even supports days of the week.
+
+```keel
+job EmailReport {
+  @schedule("every tuesday and thursday at 8am, 12pm, and 5pm")
+}
+```
+
+Take a visit over at [the official documentation](/jobs) to learn more.
+
+## Fixes and Improvements
+
+We've also released [a bunch of fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.371.0) to our CLI, the SDK packages, and to our VS Code extension. And, in case you missed it, we did a [patch release](https://github.com/teamkeel/keel/releases/tag/v0.370.1) last week, which shipped with some major improvements to our runtime.
+
+## Next Steps
+
+To upgrade to the latest version, please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
