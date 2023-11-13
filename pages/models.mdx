@@ -156,13 +156,13 @@ A simple example of a many to many relationship is products and tags, where a pr
 ```keel
 model Product {
   fields {
-    tags ProductTags[]
+    tags ProductTag[]
   }
 }
 
 model Tag {
   fields {
-    products ProductTags[]
+    products ProductTag[]
   }
 }
 
