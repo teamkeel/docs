@@ -1,0 +1,6 @@
+{
+  "oidc-token-auth": "OIDC Token",
+  "sso-login-auth": "SSO Login",
+  "providers": "Providers",
+  "endpoints": "Endpoints"
+}

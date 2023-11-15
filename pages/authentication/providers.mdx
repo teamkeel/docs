@@ -1,0 +1,14 @@
+# Providers
+
+The table below lists the providers we support out of the box, however **you can configure any OAuth2.0 provider you want** using the `oauth` and 'oidc` (specifically for OpenID Connect) provider types.
+
+| Provider        | Type       | Auto SSO | OIDC Token | Additional properties |
+|-----------------|------------|----------|------------|-----------------------|
+| Google          | `google`   | ✅        | ✅          |                       |
+| Facebook        | `facebook` | ✅        | ✅          |                       |
+| Gitlab          | `gitlab`   | ✅        | ✅          |                       |
+| GitHub          | `github`   | ✅        |            |                       |
+| Microsoft Azure | `azure`    | ✅        | ✅          | `issuerUrl`           |
+| Auth0           | `auth0`    | ✅        | ✅          | `issuerUrl`           |
+| _Custom OIDC_   | `oidc`     | ✅        | ✅          |                       |
+| _Custom OAuth2_ | `oauth`    | ✅        |            |                       |
