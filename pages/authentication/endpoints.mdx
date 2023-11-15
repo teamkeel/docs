@@ -4,7 +4,7 @@ We provide authentication endpoints to support our various authentication flows 
 
 ## Token endpoint
 
-The token endpoint is used to get access tokens, which are subsequently used to access your Keel API.
+The token endpoint is used to get access tokens, which are subsequently used to access your Keel API.  
 
 To request an access token, make a POST request to `/auth/token` using form-encoded data.  For example,
 
@@ -13,7 +13,7 @@ curl --request POST \
   --url 'https://{your-domain}/auth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
-  --data id_token=ID_TOKEN
+  --data id_token={{provider_id_token}}
 ```
 
 ### Parameters
@@ -24,22 +24,21 @@ curl --request POST \
 | `refresh_token`  | Only required for `refresh_token` grant    |
 | `subject_token`  | Only required for `token_exchange` grant   |
 
-Use the `refresh_token` grant type to refresh your access token.  TODO: page and link.
+We currently support two types of _grants_:
 
-Use the `token_exchange` grant type to perform IODC Token authentication.  TODO: page and link.
-
-TODO: the SSO Login flow could be make a grant type here as well - perhaps `sso_login`.
+ - The `refresh_token` grant type to [refresh your access token](/authentication/refresh-tokens).
+ - The `token_exchange` grant type to perform [IODC Token authentication](/authentication/flows/oidc-flow). 
 
 ### Response
 
-A successful post will return an `application/json` HTTP 200 reponse with the access token, refresh token, and expiry duration.
+Regardless of the grant request, a successful response will return with a `application/json` HTTP 200 response, which will include the access token, refresh token, and expiry duration.
 
 ```json filename="HTTP 200"
 {
-  "access_token": "eyJhbGciOiJSUzI...",
+  "access_token": "{{keel_access_token}}",
   "token_type": "Bearer",
   "expires_in": 86400,
-  "refresh_token": "TvngQKPYcCXsuCp..."
+  "refresh_token": "{{keel_refresh_token}}"
 }
 ```
 
