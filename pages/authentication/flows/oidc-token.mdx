@@ -1,18 +1,18 @@
 # OIDC Token Authentication
 
-With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow we do not perform the authentication steps with the provider.  For example, if you're authenticating with Google, then you'll most like implement the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in.  You will need to build this into your application. 
+With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow you would have already performed the necessary authentication steps with the provider.  For example, if you're authenticating with Google, then you'll most likely have implemented the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in. 
 
 These are the general steps:
 
  1. Perform the relevant authentication flow with your provider
- 2. Extract `id_token` from the successful auth respoonse
- 3. Perform "token exchange” with our `/auth/token` endpoint to authenticate
- 4. Use access and refresh tokens to query your Keel API
+ 2. Extract the `id_token` from the successful token response
+ 3. Perform "token exchange" with our `/auth/token` endpoint to authenticate
+ 4. Use the access and refresh tokens to query your Keel API
 
 
 import { Callout } from "nextra/components";
 
-<Callout type="info" emoji="🙌">
+<Callout type="info" emoji="ℹ️">
   An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google, Facebook, and, Auth0.
 </Callout>
 
@@ -20,8 +20,8 @@ For OpenID Connect-compatible providers, the ID token will normally be returned 
 
 ```json
 {
-	"access_token": "{{access_token}}",
-	"id_token": "{{id_token}}",
+	"access_token": "{{provider_access_token}}",
+	"id_token": "{{provider_id_token}}",
 	"scope": "openid profile email address phone",
 	"expires_in": 86400,
 	"token_type": "Bearer"
@@ -34,30 +34,29 @@ Once you have obtained the ID token, you can use it to gain access to your Keel 
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
-<Tabs items={['cURL', 'Node.JS', 'GraphQL query']}>
+<Tabs items={['cURL', 'Node.JS']}>
   <Tab>
 ```bash
 curl --request POST \
   --url 'https://{yourDomain}/auth/token’ \
   --header 'content-type: application/x-www-form-urlencoded’ \
   --data grant_type=token_exchange \
-  --data subject_token=ID_TOKEN
+  --data subject_token={{provider_id_token}}
 ```
   </Tab>
   <Tab>
 ```js
-var axios = require("axios”).default;
+var axios = require("axios").default;
 var options = {
   method: 'POST’,
-  url: 'https://{yourDomain}/oauth/token’,
+  url: 'https://{yourDomain}/auth/token’,
   headers: {'content-type’: 'application/x-www-form-urlencoded’},
   data: new URLSearchParams({
-    grant_type: 'client_credentials’,
-    client_id: 'YOUR_CLIENT_ID’,
-    client_secret: 'YOUR_CLIENT_SECRET’,
-    audience: 'YOUR_API_IDENTIFIER’
+    grant_type: 'token_exchange,
+    subject_token: '{{provider_id_token}}'
   })
 };
+
 axios.request(options).then(function (response) {
   console.log(response.data);
 }).catch(function (error) {
@@ -71,9 +70,9 @@ If you are successfully authenticated, the token endpoint has a standard `applic
 
 ```json filename="HTTP 200"
 {
-  "access_token”: "eyJhbGciOiJSUzI...",
-  "token_type”: "Bearer”,
-  "expires_in”: 86400,
-  "refresh_token”: "TvngQKPYcCXsuCp...”
+  "access_token": "{{keel_access_token}}",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "{{keel_id_token}}"
 }
 ```
