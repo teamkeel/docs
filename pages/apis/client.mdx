@@ -71,7 +71,7 @@ const allUsers = await client.api.queries.listUsers()
 console.log(response.data?.results)
 ```
 
-You can also use `.api.mutations` if you have actions that mutate data. For example, if you have an action that deletes a user, you can use it like so:
+You can also use `.api.mutations` if you have actions that mutate data. For example, if you have an action that creates a user, you can use it like so:
 
 ```ts
 const client = new APIClient({
