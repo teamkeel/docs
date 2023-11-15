@@ -12,7 +12,7 @@ These are the general steps:
 import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="ℹ️">
-  An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google, Facebook, and, Auth0.
+  An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google and Facebook.
 </Callout>
 
 For OpenID Connect-compatible providers, the ID token will normally be returned from the provider's token endpoint.  For example, this is the response from Auth0's token endpoint after successfully authenticating:
@@ -37,8 +37,8 @@ import { Tab, Tabs } from "nextra-theme-docs";
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{yourDomain}/auth/token’ \
-  --header 'content-type: application/x-www-form-urlencoded’ \
+  --url 'https://{yourDomain}/auth/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
 ```
@@ -47,9 +47,9 @@ curl --request POST \
 ```js
 var axios = require("axios").default;
 var options = {
-  method: 'POST’,
-  url: 'https://{yourDomain}/auth/token’,
-  headers: {'content-type’: 'application/x-www-form-urlencoded’},
+  method: 'POST',
+  url: 'https://{yourDomain}/auth/token',
+  headers: {'content-type': 'application/x-www-form-urlencoded'},
   data: new URLSearchParams({
     grant_type: 'token_exchange,
     subject_token: '{{provider_id_token}}'

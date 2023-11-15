@@ -28,7 +28,7 @@ curl --request POST \
   --url 'https://{yourDomain}/auth/token’ \
   --header 'content-type: application/x-www-form-urlencoded’ \
   --data grant_type=refresh_token \
-  --data token={{refresh_token}}
+  --data subject_token={{refresh_token}}
 ```
   </Tab>
   <Tab>
@@ -40,7 +40,7 @@ var options = {
   headers: {'content-type’: 'application/x-www-form-urlencoded’},
   data: new URLSearchParams({
     grant_type: 'refresh_token,
-    token: '{{refresh_token}}'
+    subject_token: '{{refresh_token}}'
   })
 };
 
