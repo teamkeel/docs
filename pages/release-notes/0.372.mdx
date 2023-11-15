@@ -1,0 +1,65 @@
+# 15 November, 2023
+
+These changes have been released with version `0.372` of the CLI.
+
+## Improvements to Function Hooks
+​
+We’ve made some improvements and bug fixes to the way function hooks work and also updated the [docs](/functions) page, but here is a summary of the changes:
+​
+* All hooks are now typed so they can be async / return Promises
+* `beforeQuery` in an `update` function can now return a query builder
+* `beforeWrite` in an `update` function now receives the _current_ record as a fourth argument
+* `beforeWrite` is now called for `delete` functions
+* Both `beforeWrite` and `afterWrite` for `delete` functions are passed the record that is being deleted as the third argument, rather than just the id
+​
+### Using non-model inputs
+
+Another thing that is now fully supported is using non-model inputs in functions. An example of this would be something like:
+​
+```keel
+model Film {
+  fields {
+    title Text
+    releaseDate Date?
+  }
+  actions {
+    list searchFilms(title, unreleased: Boolean?) @function
+  }
+}
+```
+​
+In this schema the `searchThings` action accepts `title` which is a model field and `unreleased` which is **not a model field** and is explicitly typed as an optional boolean. The default query that is generated for this function will handle the `title` input automatically but will do nothing with the `unreleased` input - that is for you to handle in your function. For example:
+​
+```ts
+export default SearchThings({
+  beforeQuery(ctx, inputs, query) {
+    if (inputs.unreleased) {
+      return query.where({
+        releaseDate: {
+          equals: null,
+        },
+      })
+    }
+​
+    return query;
+  }
+});
+```
+​
+Non-model inputs can use any basic type - `Text`, `Boolean`, `Number`, `Date`, and `Timestamp` as well as enums.
+
+## Fixes and Improvements
+
+We've also released [a bunch of fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.372.0) to our CLI, the SDK packages, and to our VS Code extension. 
+
+## Next Steps
+
+To upgrade to the latest version, please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
