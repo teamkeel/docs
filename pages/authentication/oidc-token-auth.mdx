@@ -6,7 +6,7 @@ These are the general steps:
 
  1. Perform the relevant authentication flow with your provider
  2. Extract `id_token` from the successful auth respoonse
- 3. Perform “token exchange” with our `/auth/token` endpoint to authenticate
+ 3. Perform "token exchange” with our `/auth/token` endpoint to authenticate
  4. Use access and refresh tokens to query your Keel API
 
 
@@ -32,29 +32,30 @@ If an ID token is not returned with your providers token endpoint, then you migh
 
 Once you have obtained the ID token, you can use it to gain access to your Keel app.  
 
-import { Tab, Tabs } from ‘nextra-theme-docs’
-<Tabs items={[‘cURL’, ‘Node.JS’, ‘GraphQL query’]}>
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['cURL', 'Node.JS', 'GraphQL query']}>
   <Tab>
 ```bash
 curl --request POST \
-  --url ‘https://{yourDomain}/auth/token’ \
-  --header ‘content-type: application/x-www-form-urlencoded’ \
+  --url 'https://{yourDomain}/auth/token’ \
+  --header 'content-type: application/x-www-form-urlencoded’ \
   --data grant_type=token_exchange \
   --data subject_token=ID_TOKEN
 ```
   </Tab>
   <Tab>
 ```js
-var axios = require(“axios”).default;
+var axios = require("axios”).default;
 var options = {
-  method: ‘POST’,
-  url: ‘https://{yourDomain}/oauth/token’,
-  headers: {‘content-type’: ‘application/x-www-form-urlencoded’},
+  method: 'POST’,
+  url: 'https://{yourDomain}/oauth/token’,
+  headers: {'content-type’: 'application/x-www-form-urlencoded’},
   data: new URLSearchParams({
-    grant_type: ‘client_credentials’,
-    client_id: ‘YOUR_CLIENT_ID’,
-    client_secret: ‘YOUR_CLIENT_SECRET’,
-    audience: ‘YOUR_API_IDENTIFIER’
+    grant_type: 'client_credentials’,
+    client_id: 'YOUR_CLIENT_ID’,
+    client_secret: 'YOUR_CLIENT_SECRET’,
+    audience: 'YOUR_API_IDENTIFIER’
   })
 };
 axios.request(options).then(function (response) {
@@ -68,11 +69,11 @@ axios.request(options).then(function (response) {
 
 If you are successfully authenticated, the token endpoint has a standard `application/json` response.
 
-```json filename=“HTTP 200"
+```json filename="HTTP 200"
 {
-  “access_token”: “eyJhbGciOiJSUzI...“,
-  “token_type”: “Bearer”,
-  “expires_in”: 86400,
-  “refresh_token”: “TvngQKPYcCXsuCp...”
+  "access_token”: "eyJhbGciOiJSUzI...",
+  "token_type”: "Bearer”,
+  "expires_in”: 86400,
+  "refresh_token”: "TvngQKPYcCXsuCp...”
 }
 ```
