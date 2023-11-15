@@ -48,6 +48,14 @@ export default SearchThings({
 ​
 Non-model inputs can use any basic type - `Text`, `Boolean`, `Number`, `Date`, and `Timestamp` as well as enums.
 
+## 3rd-party Authentication
+
+We have been working on providing _really good_ support for integrating your Keel app with third-party authentication providers, such as Google, Facebook and the likes.  Not only that, but we are working on providing a better (and more secure) auth experience using access tokens, refresh tokens, and a set of dedicated OAuth2 endpoints.  Do watch this space over the next 2 weeks! 👀
+
+### OIDC Token Authentication (pre-release)
+
+Today we have shipped a pre-release of **OIDC Token authentication**.  With this flow, you can authenticate your users from any OpenID Connect provider using just an ID token. This feature is not yet publicly available, nor have we published documentation for it, but if you would like to get started early then please do raise your hand on our Discord channel.  We'll happily work with you on getting integrated.
+
 ## Fixes and Improvements
 
 We've also released [a bunch of fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.372.0) to our CLI, the SDK packages, and to our VS Code extension. 
