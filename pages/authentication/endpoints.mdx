@@ -13,7 +13,7 @@ curl --request POST \
   --url 'https://{your-domain}/auth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
-  --data id_token={{provider_id_token}}
+  --data subject_token={{provider_id_token}}
 ```
 
 ### Parameters
@@ -27,7 +27,7 @@ curl --request POST \
 We currently support two types of _grants_:
 
  - The `refresh_token` grant type to [refresh your access token](/authentication/refresh-tokens).
- - The `token_exchange` grant type to perform [IODC Token authentication](/authentication/flows/oidc-flow). 
+ - The `token_exchange` grant type to perform [OIDC Token authentication](/authentication/flows/oidc-flow). 
 
 ### Response
 
