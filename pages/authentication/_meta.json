@@ -1,6 +1,7 @@
 {
   "oidc-token-auth": "OIDC Token",
   "sso-login-auth": "SSO Login",
+  "configuration": "Configuration",
   "providers": "Providers",
   "endpoints": "Endpoints"
 }
