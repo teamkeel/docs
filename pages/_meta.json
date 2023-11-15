@@ -25,6 +25,7 @@
   "models": "Models",
   "actions": "Actions",
   "identity": "Identity",
+  "authentication": "Authentication",
   "permissions": "Permissions",
   "functions": "Functions",
   "apis": "APIs",

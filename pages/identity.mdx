@@ -2,10 +2,14 @@ import { Callout } from "nextra/components"
 
 # Identity
 
+<Callout type="warning">
+    We now support integration with 3rd-party authentication providers, and will be deprecating the `authenticate` action that ships with the `Identity` model.
+</Callout>
+
 Almost every application requires authentication and for this purpose Keel comes with a built-in `Identity` model. This model represents the different **identities** that have **authenticated** with your app and includes a few actions that can be used to build authentication into your product.
 
-<Callout emoji="ℹ️" type="info">
-  The `Identity` model is intended to be a building block for further authentication logic and is not intended to be a complete authentication solution. 
+<Callout type="info">
+  The `Identity` model is intended to be a building block for further authentication logic and is not intended to be a complete authentication solution.  
 </Callout>
 
 

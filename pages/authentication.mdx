@@ -1,0 +1,118 @@
+# Authentication
+
+In order for users to interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly and security integrating with third-party authentication providers, such as Google and GitHub.  We take security very seriously, and have gone the extra mile in ensuring that we've done this right, but we also understand that security isn't easy, and so we've made is simple.
+
+We support two methods of authenticating with 3rd-party providers.
+
+*Auto SSO:*  Use this flow if you want Keel to perform the complicated handshake between your preferred 3rd-party provider.
+
+*OIDC Tokens:*  Use this flow if you have already built the authenticatation steps with your preferred 3rd-party provider (probably using Authorization Code Flow) and you have an ID Token.  Note that this flow only supports OpenID Connect providers.  (Why?)
+
+## Supported providers
+
+You can configure any Auth2.0 authentication provider to work with Keel, however we have preconfigured some of the popular providers for your convenience.  Not all providers are supported with the OIDC Token flow; only OpenID Connect compliant providers will work, which fortunately does cover most the of the popular social login options.
+
+The table below lists the providers we support out of the box, however **you can configure any OAuth2.0 provider** using the `oauth` and 'oidc` (specifically for OpenID Connect) provider types.
+
+| Provider        | Type       | Auto SSO | OIDC Token | Additional properties |
+|-----------------|------------|----------|------------|-----------------------|
+| Google          | `google`   | ✅        | ✅          |                       |
+| Facebook        | `facebook` | ✅        | ✅          |                       |
+| Gitlab          | `gitlab`   | ✅        | ✅          |                       |
+| GitHub          | `github`   | ✅        |            |                       |
+| Microsoft Azure | `azure`    | ✅        | ✅          | `issuerUrl`           |
+| Auth0           | `auth0`    | ✅        | ✅          | `issuerUrl`           |
+| Custom OIDC*    | `oidc`     | ✅        | ✅          |                       |
+| Custom OAuth2*  | `oauth`    | ✅        |            |                       |
+
+## Configuration
+
+It's really simple.  There are just three steps involved in configuring a provider:
+ 1. Setup a new OAuth client with your third-party provider
+ 2. Configure the client ID in your application's `keelconfig.yaml`
+ 3. Configure the client secret in your host's environment variables (not required for OIDC Token authentication).
+
+See Configuring Providers (TODO: make pages on how to configure each provider) to enable OAuth on your preferred third-party provider, and obtain the client ID and secret necessary for configuration. 
+
+Now that we've got our client ID, let's configure our keelconfig.yaml with our Google client:
+
+```yaml filename="keelconfig.yaml"
+auth:
+  providers:
+    - type: google
+      name: 'Google Example Client'
+      clientId: {{clientId}}
+```
+
+If you want to enable Auto SSO, then you will also need to configure the client secret as an environment variable on your host. Secrets for authentication providers follow this pattern: `KEEL_AUTH_{{provider name}}_SECRET` where `{{provider name}} is a upper-snake-cased provider name.  In our case, it will be `KEEL_AUTH_GOOGLE_EXAMPLE_CLIENT_SECRET`.  If on local, DO THIS, if on Console, DO THIS.
+
+## Authenticating with Auto SSO
+
+ 1. Get login links from `/sso/login`
+ 2. Redirect to desired login link (perhaps on your own login page)
+ 3. The user will then be taken through the providers auth process
+ 4. Use access and refresh tokens to query your Keel API
+
+## Authenticating with IODC Tokens
+
+ 1. Perform the relevant authentication flow with your provider
+ 2. Extract `id_token` from the successful token respoonse
+ 3. Perform "token exchange" with our `/auth/token` endpoint to authenticate
+ 4. Use access and refresh tokens to query your Keel API
+
+import { Tab, Tabs } from 'nextra-theme-docs'
+ 
+<Tabs items={['cURL', 'Node.JS', 'GraphQL query']}>
+  <Tab>
+```bash
+curl --request POST \
+  --url 'https://{yourDomain}/auth/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=token_exchange \
+  --data subject_token=ID_TOKEN
+```
+  </Tab>
+  <Tab>
+```js
+var axios = require("axios").default;
+
+var options = {
+  method: 'POST',
+  url: 'https://{yourDomain}/oauth/token',
+  headers: {'content-type': 'application/x-www-form-urlencoded'},
+  data: new URLSearchParams({
+    grant_type: 'client_credentials',
+    client_id: 'YOUR_CLIENT_ID',
+    client_secret: 'YOUR_CLIENT_SECRET',
+    audience: 'YOUR_API_IDENTIFIER'
+  })
+};
+
+axios.request(options).then(function (response) {
+  console.log(response.data);
+}).catch(function (error) {
+  console.error(error);
+});
+```
+  </Tab>
+</Tabs>
+
+If you are successfully authenticated, the token endpoint has a standard `application/json` response.
+
+```json filename="HTTP 200"
+{
+  "access_token": "eyJhbGciOiJSUzI...",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "TvngQKPYcCXsuCp..."
+}
+```
+
+More about the token and the other endpoints here.  TODO pages and links
+
+## Access Tokens
+
+## Refresh Tokens
+
+
+## Configuration
