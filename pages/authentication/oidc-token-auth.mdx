@@ -1,0 +1,78 @@
+# OIDC Token Authentication
+
+With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow we do not perform the authentication steps with the provider.  For example, if you're authenticating with Google, then you'll most like implement the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in.  You will need to build this into your application. 
+
+These are the general steps:
+
+ 1. Perform the relevant authentication flow with your provider
+ 2. Extract `id_token` from the successful auth respoonse
+ 3. Perform “token exchange” with our `/auth/token` endpoint to authenticate
+ 4. Use access and refresh tokens to query your Keel API
+
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="🙌">
+  An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google, Facebook, and, Auth0.
+</Callout>
+
+For OpenID Connect-compatible providers, the ID token will normally be returned from the provider's token endpoint.  For example, this is the response from Auth0's token endpoint after successfully authenticating:
+
+```json
+{
+	"access_token": "{{access_token}}",
+	"id_token": "{{id_token}}",
+	"scope": "openid profile email address phone",
+	"expires_in": 86400,
+	"token_type": "Bearer"
+}
+```
+
+If an ID token is not returned with your providers token endpoint, then you might need to request it by providing the scope value `openid`.
+
+Once you have obtained the ID token, you can use it to gain access to your Keel app.  
+
+import { Tab, Tabs } from ‘nextra-theme-docs’
+<Tabs items={[‘cURL’, ‘Node.JS’, ‘GraphQL query’]}>
+  <Tab>
+```bash
+curl --request POST \
+  --url ‘https://{yourDomain}/auth/token’ \
+  --header ‘content-type: application/x-www-form-urlencoded’ \
+  --data grant_type=token_exchange \
+  --data subject_token=ID_TOKEN
+```
+  </Tab>
+  <Tab>
+```js
+var axios = require(“axios”).default;
+var options = {
+  method: ‘POST’,
+  url: ‘https://{yourDomain}/oauth/token’,
+  headers: {‘content-type’: ‘application/x-www-form-urlencoded’},
+  data: new URLSearchParams({
+    grant_type: ‘client_credentials’,
+    client_id: ‘YOUR_CLIENT_ID’,
+    client_secret: ‘YOUR_CLIENT_SECRET’,
+    audience: ‘YOUR_API_IDENTIFIER’
+  })
+};
+axios.request(options).then(function (response) {
+  console.log(response.data);
+}).catch(function (error) {
+  console.error(error);
+});
+```
+  </Tab>
+</Tabs>
+
+If you are successfully authenticated, the token endpoint has a standard `application/json` response.
+
+```json filename=“HTTP 200"
+{
+  “access_token”: “eyJhbGciOiJSUzI...“,
+  “token_type”: “Bearer”,
+  “expires_in”: 86400,
+  “refresh_token”: “TvngQKPYcCXsuCp...”
+}
+```
