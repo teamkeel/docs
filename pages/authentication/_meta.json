@@ -1,7 +1,7 @@
 {
-  "oidc-token-auth": "OIDC Token",
-  "sso-login-auth": "SSO Login",
+  "flows": "Flows",
   "configuration": "Configuration",
   "providers": "Providers",
-  "endpoints": "Endpoints"
+  "endpoints": "Endpoints",
+  "refresh-tokens": "Refresh Tokens"
 }
