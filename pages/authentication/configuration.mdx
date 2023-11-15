@@ -1,0 +1,83 @@
+# Configuration
+
+All configuration is done in the `keelconfig.yaml` file.
+
+## Tokens
+
+```yaml
+auth:
+  tokens:
+    # Lifespan of the access token in seconds. Default is 24 hours.
+    accessTokenExpiry: 3600
+    # Lifespan of the refresh token in seconds. Default is 3 months.
+    refreshTokenExpiry: 604800
+    # Enable refresh token rotation. Default is true.
+    refreshTokenRotationEnabled: false
+```
+
+## Providers
+
+Various providers can be configured.  Depending on the `type` various other fields may be required.  
+
+| Parameter Name | Description                                |
+|----------------|--------------------------------------------|
+| `type`     | The type of provider |
+| `name`  | The unique name you give to this provider       |
+| `clientId`  | The client ID given to you by your provider    |
+
+### Types of providers
+
+We support various out-of-the-box provider types (such as `google`, `facebook`, etc.) - please see [the providers page](/authentication/providers) for more.
+
+You can also configure your own custom OAuth2 (`oauth`) or OpenId Connect (`oidc`) provider types. Read on for more.
+
+### Out of the box providers
+
+No additional fields need to be provided.
+
+```yaml
+auth:
+  providers:
+    - type: google
+      name: 'My google client'
+      clientId: hfjuwaa3a2983h1hfsdf
+```
+
+### Custom OAuth2 provider
+
+| Parameter Name | Description                                |
+|----------------|--------------------------------------------|
+| `authorizationUrl`     | The provider's authorization endpoint |
+| `tokenUrl`  | The provider's token endpoint |
+
+```yaml
+auth:
+  providers:
+    # Custom OAuth provider
+    - type: oauth
+      name: id-server
+      clientId: hfjuwaa3a2983h1hfsdf
+      authorizationUrl: https://-------.com/auth
+      tokenUrl: https://-------..com/token
+```
+
+### Custom OpenID Connect provider
+
+| Parameter Name | Description                                |
+|----------------|--------------------------------------------|
+| `issuerUrl`     | The provider's issuer URL used for discovery purposes |
+
+```yaml
+auth:
+  providers:
+    # Custom OIDC
+    - type: oidc
+      name: Baidu
+      issuerUrl: 'https://dev-skhlutl45lbqkvhv.us.auth0.com'
+      clientId: 'kasj28fnq09ak'
+```
+
+### Client Secret Configuration
+
+TODO: config on local
+TODO: config on hosted environment

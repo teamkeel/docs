@@ -1,20 +1,24 @@
 # Authentication
 
-In order for users to interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly and security integrating with third-party authentication providers, such as Google, Facebook and GitHub.  We take security very seriously, and have gone the extra mile in ensuring that we've done this right, but we also understand that security isn't easy, and so we've made is simple.
+In order for users to securely interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly integrating with third-party authentication providers, such as Google, Facebook and GitHub.  
 
-We support two methods of authenticating with third-party providers.
+We currently support two flows of authenticating with third-party providers.
 
-*Auto SSO:*  Use this flow if you want Keel to perform the complicated handshake between your preferred provider.
+ - [**SSO Login:**](/authentication/sso-login-auth) *Done for you.* Use this flow if you want Keel to perform the complicated handshake with your preferred provider. This flow will work with all OAuth2-compatible providers.
 
-*OIDC Tokens:*  Use this flow if you have already built the authenticatation steps with your preferred provider (probably using Authorization Code Flow) and you have an ID Token.  Note that this flow only supports OpenID Connect providers.  (Why?)
+ - [**OIDC Tokens:**](/authentication/oidc-token-auth) *Bring your own.*  Use this flow if you have already built the authenticatation steps with your preferred provider (probably using Authorization Code Flow) and you have an ID Token.
 
-## Supported providers
+These flows are both enabled by default. All you need to do is configure your providers. 
 
-You can configure any OAuth2.0 authentication provider to work with Keel, however we have preconfigured some of the popular providers for your convenience.  Not all providers are supported with the OIDC Token flow; only OpenID Connect compliant providers will work, which fortunately still does cover most the of the popular options.
+## Supported Providers
 
-The table below lists the providers we support out of the box, however **you can configure any OAuth2.0 provider you want** using the `oauth` and 'oidc` (specifically for OpenID Connect) provider types.
+You can configure **any OAuth2.0 authentication provider** to work with Keel, however we have already preconfigured some of the popular providers for you.  
 
-| Provider        | Type       | Auto SSO | OIDC Token | Additional properties |
+Not all providers are supported with the OIDC Token flow; only OpenID Connect compliant providers will work, which fortunately still does cover most the of the popular options.
+
+The table below lists the providers we support out of the box, however **you can configure any OAuth2.0 provider you want** using the `oauth` and `oidc` provider types.
+
+| Provider        | Type       | SSO Login | OIDC Token | Additional properties |
 |-----------------|------------|----------|------------|-----------------------|
 | Google          | `google`   | ✅        | ✅          |                       |
 | Facebook        | `facebook` | ✅        | ✅          |                       |
@@ -27,9 +31,9 @@ The table below lists the providers we support out of the box, however **you can
 
 ## Getting Started
 
-### 1. Configuration
+### Configuration
 
-It's really simple. Authentication providers are all configured in your `keelconfig.yaml` file.  For example, to enable Google and Facebook authenticaiton:
+It's really simple. Authentication providers are all configured in your `keelconfig.yaml` file.  For example, let's enable Google:
 
 ```yaml filename="keelconfig.yaml"
 auth:
@@ -41,7 +45,7 @@ auth:
 
 If you would like to configure your own custom provider, please read the authentication configuration page for more.  TODO
 
-### 2. Setup the client with your provider
+### Setup the client with your provider
 
 You will also need to setup the client with each of the third-party providers you have configured.  Once you've set up the client, you will be provided with the following:
  - Client ID:  An identifier for your app.  This needs to be configured in your `keelconfig.yaml` as shown in the example configuration above.
@@ -50,22 +54,20 @@ You will also need to setup the client with each of the third-party providers yo
 import { Callout } from "nextra/components";
 
 <Callout type="info">
-  If you only intend to use OIDC Token authentication, then you can ignore the client secret. It is only necessary for Auto SSO. 
+  If you only intend to use OIDC Token authentication, then you can ignore the client secret. It is only necessary for SSO Login. 
 </Callout>
 
-### 3. Configure the client secret on your host
+### Configure the client secret on your host
 
-If you plan to use the Auto SSO flow, then you will need to configure the client secret on every host on which your Keel app will run.  
+If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
 Secrets for authentication providers follow this pattern: `KEEL_AUTH_{{provider name}}_SECRET` where `{{provider name}} is a upper-snake-cased provider name.  In our case, it will be `KEEL_AUTH_GOOGLE_EXAMPLE_CLIENT_SECRET`.
 
 If on local, DO THIS, if on Console, DO THIS.  TODO SECTION!
 
-## OIDC Token authentication
+## Authentication
 
+Now that you configured, the next step is to authenticate using one of our flows:
 
-
-
-## Auto SSO authentication
-
-TODO
+ * [OIDC Token flow](/authentication/oidc-token-auth)
+ * [SSO Login flow](/authentication/sso-login-auth)
