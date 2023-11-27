@@ -41,11 +41,11 @@ All functions receive a context object as their first argument. This object is v
 ```ts
 type Secrets = {
   // populated from the secrets defined in your keelconfig.yaml
-}
+};
 
 type Environment = {
   // populated from the environment variables defined in your keelconfig.yaml
-}
+};
 
 type Context = {
   secrets: Secrets;
@@ -297,7 +297,11 @@ For `create` and `update` this hook can return a modified version of the record 
 import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="ℹ️">
-  Although the `afterWrite` hook can be used to perform side-effects after a write, in many cases it will be better to use an [event](/events). The key difference is that the `afterWrite` hook happens as part of your action and so will affect the response time of your action, whereas an event happens _asynchronously_.
+  Although the `afterWrite` hook can be used to perform side-effects after a
+  write, in many cases it will be better to use an [event](/events). The key
+  difference is that the `afterWrite` hook happens as part of your action and so
+  will affect the response time of your action, whereas an event happens
+  _asynchronously_.
 </Callout>
 
 #### Arguments
@@ -334,7 +338,10 @@ import { sendSlackMessage } from "../lib/slack";
 
 export default DeleteProduct({
   async afterWrite(ctx, inputs, data) {
-    await sendSlackMessage("#products", `${data.title} (${data.id}) has been deleted!`);
+    await sendSlackMessage(
+      "#products",
+      `${data.title} (${data.id}) has been deleted!`
+    );
   },
 });
 ```
@@ -401,6 +408,47 @@ export default MyFunction((inputs, api, ctx) => {
   ctx.response.headers.set("X-My-Other-Header", "1234");
 });
 ```
+
+## HTTP Status Codes
+
+You can set the HTTP status code of the response from your function, which is useful if you want to return a redirect response from your action.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['Function', 'Schema']}>
+  <Tab>
+```tsx filename="functions/myRedirectFunction.ts"
+import { MyRedirectFunction } from "@teamkeel/sdk"
+
+export default MyRedirectFunction((inputs, api, ctx) => {
+  // do some stuff...
+
+  // return a redirect
+  ctx.response.headers.set("Location", "https://some.url.com/");
+  ctx.response.status = 302;
+  return null;
+});
+
+````
+  </Tab>
+   <Tab>
+```keel filename="schema.keel"
+model MyModel {
+  actions {
+    write myRedirectFunction(Any) returns (Any)
+  }
+}
+````
+
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  Setting the HTTP response status code will only have an affect on your JSON
+  API endpoints, so in the above example `/json/api/myRedirectFunction` will
+  return a redirect response but using `myRedirectFuntion` via GraphQL or
+  JSON-RPC API's will not.
+</Callout>
 
 ## Environment Variables and Secrets
 
