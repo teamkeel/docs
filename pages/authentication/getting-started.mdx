@@ -4,7 +4,7 @@ In order for users to securely interact with your application, they will need to
 
 We currently support two flows of authenticating with third-party providers.
 
- - [**SSO Login:**](/authentication/flows/sso-login) *Done for you.* Use this flow if you want Keel to perform the complicated handshake with your preferred provider. This flow will work with all OAuth2-compatible providers.
+ - [**SSO Login:**](/authentication/flows/sso-login) *Done for you.* Use this flow if you want Keel to perform the complicated handshake with your preferred provider. 
 
  - [**OIDC Tokens:**](/authentication/flows/oidc-token) *Bring your own.*  Use this flow if you have already built the authenticatation steps with your preferred provider (probably using Authorization Code Flow) and you have an ID Token.
 
@@ -12,18 +12,15 @@ These flows are both enabled by default. All you need to do is configure your pr
 
 ## Supported Providers
 
-You can configure **any OAuth2.0 authentication provider** to work with Keel, however we have already preconfigured some of the popular providers for you.  
+You can configure **any OpenID Connect authentication provider** to work with Keel, however we have already preconfigured some of the popular providers for you.  
 
-Not all providers are supported with the OIDC Token flow; only OpenID Connect compliant providers will work, which fortunately still does cover most the of the popular options.
-
-The table below lists the providers we support out of the box, however **you can configure any OAuth2.0 provider you want** using the `oauth` and `oidc` provider types.
+The table below lists the providers we support out of the box, however **you can configure any OpenID Connect provider you want** using the `oidc` and `oidc` provider type.
 
 | Provider        | Type       | SSO Login | OIDC Token | 
 |-----------------|------------|----------|------------|
 | Google          | `google`   | ✅        | ✅          | 
 | Facebook        | `facebook` | ✅        | ✅          |
 | _Custom OIDC_   | `oidc`     | ✅        | ✅          | 
-| _Custom OAuth2_ | `oauth`    | ✅        |            |
 
 ## Getting Started
 

@@ -1,3 +1,16 @@
 # Single-sign-on Login
 
-Coming soon!
+Configure the callbackUrl to the client's allowed callback URLs. This can be found at GET /auth/providers:
+
+```json
+[
+	{
+		"name": "Auth0",
+		"type": "oidc",
+		"authorizeUrl": "http://localhost:8000/auth/authorize/auth0",
+		"callbackUrl": "http://localhost:8000/auth/callback/auth0"
+	}
+]
+```
+
+Make sure to enable the Authorization Code Grant type

@@ -15,6 +15,10 @@ auth:
     refreshTokenRotationEnabled: false
 ```
 
+## Redirect URL
+
+For SSO Login, make sure to configure the `redirectUrl`.  This URL will be redirected to after the `auth/authorize/{provider}` flow has successfully completed.  An auth code will be provided in querystring, which can then be used at the token endpoint to acquire tokens.
+
 ## Providers
 
 Various providers can be configured.  Depending on the `type` various other fields may be required.  
@@ -29,7 +33,7 @@ Various providers can be configured.  Depending on the `type` various other fiel
 
 We support various out-of-the-box provider types (such as `google`, `facebook`, etc.) - please see [the providers page](/authentication/providers) for more.
 
-You can also configure your own custom OAuth2 (`oauth`) or OpenId Connect (`oidc`) provider types. Read on for more.
+You can also configure your own custom OpenId Connect (`oidc`) provider type. Read on for more.
 
 ### Out of the box providers
 
@@ -41,24 +45,6 @@ auth:
     - type: google
       name: 'My google client'
       clientId: hfjuwaa3a2983h1hfsdf
-```
-
-### Custom OAuth2 provider
-
-| Parameter Name | Description                                |
-|----------------|--------------------------------------------|
-| `authorizationUrl`     | The provider's authorization endpoint |
-| `tokenUrl`  | The provider's token endpoint |
-
-```yaml
-auth:
-  providers:
-    # Custom OAuth provider
-    - type: oauth
-      name: id-server
-      clientId: hfjuwaa3a2983h1hfsdf
-      authorizationUrl: https://-------.com/auth
-      tokenUrl: https://-------..com/token
 ```
 
 ### Custom OpenID Connect provider
