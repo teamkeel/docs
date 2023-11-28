@@ -9,6 +9,8 @@ These are the general steps:
  3. Perform "token exchange" with our `/auth/token` endpoint to authenticate
  4. Use the access and refresh tokens to query your Keel API
 
+## Retrieving the ID token
+
 import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="ℹ️">
@@ -28,6 +30,8 @@ For OpenID Connect-compatible providers, the ID token will normally be returned 
 ```
 
 If an ID token is not returned with your providers token endpoint, then you might need to request it by providing the scope value `openid`.
+
+## Getting access tokens
 
 Once you have obtained the ID token, you must then exchange it for a Keel access token. This is done by calling the `/auth/token` endpoint with the `token_exchange` grant.
 

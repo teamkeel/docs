@@ -1,4 +1,6 @@
 {
   "google": "Google",
-  "auth0": "auth0"
+  "facebook": "Facebook",
+  "gitlab": "GitLab",
+  "auth0": "Auth0"
 }

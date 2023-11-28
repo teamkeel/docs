@@ -1,16 +1,105 @@
 # Single-sign-on Login
 
-Configure the callbackUrl to the client's allowed callback URLs. This can be found at GET /auth/providers:
+With this flow, Keel provides an abstraction over all the complex OAuth gymnastics which you would normally need to build into for your application. This is especially useful if you want to support multiple different authentication providers (such as Google, Facebook, GitLab, etc.). What this means is that all you need to do is provide some simple configuration in your keelconfig.yaml file, integrate with a singular auth endpoint, and then leave the rest to us.
+
+These are the general steps:
+
+ 1. Point the browser to the relevant provider login; `/auth/authorize/{name}`
+ 2. Handle the redirect after the completed authentication flow (configured at `redirectUrl` in the keelconfig.yaml)
+ 3. Extract the `code` value from the redirectUrl query string
+ 4. Perform "authorization code" with our `/auth/token` endpoint to authenticate
+ 4. Use the access and refresh tokens to query your Keel API	
+
+## Getting access tokens
+
+Once you have obtained the auth code, you must then trade it for a Keel access token. This is done by calling the `/auth/token` endpoint with the `authorization_code` grant.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['cURL', 'Node.JS']}>
+  <Tab>
+```bash
+curl --request POST \
+  --url 'https://{yourDomain}/auth/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=authorization_code \
+  --data subject_token={{auth_code}}
+```
+  </Tab>
+  <Tab>
+```js
+var axios = require("axios").default;
+var options = {
+  method: 'POST',
+  url: 'https://{yourDomain}/auth/token',
+  headers: {'content-type': 'application/x-www-form-urlencoded'},
+  data: new URLSearchParams({
+    grant_type: 'authorization_code,
+    subject_token: '{{auth_code}}'
+  })
+};
+
+axios.request(options).then(function (response) {
+  console.log(response.data);
+}).catch(function (error) {
+  console.error(error);
+});
+```
+  </Tab>
+</Tabs>
+
+If you are successfully authenticated, the token endpoint will respond with HTTP 200 and an `application/json` response body.
+
+```json filename="HTTP 200"
+{
+  "access_token": "{{keel_access_token}}",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "{{keel_refresh_token}}"
+}
+```
+
+Note that the auth code has a very short expiry and must be used immediately after retrieved.
+
+Note that we do not support PKCE yet, but soon!
+
+### Setting the `redirectUrl` in keelconfig.yaml
+
+Configure a redirectUrl in the keelconfig.yaml with the URL you want authentication to redirect after it has completed:
+
+```yaml
+auth:
+  redirectUrl: http://localhost:8000/callback
+  providers:
+    - type: google
+      name: google
+      clientId: 1234
+
+```
+
+### Setting the `callbackUrl` with the provider
+
+Configure the callbackUrl below to the client's allowed redirect URLs. This can be found at GET /auth/providers:
 
 ```json
 [
-	{
-		"name": "Auth0",
-		"type": "oidc",
-		"authorizeUrl": "http://localhost:8000/auth/authorize/auth0",
-		"callbackUrl": "http://localhost:8000/auth/callback/auth0"
-	}
+  {
+    "name": "Auth0",
+    "type": "oidc",
+    "authorizeUrl": "http://localhost:8000/auth/authorize/auth0",
+    "callbackUrl": "http://localhost:8000/auth/callback/auth0"
+  }
 ]
 ```
 
-Make sure to enable the Authorization Code Grant type
+### Setting the client secret
+
+SSO Login flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client.  This secret must be set as a secret in you environment.
+ - For local CLI use, `keel secrets set development MY_SECRET 'my-value'` is used to set a secret
+ - For hosted environments, use the secrets page in the Console
+
+The name of the secret has the format `AUTH_PROVIDER_SECRET_{name}` where `{name}` is the uppercased name of the provider as configured in your keelconfig.yaml file.
+
+### Extras
+
+Make sure to enable the Authorization Code Grant flow on the auth provider's console, if necessary.  Auth0 requires this to be explicitly enabled.

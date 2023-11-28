@@ -17,7 +17,7 @@ auth:
 
 ## Redirect URL
 
-For SSO Login, make sure to configure the `redirectUrl`.  This URL will be redirected to after the `auth/authorize/{provider}` flow has successfully completed.  An auth code will be provided in querystring, which can then be used at the token endpoint to acquire tokens.
+For SSO Login, make sure to configure the `redirectUrl`.  This URL will be redirected to after the `auth/authorize/{provider}` flow has successfully completed.  An auth code will be provided in querystring parameter `code`, which can then be used at the token endpoint to acquire an access and refresh token.
 
 ## Providers
 
@@ -65,5 +65,6 @@ auth:
 
 ### Client Secret Configuration
 
-TODO: config on local
-TODO: config on hosted environment
+Only necessary for the SSO Login flow.
+
+The name of the secret has the format `KEEL_AUTH_PROVIDER_SECRET_{name}` where `{name}` is the uppercased name of the provider as configured in your keelconfig.yaml file.  See the SSO Login page for more.
