@@ -1,0 +1,252 @@
+import { Callout } from 'nextra/components'
+
+# Quickstart
+
+Keel is a purpose-built backend that **heavily accelerates product development** by providing powerful tooling to build and manage your product. In this guide, we will setup and use those tools, ultimately deploying our product to Keel.
+
+## Prerequisites
+
+Before we get started, you'll need to have the following installed:
+
+1. [Docker](https://docs.docker.com/get-docker/)
+2. [Node.js](https://nodejs.org/en/download/)
+
+### Optional Prerequisites
+
+Since Keel applications are described in a custom schema language, we have a [VSCode extension](https://marketplace.visualstudio.com/items?itemName=teamkeel.keel) to get syntax highlighting and autocompletion. If you're using VSCode, we highly recommend installing this extension.
+
+## The CLI
+
+To get the most out of Keel, you'll need the [Keel CLI](/cli) that can be installed by running the following command in your terminal:
+
+```sh
+brew tap teamkeel/homebrew-keel
+brew install keel
+```
+
+This CLI will set you up with everything you need to run Keel locally before deploying to production.
+
+## Creating a New Project
+
+Great! Now that we have the CLI installed, let's create a new project by creating a directory where we can work. We'll call this directory `my-project`:
+
+```sh
+mkdir my-project
+cd my-project
+```
+
+Now that we have a directory, we can create a new Keel project by running the following command:
+
+```sh
+keel init
+```
+
+This will create a few files for us, specifically:
+
+- `schema.keel` - The file that represents our application's backend.
+- `keelconfig.yaml` - Configuration for our backend around secrets, authentication, and more. We'll cover this in more detail later.
+
+Great, we've got a Keel schema. Let's populate it.
+
+## The Keel Schema
+
+The Keel schema is a custom language that describes your application's backend. It's a declarative language that allows you to describe your application's data models, actions your application can do on those models, authentication, and more.
+
+Let's explore this by creating a simple application that allows users to create and view posts.
+
+<Callout type="info" emoji="ℹ️">
+  We've created an AI assistant called [KeelGPT](https://chat.openai.com/g/g-0xwNB1Azt-keelgpt) to help you navigate the Keel schema. It can generate schemas for you, answer questions, and more. It may be helpful as you follow the schema below.
+</Callout>
+
+Paste this into your `schema.keel` file:
+
+```keel
+// We define a model
+model User {
+
+    // A model has fields
+    fields {
+        identity Identity @unique
+        name Text
+        email Text
+        posts Post[]
+    }
+
+    // A model also has actions you can do to it, like
+    actions {
+
+        // Create
+        create createUser() with (name, email) {
+            @set(user.identity = ctx.identity)
+        }
+
+        // Get a single unit
+        get getUser(id) 
+
+        // Get a list
+        list listUsers()
+    }
+
+    // We also must define permissions for our model,
+    // otherwise it will be inaccessible by default.
+    @permission(
+        actions: [get, list, create],
+        expression: ctx.isAuthenticated
+    )
+}
+
+// Let's repeat this for Posts
+model Post {
+    fields {
+        title Text
+        content Text
+        author User
+    }
+
+    actions {
+        create createPost() with (title, content, author.id) {
+            @permission(expression: ctx.isAuthenticated)
+        }
+        get getPost(id)
+        list listPosts(author.id?) 
+    }
+
+    @permission(
+        actions: [get, list],
+        expression: ctx.isAuthenticated
+    )
+}
+```
+
+From the above snippet, we get our first taste of the Keel schema language. Let's break it down.
+
+### Models
+
+Models are the core of your application. They represent the data that your application stores and manipulates. Models have `fields` that describe attributes about them, and `actions` that describe what you can do to them.
+
+Models are locked down by default, meaning that you must explicitly define permissions for them to be accessible. We'll cover permissions in more detail later.
+
+### Fields
+
+Fields are the attributes of your models. They can be of a variety of types, including `Text`, `Number`, `Timestamp`, `Boolean`, and more. You can also define relationships between models, like `User` and `Post` above.
+
+### Actions
+
+Actions are the operations you can do on your models. They can be `create`, `get`, `list`, `update`, and `delete`. You can also define custom actions that can do anything you want. We'll dive into those later in the docs. For now, let's focus on the built-in actions that represent CRUD (Create, Read, Update, Delete) operations.
+
+### Permissions
+
+Permissions are how you control access to your models and actions. They are defined using a custom expression language that allows you to define complex rules around who can access what. We'll cover this in more detail later.
+
+## Running Locally
+
+Now that we have a schema, let's run it locally. To do this, we'll need to start the Keel server. We can do this by running the following command:
+
+```sh
+keel run
+```
+
+<Callout type="info" emoji="ℹ️">
+  You'll need to have Docker running for this to work. You can confirm this by running `docker ps` in your terminal.
+</Callout>
+
+This will start the Keel server locally, which will allow us to interact with our backend. It will give us 3 APIs: 
+
+- A GraphQL API at http://localhost:8000/api/graphql
+- A JSON API at http://localhost:8000/api/json
+- A JSON RPC API at http://localhost:8000/api/rpc
+
+Each API has feature parity, so you can use whichever you prefer. For this guide, we'll use the GraphQL API. You also get a GraphQL API playground at http://localhost:8000/api/graphiql.
+
+That's it! Our backend is up and running! Let's interact with it using the GraphQL playground.
+
+
+## Interacting with the GraphQL API
+
+Let's start by authenticating with the API so we can create a user. To do this, let's first navigate to the GraphQL playground by going to http://localhost:8000/api/graphiql. From there, we'll need to run the following query:
+
+```graphql
+mutation authenticate {
+# We're calling the authenticate mutation
+  authenticate(
+    # It takes an `input` argument
+    input: {
+        # We're authenticating with an email and password
+        createIfNotExists: true, 
+        emailPassword: {
+            email: "test@keel.xyz",
+            password: "superSecr3t!"
+        }
+    }
+  ) {
+    # We get back 
+    token # an authentication token
+    identityCreated # whether or not the identity was created
+  }
+}
+```
+
+If all went well, we should receive a response that looks something like this:
+
+```json
+{
+  "data": {
+    "authenticate": {
+      "identityCreated": true,
+      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ"
+    }
+  }
+}
+```
+
+That `token` is what will let us use the rest of the API.
+
+Great! Now we have an **API user**. Let's use it to create an **application user**. To do this, we'll run the following query:
+
+```graphql
+mutation createUser {
+    # We're calling the createUser mutation, generated by Keel with the appropriate inputs
+  createUser(input: {
+    name: "Testy McTesterson", 
+    email: "test@keel.xyz"
+}) {
+    id # We get back an ID
+  }
+}
+```
+
+It's important that we're authenticated here, so let's take the `token` from the previous `authenticate` function and add it to the Headers tab in the GraphQL playground:
+
+```json
+{
+  "Authorization":"Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ"
+}
+```
+
+Great. Now, if we run this mutation, we should receive a response like this:
+
+```json
+{
+  "data": {
+    "createUser": {
+      "id": "2YtrRyJZjwm5KMzY1fYcK3BcYQ7"
+    }
+  }
+}
+```
+
+We've created a user! The rest of the GraphQL API works similarly, so we won't go into detail here. You can explore the API using the GraphQL playground. 
+
+Now, you've got a backend running locally—all that's left is to build a frontend that communicates with this API and we've got a full product.
+
+## Deploying to Production
+
+Now that we have a product running locally, let's deploy it to production. To do this, we'll need to create a Keel account. If you don't already have one, you can create one by navigating to [the Keel console](https://console.keel.so/) and signing up.
+
+Then, we create a project on Keel, connect it to a GitHub repository hosting our code, and that's it—we're in production. Our local Keel backend is normally available at `http://localhost:8000/api/graphql`, but when we deploy to production, it will be available at `https://<project-name>.keel.so/api/graphql`. We can make customize which version our frontend talks to using [environment variables](https://vercel.com/docs/projects/environment-variables#:~:text=Environment%20Variables%20are%20key%2Dvalue,Step%20or%20during%20Function%20execution.) and we're good to go.
+
+This is how Keel **drastically accelerates product development** by providing powerful tooling and ideal developer experience for product backends end-to-end. We can build our product locally, and when we're ready, we can deploy it to production with a single command. We don't need to worry about infrastructure, databases, or anything else. Keel handles all of that for us, from a single schema.
+
+## Next Steps
+
+We've just scratched the surface on models, fields, actions, and permissions. There's a lot more to explore, including custom actions, jobs, and more. You can explore the rest of the docs to learn more about the Keel schema language and how to build powerful backends with it.
