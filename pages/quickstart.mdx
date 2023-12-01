@@ -75,7 +75,7 @@ model User {
     // A model also has actions you can do to it, like
     actions {
 
-        // Create
+        // Create a new user, setting the identity to the caller of the action
         create createUser() with (name, email) {
             @set(user.identity = ctx.identity)
         }
