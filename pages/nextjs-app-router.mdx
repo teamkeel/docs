@@ -1,0 +1,319 @@
+import { Callout } from "nextra/components"
+
+# Keel + Next.js (App Router)
+
+In this guide, you’ll learn how to quickly set up a Keel-powered application using the Next.js app router, server actions, and server components.
+
+## Create Next.js project
+
+Create a Next.js project by running the command below:
+
+```bash
+npx create-next-app@latest
+```
+
+On running the command, you must answer a few questions. Answer them as shown below:
+
+```bash
+What is your project named? my-app
+Would you like to use TypeScript?  <Yes>
+Would you like to use ESLint? <No>
+Would you like to use Tailwind CSS? <Yes>
+Would you like to use `src/` directory? <Yes>
+Would you like to use App Router? (recommended) <Yes>
+Would you like to customize the default import alias (@/*)? <Yes>
+What import alias would you like configured? @/* <Press Enter>
+```
+
+After completing this step you should have a new directory containing a Next.js app so change into that directory, for example.
+
+```
+cd my-app
+```
+
+## Build Your Backend with Keel
+
+Keel utilizes a schema-driven approach to application development. This implies that all you need to construct a fully managed backend is to define a [schema](https://docs.keel.so/what-is-keel#schema?utm_medium=blog&utm_id=demola) comprising data models, APIs, and permissions.
+
+In this guide, you’ll quickly set up a CRUD backend for a basic task manager.
+
+### The Schema
+
+Create a new file called `schema.keel` in the project root directory and insert the snippet below:
+
+```protobuf
+model Task {
+    fields {
+        description Text
+    }
+
+    actions {
+        create createTask() with (description)
+        get getTask(id)
+        update updateTask(id) with (description)
+        delete deleteTask(id)
+        list listTask() {
+            @orderBy(createdAt: desc)
+        }
+    }
+
+    @permission(
+        actions: [create, get, update, delete, list],
+        expression: true
+    )
+}
+```
+
+The schema above creates a `Task` model with a `description` field as well as some actions that will allow us to interact with tasks over our API.
+
+<Callout type="info" emoji="ℹ️">
+💡 All models have `id`, `createdAt` and `updatedAt` fields built-in.
+</Callout>
+
+By default, your Keel API’s are secure unless you explicitly define permission rules to access them. For this example we just want our API’s to be accessible publicly (e.g. without auth) so we’ve added a permission rule that always allows access using `expression: true`.
+
+That’s it, nothing else! From this schema Keel will create a fully-managed API that can be used via JSON endpoints or GraphQL.
+
+Keel supports running a local Keel instance with Docker and a cloud instance on the Keel console.
+
+### Running Your Backend Locally
+
+Ensure Docker is running.
+
+```bash
+docker ps
+```
+
+With docker running, you can run the backend using the Keel CLI.
+
+```bash
+keel run
+```
+
+You should see a success message on your terminal and the API endpoints.
+
+### Deploying Your Backend to Keel
+
+Sign in to your GitHub account, create a repository, and copy the corresponding Git URL.
+
+With that done, create a project on Keel by going to [the console](https://console.keel.so/) and signing up if you haven't already. From there, create a new project with the **Existing code** option, enter the required details, authorize GitHub, and select the repository you just created.
+
+Next, add the Git remote URL to the Next.js project.
+
+```bash
+git remote add origin <REPLACE WITH COPIED URL>
+```
+
+With that done, push the code to the repository by running the commands below:
+
+```bash
+git add .
+git commit -m "keel backend deploy"
+git push origin main
+```
+
+Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so), navigate to the API explorer tab and you’ll see all your actions show up as API endpoints.
+
+## Integrate Keel with Next.js
+
+To use your Keel APIs in your Next.js app, Keel can generate you a fully type-safe API client based on your schema using the [Keel CLI](/cli) to generate a client.
+
+```bash
+keel client .
+```
+
+With that, you should see a `keelClient.ts` file in the root of your project.
+
+### Create a Keel client
+
+A best practice with Keel is to create an instance of a Keel client per request. Let's write a small helper function to do this in `src/utils/createClient.ts` to create and return a new instance of the generated Keel client.
+
+```tsx
+import { APIClient } from '../../keelClient';
+
+if (!process.env.KEEL_API_URL) {
+    throw new Error('KEEL_API_URL environment variable not set.');
+}
+
+export const createClient = () => {
+    const client = new APIClient({
+        baseUrl: process.env.KEEL_API_URL,
+    });
+
+    return client;
+};
+```
+
+Finally, let's create a `.env` file in the project root and add the Keel API root. Note that the URL should end with just `/api`. 
+
+```bash
+# Using Keel in your local
+KEEL_API_URL=http://localhost:8000/api 
+```
+
+## Build a Task Management App
+
+With the APIs running, let's utilize Keel in a basic task management application that supports creating and listing tasks.
+
+### Creating a Task
+
+Create a `src/app/actions/createTask.ts` file and add the code snippet below. This code will use Next.js’ [Server Actions](https://nextjs.org/docs/app/api-reference/functions/server-actions) to process the form for creating tasks.
+
+```tsx
+'use server';
+
+import { createClient } from '@/utils/createClient';
+import { revalidatePath } from 'next/cache';
+
+export const createTaskAction = async (formData: FormData) => {
+    const client = createClient();
+    const description = formData.get('description');
+
+    if (!description) {
+        throw new Error("No description provided.")
+    }
+
+    const response = await client.api.mutations.createTask({ description });
+
+    if (response.data) {
+        revalidatePath('/');
+    } else {
+        throw new Error(response.error);
+    }
+};
+```
+
+Next, create a client component file `src/components/CreateTaskForm.tsx` to implement task creation using the `createTaskAction` action.
+
+```tsx
+import { createTaskAction } from "@/app/actions/createTask";
+import { Button } from "@/components/Button";
+
+export const CreateTaskForm = () => {
+    return (
+        <form action={createTaskAction}>
+            <textarea
+                name='description'
+                cols={30}
+                rows={2}
+                className='w-full border rounded-lg mb-2 p-4'
+                placeholder='Enter task description'
+            />
+            <div className='flex justify-end'>
+                <div>
+                    <Button />
+                </div>
+            </div>
+        </form>
+    );
+};
+```
+
+That'll probably produce an error because we haven't created the `Button` component yet. Let's do that now.
+
+Create a `src/components/Button.tsx` file and add the code snippet below:
+
+```tsx
+'use client';
+import { useFormStatus } from "react-dom";
+
+export function Button() {
+    const { pending } = useFormStatus();
+    return (
+        <button
+            disabled={pending}
+            className='py-1 px-4 w-full h-10 rounded-lg text-white bg-zinc-800 hover:bg-zinc-900'
+        >
+            {pending ? 'Please wait...' : 'Create'}
+        </button>
+    );
+}
+```
+
+Our button component needs to be separate because it is a **client component** since it has interactivity (it can be clicked). Client components are included in JavaScript we send to browsers and so ideally, they're as small as possible. Server components like our form can import client components, but not the other way around.
+
+### Viewing a Task
+
+To display task details, create a server component file `src/components/TaskComp.tsx` and insert the snippet below:
+
+```tsx
+import Link from 'next/link';
+import type { Task } from '../../keelClient';
+
+type TaskCompType = {
+    task: Task;
+};
+
+export const TaskComp = ({ task }: TaskCompType) => {
+    return (
+        <div className='flex border p-2 rounded-lg mb-2'>
+            <div className='ml-4'>
+                <p className='text-sm text-zinc-500 mb-2'>{task.description}</p>
+                <div className='flex gap-4 items-center'>
+                    <Link
+                        href={task.id}
+                        className='flex items-center border py-1 px-2 rounded-lg hover:bg-zinc-300'
+                    >
+                        <p className='text-sm'>Edit</p>
+                    </Link>
+                    <button className='flex items-center border py-1 px-2 rounded-lg hover:bg-red-300'>
+                        <p className='text-sm'>Delete</p>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+```
+
+Note how on line 2 you are able to import the `Task` type from the generated client, making your app fully type-safe.
+
+## Putting it all together
+
+Update the `src/app/page.tsx` file to include the components and display all the tasks.
+
+```tsx
+import { CreateTaskForm } from "@/components/CreateTaskForm";
+import { TaskComp } from "@/components/TaskComp";
+import { createClient } from "@/utils/createClient";
+
+export default async function Home() {
+  const client = createClient();
+  const tasks = await client.api.queries.listTask();
+
+  if (tasks.error) {
+    return (
+      <p className="text-center text-sm mt-6 text-red-600">
+        Error processing request!
+      </p>
+    );
+  }
+
+  return (
+    <main className="min-h-screen pt-10 w-full bg-[#fafafa]">
+      <div className="w-full flex justify-center">
+        <div className="w-full lg:w-1/2">
+          <CreateTaskForm />
+          <section className="border-t border-t-zinc-200 mt-6 px-2 py-4">
+            {tasks.data.results.length === 0 ? (
+              <p className="text-sm text-zinc-500 text-center">No tasks yet!</p>
+            ) : (
+              tasks.data.results.map((task) => (
+                <TaskComp key={task.id} task={task} />
+              ))
+            )}
+          </section>
+        </div>
+      </div>
+    </main>
+  );
+}
+```
+
+Once completed, run the local server with the command `npm run dev` and test it on a browser using `localhost:3000`.
+
+## Next Steps
+
+Great job! You have successfully set up a Keel-powered application using the Next.js app router. You can extend the application further to support updating and deleting tasks.
+
+We've also got an [examples repository](https://github.com/teamkeel/examples) with a number of real-world examples of using Keel with different frameworks and libraries. Be sure to give that a look!
