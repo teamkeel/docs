@@ -1,6 +1,6 @@
 # Jobs
 
-Jobs allow you to execute tasks in the background, either manually or on a schedule. Jobs are Keel's answer to the collection of random scripts that every team ends up with and that one cron job which everyone forgets about but actually keeps the business running.
+Jobs allow you to execute tasks in the background, either manually or on a schedule as with [cron](https://en.wikipedia.org/wiki/Cron). Jobs are Keel's answer to the collection of random scripts that every team ends up with and that one cron job which everyone forgets about but actually keeps the business running.
 
 Jobs are written as normal **TypeScript functions** and have full access to your database. You can view job runs from the Keel console along with full **traces and logs** for easy debugging. You can limit who can run each job with **role-based permission rules**. Jobs can also accept inputs, making it possible to build **simple but powerful internal tools**.
 
@@ -26,7 +26,7 @@ export default EmailNewCustomerReport(async (ctx) => {
 });
 ```
 
-Your job code can do whatever you want - call 3rd party API's or use packages from npm. You can also interact with the database in the same way you would in functions, using the [APIs](/functions/sdk) available in the `@teamkeel/sdk` package.
+Your job code can do whatever you want - call 3rd party APIs or use packages from npm. You can also interact with the database in the same way you would in functions, using the [APIs](/functions/sdk) available in the `@teamkeel/sdk` package.
 
 ### Limitations
 
@@ -81,6 +81,8 @@ The table below shows examples of the human-readable form with the equivalent cr
 | `"every 2 hours from 9am to 3pm"`                    | `"0 9,11,13,15 * * *"` |
 | `"every monday at 9am"`                              | `"0 9 * * 1"`          |
 | `"every tuesday and thursday at 8am, 12pm, and 5pm"` | `"0 8,12,17 * * 2,4"`  |
+
+If you're not familiar with cron syntax you can use a tool like [crontab.guru](https://crontab.guru/) to help you build your schedule.
 
 ### Validation
 

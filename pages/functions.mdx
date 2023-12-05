@@ -4,7 +4,36 @@ Functions allow you to implement actions using code, but they are so much more t
 
 We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`.
 
-## The Basics
+Once you have described your function in your schema, you can run `keel generate` via the [CLI](/cli) to scaffold the code for your functions and put files in the right place to get you started. Then, you'd just fill in your application-specific logic in the generated file and you're good to go. 
+
+Keel supports two main types of functions:
+
+1. [Action functions](#action-functions) that are defined on existing actions like `get`, `create`, `update`, and so on. These functions **modify the default behaviour of a built-in action** by *hooking* in to the lifecycle of the action. For example, you might want to add constraints to a query before it is run, or perform custom permission logic on the returned rows after the data returns from the database.
+
+2. [Custom functions](#custom-functions) that are unrelated to any built-in action. These functions are defined using the `read` or `write` action types and allow you to define custom inputs and responses. These functions are the closest to what you might think of as an [API route in Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) as they are not tied to any built-in action. They are still deeply integrated into your app, however, and you can still use the built-in Keel types and APIs to interact with your database. You'd use this type of function to communicate with 3rd party APIs, do batch operations, or perform other custom logic.
+
+## Context
+
+All functions receive a context object as their first argument. This object is very similar to the `ctx` object that can be used in expressions in your Keel schema. It provides type-safe access to [secrets](/secrets) and [environment variables](/envvars), as well as the [identity](/identity) of the caller.
+
+```ts
+type Secrets = {
+  // populated from the secrets defined in your keelconfig.yaml
+};
+
+type Environment = {
+  // populated from the environment variables defined in your keelconfig.yaml
+};
+
+type Context = {
+  secrets: Secrets;
+  env: Environment;
+  identity?: Identity;
+  now(): Date;
+};
+```
+
+## Action Functions
 
 Functions can use the same action types as actions, for example `get`, `list` and so on. To make a built-in action a function, we apply the `@function` attribute. To illustrate how functions work lets implement a simple `get` function.
 
@@ -30,34 +59,11 @@ export default GetProduct(hooks);
 
 The `@teamkeel/sdk` package is auto-generated based on your schema and contains wrapper functions for each of your schema-defined functions. These wrapper functions ensure that your code is correctly typed without having to explicitly declare types.
 
-As you can see from this example all function hooks are optional, so even if no hooks are defined a function will still work correctly. For example, if we pass `id` in the inputs to the action, the function will query the database to find a product matching that `id` and return it.
+As you can see from this example all function hooks are optional, so even if no hooks are defined a function will still work correctly. We'll talk more about hooks in a bit, but for now they're fundamentally ways to do things around the lifecycle of the main `get` function which Keel still fully manages for you. For example, if we pass `id` in the inputs to the action, the function will query the database to find a product matching that `id` and return it.
 
-Obviously if you don't need to define any hooks then you also don't need to annotate your action with `@function`.
+### Hooks
 
-## Context
-
-All functions receive a context object as their first argument. This object is very similar to the `ctx` object that can be used in expressions in your Keel schema. It provides type-safe access to [secrets](/secrets) and [environment variables](/envvars), as well as the [identity](/identity) of the caller.
-
-```ts
-type Secrets = {
-  // populated from the secrets defined in your keelconfig.yaml
-};
-
-type Environment = {
-  // populated from the environment variables defined in your keelconfig.yaml
-};
-
-type Context = {
-  secrets: Secrets;
-  env: Environment;
-  identity?: Identity;
-  now(): Date;
-};
-```
-
-## Hooks
-
-Function hooks allow you to **modify the default behaviour of a function**, for example you might want to add constraints to a query, run custom permission logic on the returned rows, create related data, or perform other side effects.
+Action function hooks allow you to **modify the default behaviour of a function**, for example you might want to add constraints to a query, run custom permission logic on the returned rows, create related data, or perform other side effects.
 
 Each hook is described in detail below but this table shows which hooks are called for which action types.
 
@@ -68,17 +74,17 @@ Each hook is described in detail below but this table shows which hooks are call
 | `beforeWrite` | ❌      | ❌       | ✅         | ✅         | ✅         |
 | `afterWrite`  | ❌      | ❌       | ✅         | ✅         | ✅         |
 
-### `beforeQuery`
+#### `beforeQuery`
 
 The `beforeQuery` hook allows you to affect which records are being acted on. If this hook is not defined then a default query is executed based on the inputs your action accepts. This hook is passed the default query and may return a modified version of it, a new query, or database record(s).
 
-#### Arguments
+##### Arguments
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
 - `query` - the default query that will be run
 
-#### Example: extending the default query
+##### Example: extending the default query
 
 By default, a query is generated based on the inputs your action accepts. For example, given the following schema:
 
@@ -123,7 +129,7 @@ The `listFilms` action will now always filter for records whose title ends with 
 
 You would now get back films whose title starts with "star wars" **and** ends with "phantom menace". This example shows how you can _extend_ the default query for all actions that this hook is valid for.
 
-#### Example: custom query
+##### Example: custom query
 
 If you don't want the default query behaviour at all then you can return a new query object. To illustrate this the following schema defines a `get` function called `latestRelease`:
 
@@ -171,17 +177,17 @@ export default LatestRelease({
 });
 ```
 
-### `afterQuery`
+#### `afterQuery`
 
 The `afterQuery` hook allows you to modify the response, perform custom permission checks, or perform side effects using the data returned from the query.
 
-#### Arguments
+##### Arguments
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
 - `data` - the data that was retrieved from the database
 
-#### Example: modify the response
+##### Example: modify the response
 
 The following example shows how `afterQuery` could modify the data returned from the function.
 
@@ -199,7 +205,7 @@ export default ListPreviewProducts({
 });
 ```
 
-#### Example: custom permissions check
+##### Example: custom permissions check
 
 The `afterQuery` hook could also be used to add a custom permissions check, for example:
 
@@ -223,11 +229,11 @@ export default ListProducts({
 });
 ```
 
-### `beforeWrite`
+#### `beforeWrite`
 
 The `beforeWrite` hook allows you perform side-effects or permission checks for `create`, `update`, and `delete` function. For `create` and `update` functions this hook can also be used to modify the values that will be written to the database.
 
-#### Arguments
+##### Arguments
 
 The arguments to `beforeWrite` are slightly different depending on the action type.
 
@@ -250,7 +256,7 @@ The arguments to `beforeWrite` are slightly different depending on the action ty
 - `inputs` - the inputs provided by the caller of your function
 - `record` - the record that is going to be deleted
 
-#### Example: mutate write values
+##### Example: mutate write values
 
 The following example shows how the `beforeWrite` hook can be used to mutate the values being written to the database. Here a `summary` field is computed based on the title and the first 100 characters of the description.
 
@@ -271,7 +277,7 @@ export default CreateProduct({
 });
 ```
 
-#### Example: update based on existing values
+##### Example: update based on existing values
 
 When using this hook in an `update` function the fourth argument to the hook is the _existing_ record. The following example shows how you can use that record to update the values that will be used for the update.
 
@@ -288,7 +294,7 @@ export default IncrementCounter({
 });
 ```
 
-### `afterWrite`
+#### `afterWrite`
 
 The `afterWrite` hook allows you to perform side effects after the record has been written to the database for `create` and `update` and after the record has been deleted for `delete`. Common use cases include creating other models and performing custom permission checks.
 
@@ -304,13 +310,13 @@ import { Callout } from "nextra/components";
   _asynchronously_.
 </Callout>
 
-#### Arguments
+##### Arguments
 
 - `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
 - `inputs` - the inputs provided by the caller of your function
 - `data` - the record that that was created/updated/deleted
 
-#### Example: creating additional records
+##### Example: creating additional records
 
 The following example shows how you can create additional records in the database in an `afterWrite` hook.
 
@@ -328,7 +334,7 @@ export default CreateProduct({
 });
 ```
 
-#### Example: posting an update to Slack
+##### Example: posting an update to Slack
 
 In a `delete` function the third argument to the `afterWrite` hook is the record that was deleted. The following example shows how you could post a message to Slack whenever a product is deleted.
 
@@ -346,147 +352,9 @@ export default DeleteProduct({
 });
 ```
 
-## Using the database
-
-The `@teamkeel/sdk` package is generated based on your schema and contains type-safe API's for interacting with your models. These APIs are all available on the exported `models` object.
-
-See [Model API](/functions/sdk/modelApi) for full usage.
-
-### Low-level database API
-
-If you need more complex database operations you can use the [Database API](/functions/sdk/databaseApi) to write custom queries.
-
-## Using `fetch`
-
-We deploy your functions into an environment running Node.js 18.x, which means the Fetch API is available.
-
-One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel APIs. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend.
-
-The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function:
-
-```keel filename="schema.keel"
-model MyThing {
-  actions {
-    read doSomething(Any) returns (Any)
-  }
-}
-```
-
-The function implementation calls the 3rd party API, pass the API token, and return its response.
-
-```tsx filename="functions/doSomething.ts"
-import { DoSomething } from "@teamkeel/sdk";
-
-export default DoSomething(async (ctx, inputs) => {
-  // make an API call to 3rd party
-  const res = await fetch("https://some-cool-api.com", {
-    method: "POST",
-    headers: {
-      // use a secret to store your API token
-      "Api-Token": ctx.secrets.API_TOKEN,
-    },
-    body: JSON.stringify({
-      some: "param",
-    }),
-  });
-
-  // return the response as JSON
-  return res.json();
-});
-```
-
-## Using Headers
-
-You can access request headers by using `ctx.headers`, which is a _read-only_ version of the `[Headers](https://developer.mozilla.org/en-US/docs/Web/API/Headers)` object, and you can set response headers by using `ctx.response.headers` which is a normal [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers) object.
-
-```tsx filename="functions/myFunction.ts"
-export default MyFunction((inputs, api, ctx) => {
-  // read a request header
-  const reqHeader = ctx.headers.get("X-My-Custom-Header");
-
-  // write a response header
-  ctx.response.headers.set("X-My-Other-Header", "1234");
-});
-```
-
-## HTTP Status Codes
-
-You can set the HTTP status code of the response from your function, which is useful if you want to return a redirect response from your action.
-
-import { Tab, Tabs } from "nextra-theme-docs";
-
-<Tabs items={['Function', 'Schema']}>
-  <Tab>
-```tsx filename="functions/myRedirectFunction.ts"
-import { MyRedirectFunction } from "@teamkeel/sdk"
-
-export default MyRedirectFunction((inputs, api, ctx) => {
-  // do some stuff...
-
-  // return a redirect
-  ctx.response.headers.set("Location", "https://some.url.com/");
-  ctx.response.status = 302;
-  return null;
-});
-
-````
-  </Tab>
-   <Tab>
-```keel filename="schema.keel"
-model MyModel {
-  actions {
-    write myRedirectFunction(Any) returns (Any)
-  }
-}
-````
-
-  </Tab>
-</Tabs>
-
-<Callout type="info">
-  Setting the HTTP response status code will only have an affect on your JSON
-  API endpoints, so in the above example `/json/api/myRedirectFunction` will
-  return a redirect response but using `myRedirectFuntion` via GraphQL or
-  JSON-RPC API's will not.
-</Callout>
-
-## Environment Variables and Secrets
-
-Environment variables defined in your `keelconfig.yaml` file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
-
-In much the same way, any secret you define in your `keelconfig.yaml` file will be available on `ctx.secrets`, which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
-
-As an example if we have the following `keelconfig.yaml` file
-
-```yaml filename="keelconfig.yaml"
-environment:
-  default:
-    - name: MY_ENV_VAR
-      value: "some-value"
-secrets:
-	- name: MY_SECRET
-```
-
-We could then access these in a function like so
-
-```tsx filename="functions/myFunction.ts"
-export default MyFunction(async (ctx, inputs) => {
-  ctx.env.MY_ENV_VAR; // "some-value"
-  ctx.secrets.MY_SECRET; // will be decrypted secret value
-
-  // TypeScript will catch this with the error:
-  // ts(2339) Property 'FOO' does not exist on type 'Environment'.
-  ctx.env.FOO;
-
-  // TypeScript will catch this with the error:
-  // ts(2339) Property 'FOO' does not exist on type 'Secrets'.
-  ctx.secrets.FOO;
-});
-```
-
 ## Custom functions
 
-There may be cases where you want to define a function that returns custom data or needs to receive unknown data as input. For these situations, you can use the `read` and `write` action types with **messages**.
+There may be cases where you want to define a function that returns custom data or needs to receive unknown data as input. For these situations, you can use the `read` and `write` action types with `messages`.
 
 ### Custom inputs and responses
 
@@ -509,7 +377,7 @@ model Book {
 }
 ```
 
-Actions that use the `read` or `write` type must take a message as input and use the `returns` keyword to define the response message. The following example demonstrates how to define the messages we used in the `createBooks` action.
+Actions that use the `read` or `write` type must take a `message` as input and use the `returns` keyword to define the response message. The following example demonstrates how to define the messages we used in the `createBooks` action.
 
 ```keel filename="schema.keel"
 message CreateBooksInput {
@@ -529,7 +397,7 @@ message CreateBooksResponse {
 }
 ```
 
-Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a model definition. Message fields can be other messages, models, enums, or built-in Keel types.
+Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a [model](/models) definition. Message fields can be other messages, models, enums, or built-in Keel types.
 
 <Callout>
   Message names must be **UpperCamelCase** and must be distinct from any model
@@ -583,3 +451,141 @@ export default CustomAction(async (ctx, input) => {
 ```
 
 By default, functions will return permission denied until `allow()` is called so `deny()` only needs to be called if you are explicitly denying access in your code after an `allow()` call.
+
+
+## Using the database
+
+The `@teamkeel/sdk` package is generated based on your schema and contains type-safe APIs for interacting with your models. These APIs are all available on the exported `models` object.
+
+See [Model API](/functions/sdk/modelApi) for full usage.
+
+### Low-level database API
+
+If you need more complex database operations you can use the [Database API](/functions/sdk/databaseApi) to write custom queries.
+
+## Using `fetch`
+
+We deploy your functions into an environment running Node.js 18.x, which means the Fetch API is available globally.
+
+One example of using `fetch` is to proxy API calls to a 3rd party service through your Keel APIs. This is often useful if the API you want to use requires an API key and you don't want to expose that to your frontend.
+
+The following example uses the special `Any` message type to allow any input and any response from the `doSomething` function:
+
+```keel filename="schema.keel"
+model MyThing {
+  actions {
+    read doSomething(Any) returns (Any)
+  }
+}
+```
+
+The function implementation calls the 3rd party API, pass the API token, and return its response.
+
+```tsx filename="functions/doSomething.ts"
+import { DoSomething } from "@teamkeel/sdk";
+
+export default DoSomething(async (ctx, inputs) => {
+  // make an API call to 3rd party
+  const res = await fetch("https://some-cool-api.com", {
+    method: "POST",
+    headers: {
+      // use a secret to store your API token
+      "Api-Token": ctx.secrets.API_TOKEN,
+    },
+    body: JSON.stringify({
+      some: "param",
+    }),
+  });
+
+  // return the response as JSON
+  return res.json();
+});
+```
+
+## Using Headers
+
+You can access request headers by using `ctx.headers`, which is a _read-only_ version of the [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers) object, and you can set response headers by using `ctx.response.headers` which is a normal `Headers` object.
+
+```tsx filename="functions/myFunction.ts"
+export default MyFunction((inputs, api, ctx) => {
+  // read a request header
+  const reqHeader = ctx.headers.get("X-My-Custom-Header");
+
+  // write a response header
+  ctx.response.headers.set("X-My-Other-Header", "1234");
+});
+```
+
+## HTTP Status Codes
+
+You can set the HTTP status code of the response from your function, which is useful if you want to return a redirect response from your action.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['Function', 'Schema']}>
+  <Tab>
+```tsx filename="functions/myRedirectFunction.ts"
+import { MyRedirectFunction } from "@teamkeel/sdk"
+
+export default MyRedirectFunction((inputs, api, ctx) => {
+  // do some stuff...
+
+  // return a redirect
+  ctx.response.headers.set("Location", "https://some.url.com/");
+  ctx.response.status = 302;
+  return null;
+});
+
+````
+  </Tab>
+   <Tab>
+```keel filename="schema.keel"
+model MyModel {
+  actions {
+    write myRedirectFunction(Any) returns (Any)
+  }
+}
+````
+
+  </Tab>
+</Tabs>
+
+Setting the HTTP response status code will only have an affect on your JSON
+API endpoints, so in the above example `/json/api/myRedirectFunction` will
+return a redirect response but using `myRedirectFunction` via [GraphQL](/apis/graphql) or
+[JSON-RPC](/apis#json-rpc) APIs will not.
+
+## Environment Variables and Secrets
+
+Environment variables defined in your `keelconfig.yaml` {/* 👈 @todo in a future PR */} file will be available in your functions by using `ctx.env`, which is typed according to the environment variables you've defined in your config file. No more un-typed `process.env` 🎉
+
+In much the same way, any secret you define in your `keelconfig.yaml` file will be available on `ctx.secrets`, which is also typed. As secrets are sensitive values they are not set as environment variables and are only accessible by using `ctx.secrets`.
+
+As an example if we have the following `keelconfig.yaml` file
+
+```yaml filename="keelconfig.yaml"
+environment:
+  default:
+    - name: MY_ENV_VAR
+      value: "some-value"
+secrets:
+	- name: MY_SECRET
+```
+
+We could then access these in a function like so
+
+```tsx filename="functions/myFunction.ts"
+export default MyFunction(async (ctx, inputs) => {
+  ctx.env.MY_ENV_VAR; // "some-value"
+  ctx.secrets.MY_SECRET; // will be decrypted secret value
+
+  // TypeScript will catch this with the error:
+  // ts(2339) Property 'FOO' does not exist on type 'Environment'.
+  ctx.env.FOO;
+
+  // TypeScript will catch this with the error:
+  // ts(2339) Property 'FOO' does not exist on type 'Secrets'.
+  ctx.secrets.FOO;
+});
+```
+

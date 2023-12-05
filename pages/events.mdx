@@ -4,7 +4,7 @@ Events and subscribers provide the ability to asynchronously execute code when a
 
 Keel currently supports three types of events at the model level; `create`, `update` and `delete` events. These events are fired when a model undergoes the relevant mutation; whether it be due to an action or from using the [Model API](https://docs.keel.so/functions/sdk/modelApi) in a job, hook, custom function, or even in a subscriber.
 
-These event types can be configured to execute a _subscriber_. Similar to jobs, subscribers are Typescript functions which you provide your own implementation for. This means you can write custom code to respond to events that are triggered while your application is running.
+These event types can be configured to execute a _subscriber_. Similar to jobs, subscribers are TypeScript functions which you provide your own implementation for. This means you can write custom code to respond to events that are triggered while your application is running.
 
 import { Callout } from 'nextra/components'
 
@@ -64,7 +64,7 @@ Subscriber functions receive two arguments, namely:
 - `ctx` - a context object which contains [environment variables](/envvars) and [secrets](/secrets)
 - `event` - the details of the event that occurred, including a payload of the mutated model
 
-Continuing with our example, if a `create` event type is triggered on the `Member` model, the following Typescript definition of the `event` argument in the subscriber function would be generated:
+Continuing with our example, if a `create` event type is triggered on the `Member` model, the following TypeScript definition of the `event` argument in the subscriber function would be generated:
 
 ```tsx
 export interface MemberCreatedEvent = {
@@ -96,7 +96,7 @@ The `event.target.data` property provides the full model's data to the subscribe
 
 Because a subscriber function can respond to various types of events, you will likely need a way to discriminate between these event types within the code of your function.
 
-The `event` argument is a [union type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types) and the `eventName` property is a [string literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).  These bits of Typescript magic let us safely switch across the different event types.
+The `event` argument is a [union type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types) and the `eventName` property is a [string literal type](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types).  These bits of TypeScript magic let us safely switch across the different event types.
 
 Below we demonstrate this by providing an example implementation for the `verifyEmail` subscriber function.
 

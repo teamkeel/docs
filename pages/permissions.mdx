@@ -28,21 +28,83 @@ model MyModel {
 
 The `@permission` attribute can be used at model or action level and can be used to define row-based or role-based permission rules. It accepts three arguments: **actions**, **expression**, and **roles**.
 
-The `expression` argument is for defining row-based permissions, and the provided expression is evaluated against against **each record being acted on**.
+Here's an example of model level permission rules:
 
-The `roles` argument is for role-based permissions and lets you define a list of role names that the rule should allow. The caller must have **one of the provided roles**.
+```keel {6-10}
+model Post {
+  fields {
+    author Author
+  }
+
+  // Permissions for each row on the whole model
+  @permission(
+    expression: post.author.identity == ctx.identity,
+    actions: [update]
+  )
+}
+```
+
+### Actions
 
 The `actions` argument must be provided when the rule is defined at the model level, and is a list of action types that the rule should apply to. For action level permission rules this argument must be omitted.
+
+Here's an example of action level permission rules:
+
+```keel {8-11}
+model Post {
+  fields {
+    author Author
+  }
+
+  actions {
+    update updatePost(id) with (title)
+    // Permission nested inside the update action
+      @permission(
+        expression: post.author.identity == ctx.identity
+      )
+  }
+}
+```
+
+### Expressions
+
+The `expression` argument is for defining row-based permissions, and the provided expression is evaluated against **each record being acted on**. An expression is boolean. For example, here's an expression that checks if the authenticated user is the author of a post:
+
+```keel {7}
+model Post {
+  fields {
+    author Author
+  }
+
+  @permission(
+    expression: post.author.identity == ctx.identity,
+    actions: [update]
+  )
+}
+```
+
+Similarly, for a `list` action the expression is evaluated for **each record** in the list. For example, the following schema only allows users to list posts that they are the author of:
+
+```keel {7}
+model Post {
+  fields {
+    author Author
+  }
+
+  @permission(
+    expression: post.author.identity == ctx.identity,
+    actions: [list]
+  )
+}
+```
 
 Some key things to understand are:
 
 - There can be **many** permission rules in a model or action
 - Action-level rules **override** model-level rules
-- If **any** permission rule passes the action is allowed
+- If **any** permission rule passes, the action is allowed
 
-### Expressions
-
-If provided the `expression` argument is evaluated for every record being acted upon and it has the following in-scope identifiers:
+If provided the `expression` argument has the following in-scope identifiers:
 
 - the record, available as the **lowerCamelCase** version of the model name
 - `ctx` - contains things like the authenticated identity, environment variables & secrets
@@ -51,6 +113,8 @@ If provided the `expression` argument is evaluated for every record being acted 
 If the expression evaluates to true for **all records** being acted on then the rule passes.
 
 ### Roles
+
+The `roles` argument is for role-based permissions and lets you define a list of role names that the rule should allow. The caller must have **one of the provided roles**.
 
 Roles are defined in your schema and are applied to the **authenticated Identity** based on either a specific email address or an email domain name. For example the following schema says that anyone with a `@mycorp.com` email address has the `Staff` role but only `bob@mycorp.com` and `sue@mycorp.com` have the `Developer` role.
 
@@ -232,7 +296,7 @@ This schema has a many-to-many relationship between users and projects, represen
 - From **each** `UserProject` go to the `User`
 - From **each** `User` get the `identity` field
 
-The important thing here is the **“for each”** part of the last two steps. Because a project has many users we ultimately end up with a **list of Identity's**. This means we can't compare `ctx.identity` to `task.project.users.user.identity` with `==` as they are different types. For this case we need to use the `in` operator to say that the authenticated Identity must be in the list of Identity's with access to the project.
+The important thing here is the **“for each”** part of the last two steps. Because a project has many users we ultimately end up with a **list of Identities**. This means we can't compare `ctx.identity` to `task.project.users.user.identity` with `==` as they are different types. For this case we need to use the `in` operator to say that the authenticated Identity must be in the list of Identity's with access to the project.
 
 ## Functions
 

@@ -1,6 +1,6 @@
 # Generated API client
 
-As well as using the APIs directly, you can generated a typescript client for your frontend projects to easily work with your APIs with full end to end type safety
+As well as using the APIs directly, you can generated a TypeScript client for your frontend projects to easily work with your APIs with full end to end type safety
 
 
 import { Callout } from "nextra/components";
@@ -41,13 +41,15 @@ This client uses fetch so will only work in environments where fetch is availabl
 
 First, import `APIClient` from the generated file and create a new instance with the deployed url of your project (or the [localhost](http://localhost) address if running locally)
 
-**N.B.** This `baseUrl` url should include the API name path but not the protocol (e.g. json/rpc/gql)
+<Callout emoji="ℹ️" type="info">
+This `baseUrl` url should include the API name path but not the protocol (e.g. json/rpc/gql). For a local environment with `keel run`, this will be `http://localhost:8000/api`.
+</Callout>
 
 ```ts
 import { APIClient } from "../keelClient";
 
 const client = new APIClient({
-  baseUrl: "https://myproject.keelapps.xyz/web/",
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 ```
 
@@ -61,7 +63,7 @@ This includes all the actions that you have specified in your Keel schema. For e
 
 ```ts
 const client = new APIClient({
-  baseUrl: "https://myproject.keelapps.xyz/web/",
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 
 // use generated client to execute the action on the client-side
@@ -75,7 +77,7 @@ You can also use `.api.mutations` if you have actions that mutate data. For exam
 
 ```ts
 const client = new APIClient({
-  baseUrl: "https://myproject.keelapps.xyz/web/",
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 
 // use generated client to execute the action on the client-side
@@ -105,7 +107,7 @@ This provides access to user authentication state. It includes the following opt
 **Usage:**
 ```ts
 const client = new APIClient({
-  baseUrl: "https://myproject.keelapps.xyz/web/",
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 
 // returns a boolean that represents if a user is authenticated or not
@@ -116,8 +118,8 @@ client.ctx.token
 ```
 
 
-### Authenticating
-
+### Authenticating 
+{/* @todo in a separate PR redo this with the new auth*/}
 If your API requires authentication, use the `authenticate` action as normal and then store the returned token to be used for subsequent requests
 
 ```tsx

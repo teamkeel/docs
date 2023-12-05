@@ -1,8 +1,20 @@
 # APIs
 
-Your Keel backend exposes three types of API - **GraphQL**, **JSON**, and **JSON-RPC**. When running Keel locally using `keel run` you can make requests to your API at `http://localhost:8000` and for deployed environments you'll find the domain on the **Overview page** in the console.
+Your Keel backend exposes three types of APIs:
 
-## GraphQL
+- **GraphQL**
+- **JSON**, and 
+- **JSON-RPC**
+
+When running Keel locally using `keel run` you can make requests to your API at `http://localhost:8000/api/${apiType}` and for deployed environments you'll find the domain on the **Overview page** in the Keel console.
+
+## Code Generation
+
+We recommend using the [Keel CLI](/cli) to generate client code for your API. The CLI will generate a fully-typed TypeScript client for your API with autocompletion and type hints. It is the preferred way to interact with your Keel backend and recommended over directly calling the API endpoints.
+
+To learn more about the generated client, visit its [documentation page](/apis/client).
+
+## GraphQL API
 
 **Endpoint:** `/api/graphql`
 
@@ -12,15 +24,15 @@ When running locally with `keel run` you can also access a [GraphiQL](https://gi
 
 [Read the GraphQL API docs](/apis/graphql)
 
-## JSON / OpenAPI
+## JSON API (OpenAPI)
 
-**Endpoint:** `/api/json/<actionName`
+**Endpoint:** `/api/json/<actionName>`
 
-[OpenAPI](https://www.openapis.org/) is an open-source specification for describing JSON APIs. It describes which endpoints are available and the data-type's of the requests and responses. There are many open source libraries for generating clients from an OpenAPI spec and you can download the OpenAPI (v3.1) definitions for your JSON API from the API Explorer in the console or from the `/api/json/openapi.json` endpoint of your Keel app.
+[OpenAPI](https://www.openapis.org/) is an open-source specification for describing JSON APIs. It describes which endpoints are available and the data-type's of the requests and responses. There are many open source libraries for generating clients from an OpenAPI spec and you can download the OpenAPI (v3.1) definitions for your JSON API from the API Explorer in the Keel console or from the `/api/json/openapi.json` endpoint of your Keel app.
 
 [Read the JSON API docs](/apis/json)
 
-## JSON-RPC
+## JSON-RPC API
 
 **Endpoint:** `/api/rpc`
 
@@ -40,7 +52,7 @@ import { Callout } from 'nextra/components'
 
 ## Authentication
 
-All API endpoints use the same JWT-based authentication. First you need to get a JWT (JSON Web Token) by calling the built-in `authenticate` action. You can then pass this JWT in the `Authorization` header on all subsequent requests.
+All API endpoints use the same [JWT](https://jwt.io) (JSON Web Token)-based authentication. First you need to get a JWT by calling the built-in `authenticate` action. You can then pass this JWT in the `Authorization` header on all subsequent requests.
 
 ``` filename="Example of authorization header"
 Authorization: Bearer <JWT token>

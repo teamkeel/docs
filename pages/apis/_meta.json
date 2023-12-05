@@ -1,5 +1,5 @@
 {
-  "graphql": "GraphQL",
-  "json": "JSON / OpenAPI",
-  "client": "Generated client"
+  "client": "Generated Client",
+  "graphql": "GraphQL API",
+  "json": "JSON API (OpenAPI)"
 }

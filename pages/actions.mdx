@@ -111,7 +111,7 @@ model Book {
 
 ### Using `@where`
 
-You can use the `@where` attribute in a `get` operation to filter records. One use case for this is defining an action that returns data based on the calling identity.
+You can use the `@where` attribute in a `get` operation to filter records. One use case for this is defining an action that returns data based on the calling identity. We dive deeper into identities in the [Identity docs](/identity) but for now you can think of them as a way to identify the caller of an API. In the example below we define an action that returns the profile of the caller.
 
 ```keel
 model Profile {
@@ -153,7 +153,7 @@ As shown in the above schema, the inputs for a `create` action come after the `w
 
 ### Using `@set`
 
-You can use the `@set` attribute in a `create` operation to set fields on the newly created record. One use case for this is to set the calling identity on a field that uses the `Identity` model
+You can use the `@set` attribute in a `create` operation to set fields on the newly created record. One use case for this is to set the calling identity on a field that uses the `Identity` model.
 
 ```keel
 model Customer {
@@ -196,7 +196,7 @@ model Course {
 
 ```
 
-The `createCourse` Operation allows you create a course along with a number of linked lessons. The `course` field of the newly created `Lesson` records will be automatically set to the newly created `Course`.
+The `createCourse` action allows you create a course along with a number of linked lessons. The `course` field of the newly created `Lesson` records will be automatically set to the newly created `Course`.
 
 ### Linking to existing records
 
@@ -219,7 +219,7 @@ model Lesson {
 
 ### Validation
 
-For `create` built-in actions, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For Functions there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
+For `create` built-in actions, Keel will validate that you are providing all required fields. Fields can be set using inputs, a `@default` attribute on the field, or a `@set` attribute. For functions, there are no restrictions on what inputs you accept, just that your functions creates and returns a single record. For more information see the [Function docs](/functions).
 
 ## `update`
 
