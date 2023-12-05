@@ -1,8 +1,10 @@
 # Configuration
 
-All configuration is done in the `keelconfig.yaml` file.
+All configuration for authentication your Keel application is done in the `keelconfig.yaml` file.
 
-## Tokens
+## Configuring Tokens
+
+You can configure your tokens like so:
 
 ```yaml
 auth:
@@ -15,9 +17,11 @@ auth:
     refreshTokenRotationEnabled: false
 ```
 
+It's recommended to keep the lifespan of an access token extremely short, since if they're stolen they can be used to access your application as a specific user. Refresh tokens are used to acquire new access tokens, and can live longer.
+
 ## Redirect URL
 
-For SSO Login, make sure to configure the `redirectUrl`.  This URL will be redirected to after the `auth/authorize/{provider}` flow has successfully completed.  An auth code will be provided in querystring parameter `code`, which can then be used at the token endpoint to acquire an access and refresh token.
+For Single Sign-on (SSO) Login, make sure to configure the `redirectUrl`.  Users will be sent here after the `auth/authorize/{provider}` flow has successfully completed. An auth code will be provided in the query parameter `code`, which can then be used at the token endpoint to acquire an access and refresh token. We go into more detail about this on the [SSO Login page](/authentication/sso-login).
 
 ## Providers
 
@@ -65,6 +69,6 @@ auth:
 
 ### Client Secret Configuration
 
-Only necessary for the SSO Login flow.
+This is only necessary for the [SSO Login flow](/authentication/flows/sso-login).
 
-The name of the secret has the format `KEEL_AUTH_PROVIDER_SECRET_{name}` where `{name}` is the uppercased name of the provider as configured in your keelconfig.yaml file.  See the SSO Login page for more.
+The name of the secret has the format `KEEL_AUTH_PROVIDER_SECRET_{name}` where `{name}` is the UPPER_SNAKE_CASEd name of the provider as configured in your `keelconfig.yaml` file. See the SSO Login page for more.

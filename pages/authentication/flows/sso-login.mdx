@@ -1,26 +1,35 @@
-# Single-sign-on Login
+import { Callout } from "nextra/components";
+import { Tab, Tabs } from "nextra-theme-docs";
 
-With this flow, Keel provides an abstraction over all the complex OAuth gymnastics which you would normally need to build into for your application. This is especially useful if you want to support multiple different authentication providers (such as Google, Facebook, GitLab, etc.). What this means is that all you need to do is provide some simple configuration in your keelconfig.yaml file, integrate with a singular auth endpoint, and then leave the rest to us.
+# Single Sign-on
+
+Keel provides an abstraction over all the complex OAuth gymnastics which you would normally need to build into for your application. This is especially useful if you want to support multiple different authentication providers (such as Google, Facebook, GitLab, etc.). What this means is that all you need to do is provide some simple configuration in your `keelconfig.yaml` file, integrate with a singular auth endpoint. Keel handles the rest.
 
 These are the general steps:
 
- 1. Point the browser to the relevant provider login; `/auth/authorize/{name}`
- 2. Handle the redirect after the completed authentication flow (configured at `redirectUrl` in the keelconfig.yaml)
- 3. Extract the `code` value from the redirectUrl query string
- 4. Perform "authorization code" with our `/auth/token` endpoint to authenticate
- 4. Use the access and refresh tokens to query your Keel API	
+ 1. Point the browser to the relevant provider login; `/auth/authorize/{name}`. This will redirect the user to the provider's login page. Once the user has successfully authenticated, the provider will redirect the user back to the `redirectUrl` configured in the `keelconfig.yaml` file.
+    <Callout type="info">`{name}` here is the name of the provider as configured in your `keelconfig.yaml` file. More on this in the [getting started](/authentication/getting-started) section.</Callout>
+ 2. Handle the redirect after the completed authentication flow (configured at `redirectUrl` in the `keelconfig.yaml`). To handle this, you will need to:
+    1. Parse the query string
+    2. Extract the `code` value from the query string under `redirectUrl`
+    3. Give the authorization code to our `/auth/token` endpoint to authenticate the provider with Keel. This will return a Keel access token and refresh token.
+ 3. Use the access and refresh tokens to query your Keel API	
+
+ Let's break these down in more detail.
 
 ## Getting access tokens
 
-Once you have obtained the auth code, you must then trade it for a Keel access token. This is done by calling the `/auth/token` endpoint with the `authorization_code` grant.
+After logging in on the external provider and redirecting to your `redirectUrl`, you will get an authorization code under teh `code` URL query parameter.. You must then trade that `code` for a Keel access token.
 
-import { Tab, Tabs } from "nextra-theme-docs";
+<Callout type="info">Note that the authorization `code` has a very short expiry and must be used immediately after retrieved.</Callout>
 
-<Tabs items={['cURL', 'Node.JS']}>
+You can trade the authorization `code` for a set of Keel tokens by calling the `/auth/token` endpoint with the `authorization_code` grant like so:
+
+<Tabs items={['cURL', 'JavaScript']}>
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{yourDomain}/auth/token' \
+  --url 'https://{yourProject}.keel.so/auth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=authorization_code \
   --data subject_token={{auth_code}}
@@ -28,18 +37,17 @@ curl --request POST \
   </Tab>
   <Tab>
 ```js
-var axios = require("axios").default;
-var options = {
+fetch('https://{yourProject}.keel.so/auth/token', {
   method: 'POST',
-  url: 'https://{yourDomain}/auth/token',
-  headers: {'content-type': 'application/x-www-form-urlencoded'},
+  url: ,
+  headers: {
+    'content-type': 'application/x-www-form-urlencoded'
+  },
   data: new URLSearchParams({
     grant_type: 'authorization_code,
     subject_token: '{{auth_code}}'
   })
-};
-
-axios.request(options).then(function (response) {
+}).then(function (response) {
   console.log(response.data);
 }).catch(function (error) {
   console.error(error);
@@ -48,24 +56,20 @@ axios.request(options).then(function (response) {
   </Tab>
 </Tabs>
 
-If you are successfully authenticated, the token endpoint will respond with HTTP 200 and an `application/json` response body.
+The expected `content-type` of the `/auth/token` endpoint is `application/x-www-form-urlencoded` because this is enforced by the OAuth standard. After making this request, if you are successfully authenticated, the token endpoint will respond with `HTTP 200` and the following `application/json` response body.
 
 ```json filename="HTTP 200"
 {
   "access_token": "{{keel_access_token}}",
   "token_type": "Bearer",
-  "expires_in": 86400,
+  "expires_in": 86400, // one day
   "refresh_token": "{{keel_refresh_token}}"
 }
 ```
 
-Note that the auth code has a very short expiry and must be used immediately after retrieved.
-
-Note that we do not support PKCE yet, but soon!
-
 ### Setting the `redirectUrl` in keelconfig.yaml
 
-Configure a redirectUrl in the keelconfig.yaml with the URL you want authentication to redirect after it has completed:
+Configure a `redirectUrl` in the keelconfig.yaml with the URL you want authentication to redirect after it has completed like so:
 
 ```yaml
 auth:
@@ -76,6 +80,8 @@ auth:
       clientId: 1234
 
 ```
+
+After the user has successfully authenticated with the provider, the provider will redirect the user back to the `redirectUrl` configured in the `keelconfig.yaml` file and pass some query params along with it. The `code` query param is the one we are interested in. This is the authorization code which we will use to get a Keel access token.
 
 ### Setting the `callbackUrl` with the provider
 
@@ -94,12 +100,14 @@ Configure the callbackUrl below to the client's allowed redirect URLs. This can 
 
 ### Setting the client secret
 
-SSO Login flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client.  This secret must be set as a secret in you environment.
+SSO Login flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client. This secret must be set as a secret in your environment.
  - For local CLI use, `keel secrets set development MY_SECRET 'my-value'` is used to set a secret
- - For hosted environments, use the secrets page in the Console
+ - For hosted environments, use the environment variables page in the Console
 
 The name of the secret has the format `AUTH_PROVIDER_SECRET_{name}` where `{name}` is the uppercased name of the provider as configured in your keelconfig.yaml file.
 
-### Extras
+We cover this in much more detail in the broader [getting started section](/authentication/getting-started#setting-secrets) as it covers both flows.
 
-Make sure to enable the Authorization Code Grant flow on the auth provider's console, if necessary.  Auth0 requires this to be explicitly enabled.
+## Other Considerations
+
+- Make sure to enable the Authorization Code Grant flow on the auth provider's console, if necessary. Auth0 requires this to be explicitly enabled.

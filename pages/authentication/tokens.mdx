@@ -1,0 +1,78 @@
+# Tokens
+
+When an ID token or authorization code is exchanged for a set of Keel access and refresh tokens using the `/api/token` endpoint, it will always respond with both an access token and a refresh token.  
+
+```json filename="HTTP 200"
+{
+  "access_token": "{{access_token}}",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "{{refresh_token}}"
+}
+```
+
+The access token is a short-lived token used to access your Keel APIs. It should be confiugred to expire quickly because it provides direct access to your application on Keel as a user. If it's stolen, it can be used to access your application as that user and their identity can be compromised.
+
+The refresh token, however, lives much longer and is used to obtain a new access token without involving the user in another round of authentication. Our default duration for a refresh token is 3 months, which typically means that a user could be "signed in" for 3 months if the client is able to remember this refresh token.
+
+Each token's lifespan is [configurable via the `keelconfig.yaml` file](/authentication/configuration).
+
+## Recommended Practices
+
+In your applications, you should always store the refresh token securely and never expose it to the user. If you need to store it in a cookie, make sure it's an HTTP-only cookie that can't be accessed by JavaScript. The access token should ideally live in browser/client memory only and not be stored anywhere. Since the access token is returned to you with an expiry time, you can use that to determine when to request a new access token using the refresh token and silently refresh the access token in the background while your users are using your application. If they close the browser and come back later, then you can silently request a new access token using the refresh token before they begin using the application again.
+
+## Requesting a new access token
+
+Access tokens can be refreshed using the standard token endpoint with the `refresh_token` grant.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['cURL', 'JavaScript']}>
+  <Tab>
+```bash
+curl --request POST \
+  --url 'https://{your-project}.keel.so/auth/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=refresh_token \
+  --data subject_token={{refresh_token}}
+```
+  </Tab>
+  <Tab>
+```js
+fetch('https://{your-project}.keel.so/auth/token', {
+  method: 'POST',
+  url: ,
+  headers: {
+    'content-type': 'application/x-www-form-urlencoded'
+  },
+  data: new URLSearchParams({
+    grant_type: 'refresh_token,
+    subject_token: '{{refresh_token}}'
+  })
+}).then(function (response) {
+  console.log(response.data);
+}).catch(function (error) {
+  console.error(error);
+});
+```
+  </Tab>
+</Tabs>
+
+If the refresh token is still valid, then a new access token will be minted and returned.
+
+```json filename="HTTP 200"
+{
+  "access_token": "{{keel_access_token}}",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "{{keel_id_token}}"
+}
+```
+
+## Refresh Token Rotation
+
+Refresh token rotation is a technique for getting new access tokens using refresh tokens that goes beyond silent authentication. Refresh tokens are typically longer-lived and can be used to request new access tokens after the shorter-lived access tokens expire. Refresh tokens are often used in native applications on mobile devices in conjunction with short-lived access tokens to provide seamless UX without having to issue long-lived access tokens.
+
+With refresh token rotation enabled in Keel, every time an application exchanges a refresh token to get a new access token, a new refresh token is also returned. Therefore, you no longer have a long-lived refresh token that, if compromised, could provide illegitimate access to resources. As refresh tokens are continually exchanged and invalidated, the threat is reduced.
+
+This setting is enabled by default in Keel. You can disable it in the [`keelconfig.yaml` file](/authentication/configuration) though we don't recommend it.

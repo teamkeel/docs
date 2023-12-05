@@ -1,4 +1,4 @@
-# OIDC Token Authentication
+# OpenID Connect (OIDC) Token
 
 With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow you would have already performed the necessary authentication steps to get an access and ID token.  For example, if you're authenticating with Google, then you'll most likely have implemented the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in. 
 
@@ -13,18 +13,18 @@ These are the general steps:
 
 import { Callout } from "nextra/components";
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info">
   An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google and Facebook.
 </Callout>
 
-For OpenID Connect-compatible providers, the ID token will normally be returned from the provider's token endpoint.  For example, this is the response from Auth0's token endpoint after successfully authenticating:
+For OpenID Connect-compatible providers, the ID token will normally be returned from the provider's token endpoint. For example, this is the response from Auth0's token endpoint after successfully authenticating:
 
 ```json
 {
 	"access_token": "{{provider_access_token}}",
 	"id_token": "{{provider_id_token}}",
 	"scope": "openid profile email address phone",
-	"expires_in": 86400,
+	"expires_in": 86400, // one day
 	"token_type": "Bearer"
 }
 ```
@@ -37,11 +37,11 @@ Once you have obtained the ID token, you must then exchange it for a Keel access
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
-<Tabs items={['cURL', 'Node.JS']}>
+<Tabs items={['cURL', 'JavaScript']}>
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{yourDomain}/auth/token' \
+  --url 'https://{your-project}.keel.so/auth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
@@ -49,18 +49,16 @@ curl --request POST \
   </Tab>
   <Tab>
 ```js
-var axios = require("axios").default;
-var options = {
+fetch('https://{your-project}.keel.so/auth/token', {
   method: 'POST',
-  url: 'https://{yourDomain}/auth/token',
-  headers: {'content-type': 'application/x-www-form-urlencoded'},
+  headers: {
+    'content-type': 'application/x-www-form-urlencoded'
+  },
   data: new URLSearchParams({
     grant_type: 'token_exchange,
     subject_token: '{{provider_id_token}}'
   })
-};
-
-axios.request(options).then(function (response) {
+}).then(function (response) {
   console.log(response.data);
 }).catch(function (error) {
   console.error(error);
@@ -69,7 +67,7 @@ axios.request(options).then(function (response) {
   </Tab>
 </Tabs>
 
-If you are successfully authenticated, the token endpoint will respond with HTTP 200 and an `application/json` response body.
+If you are successfully authenticated, the token endpoint will respond with `HTTP 200` and an `application/json` response body.
 
 ```json filename="HTTP 200"
 {
@@ -80,7 +78,7 @@ If you are successfully authenticated, the token endpoint will respond with HTTP
 }
 ```
 
-If the ID token cannot be verified, then you will receive an HTTP 401.  These are some reasons as to why the ID token would fail to authenticate:
+If the ID token cannot be verified, then you will receive an `HTTP 401` response. These are some reasons as to why the ID token would fail to authenticate:
  - The ID token has expired (they typically have a short lifespan).
  - The provider is not configured - visit the [Configuration page](/authentication/configuration) for more.
  - The ID token was issued by a different client to what is configured in your Keel app.

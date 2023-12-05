@@ -1,14 +1,16 @@
+import { Callout } from "nextra/components";
+
 # Authentication
 
 In order for users to securely interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly integrating with third-party authentication providers, such as Google, Facebook and GitHub.  
 
-We currently support two flows of authenticating with third-party providers.
+We currently support two flows for authenticating with third-party providers.
 
- - [**SSO Login:**](/authentication/flows/sso-login) *Done for you.* Use this flow if you want Keel to perform the complicated handshake with your preferred provider. 
+ - [**Single-Sign On (SSO) Login:**](/authentication/flows/sso-login) Use this flow if you want Keel to perform the authentication handshake and flow automatically for you with your preferred provider. 
 
- - [**OIDC Tokens:**](/authentication/flows/oidc-token) *Bring your own.*  Use this flow if you have already built the authenticatation steps with your preferred provider (probably using Authorization Code Flow) and you have an ID Token.
+ - [**OpenID Connect (OIDC) Tokens:**](/authentication/flows/oidc-token) Use this flow if you have already built the authenticatation steps with your preferred provider (probably using [Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)) and you have an ID Token.
 
-These flows are both enabled by default. All you need to do is configure your providers. 
+These flows are both enabled by default. All you need to do is configure your providers. For newer applications, we recommend using the SSO Login flow as it is simpler to set up and use.  However, if you already have an existing authentication flow, then you can use the OIDC Token flow.
 
 ## Supported Providers
 
@@ -21,7 +23,7 @@ The table below lists the providers we support out of the box, however **you can
 | Google          | `google`   | ✅        | ✅          | 
 | Facebook        | `facebook` | ✅        | ✅          |
 | GitLab          | `gitlab`   | ✅        | ✅          |
-| _Custom OIDC_   | `oidc`     | ✅        | ✅          | 
+| _Custom Provider_   | `oidc`     | ✅        | ✅          | 
 
 ## Getting Started
 
@@ -29,20 +31,19 @@ These are the basic steps you need to follow when setting up a new authenticatio
 
  1. Set up the client with your provider
  2. Configure your `keelconfig.yaml`
- 3. Set your client secret on your host (if you are using the SSO Login flow)
- 4. Authenticate your users! 🚀
+ 3. Authenticate your users! 🚀
 
 We will cover each of these below.
 
 ### Set up the client with your provider
 
-You will also need to set up the client with each of the third-party providers you have configured.  Once you've done this, you will be provided with the following:
- - Client ID:  An identifier for your app.  This needs to be configured in your `keelconfig.yaml` as shown in the next section.
- - Client secret:  Your app's password and should always be kept a secret.  This needs to be configured in your host, as discussed soon.
+To use an authentication flow with an external service, you will need to set up a client with each of the third-party providers you have configured. For example, to setup "Login with Google" authentication flow, you'll need to create a [Google client](http://localhost:3000/authentication/providers/google#client-setup). You'll need to do similar things on [Facebook](https://developers.facebook.com/docs/facebook-login/guides/access-tokens/), [GitHub](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authenticating-to-the-rest-api-with-an-oauth-app#registering-your-app), and any other provider you want to use.
 
-import { Callout } from "nextra/components";
+Once you've done this, you will be provided with the following:
+ - Client ID:  An identifier for your app with the external service. This is how they know your app is communicating with them. This needs to be configured in your `keelconfig.yaml` as shown in the next section.
+ - Client secret: Your app's password on the external service. This should always be kept a secret. This needs to be configured in your host, as discussed soon.
 
-<Callout type="info">
+<Callout emoji="ℹ️" type="info">
   If you only intend to use OIDC Token authentication, then you can ignore the client secret. It is only necessary for SSO Login. 
 </Callout>
 
@@ -50,7 +51,7 @@ Providers usually have decent documentation on how to set this up, but we've doc
 
 ### Configure your `keelconfig.yaml`
 
-It's really simple. Authentication providers are all configured in your `keelconfig.yaml` file.  For example, let's enable Google:
+Authentication providers are all configured in your `keelconfig.yaml` file.  For example, let's enable Google:
 
 ```yaml filename="keelconfig.yaml"
 auth:
@@ -62,14 +63,33 @@ auth:
 
 If you would like to configure your own custom provider, please read the [Configuration page](/authentication/configuration) for more details on how to do this.
 
-
-### Set the client secret on your host
+### Setting Secrets
 
 If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
-Secrets for authentication providers follow this pattern: `KEEL_AUTH_SECRET_{{provider name}}` where `{{provider name}} is a upper-snake-cased provider name.  In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
+Secrets for authentication providers follow this pattern: `KEEL_AUTH_SECRET_{{provider name}}` where `{{provider name}} is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
 
-If on local, DO THIS, if on Console, DO THIS.  TODO SECTION!
+#### Locally
+
+If you are running Keel locally, you can set the client secret by setting the environment variable `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to the client secret you obtained from your provider. Then, you'll need to add it to your local Keel backend. You can do so by running the following command using the [Keel CLI](/cli).
+
+```bash
+keel secrets set development KEEL_AUTH_SECRET_GOOGLE_EXAMPLE <your client secret>
+```
+
+The `secrets` command has the following signature:
+
+```bash
+keel secrets set <env> <key> <value>
+```
+
+So here, we're setting the `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to your secrent for the `development` environment. You can also set alternate secrets for other environments, such as `testing`.
+
+#### In Production on the Keel Console
+
+If you're hosting your app on Keel, you can set the client secret by going to the **Environment variables** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` as the key and your client secret as the value.
+
+Every subsequent deployment will have access to this secret.
 
 ## Authenticate your users!
 

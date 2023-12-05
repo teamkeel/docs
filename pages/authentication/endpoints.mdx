@@ -1,15 +1,15 @@
-# Authentication endpoints
+# Authentication Endpoints
 
 We provide the following authentication endpoints to support our various authentication flows and access token requests:
  - `/auth/providers`: lists all the configured providers and their URLs
- - `/auth/token`: returns access and refresh tokens
+ - `/auth/token`: returns access and refresh tokens in exchange for either [ID tokens](/authentication/flows/oidc-token#getting-access-tokens) or [authorization codes](/authentication/flows/sso-login#getting-access-tokens)
  - `/auth/authorize/{name}`: redirects to the provider's login page
  - `/auth/callback/{name}`: to be configured as the redirect URL with the provider
- - `/auth/revoke`: revoke endpoint
+ - `/auth/revoke`: revoke a refresh token to prevent it from being used to get a new access token
 
-## Providers endpoint
+## `/auth/providers`
 
-This endpoint lists all the configured 3rd-party authentication providers along with their authorize and callback URLs.
+This endpoint lists all the configured 3rd-party authentication providers along with their authorize and callback URLs. When you make a request to this endpoint, you get a response similar to the following:
 
 ```json
 [
@@ -28,15 +28,13 @@ This endpoint lists all the configured 3rd-party authentication providers along 
 ]
 ```
 
-## Token endpoint
+## `/auth/token`
 
-The token endpoint is used to get access tokens, which are subsequently used to access your Keel API.  
-
-To request an access token, make a POST request to `/auth/token` using form-encoded data.  For example,
+The token endpoint is used to get access tokens, which are subsequently used to access your Keel API. To request an access token, make a POST request to `/auth/token` using form-encoded data. For example,
 
 ```bash
 curl --request POST \
-  --url 'https://{your-domain}/auth/token' \
+  --url 'https://{your-project}.keel.so/auth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
@@ -83,4 +81,6 @@ curl --request POST \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data token=REFRESH_TOKEN 
 ```
+
+The refresh token will no longer be available and any attempt to use it to get a new access token with this refresh token will fail. Users will need to re-authenticate to get a new refresh token.
 

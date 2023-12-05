@@ -1,4 +1,4 @@
 {
-  "oidc-token": "OIDC Token",
-  "sso-login": "SSO Login"
+  "sso-login": "Single Sign-On",
+  "oidc-token": "OpenID Connect"
 }
