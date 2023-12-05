@@ -17,7 +17,7 @@ These are the general steps:
 
  Let's break these down in more detail.
 
-## Getting access tokens
+## Getting Access Tokens
 
 After logging in on the external provider and redirecting to your `redirectUrl`, you will get an authorization code under teh `code` URL query parameter.. You must then trade that `code` for a Keel access token.
 
@@ -67,7 +67,7 @@ The expected `content-type` of the `/auth/token` endpoint is `application/x-www-
 }
 ```
 
-### Setting the `redirectUrl` in keelconfig.yaml
+### Setting the `redirectUrl` in `keelconfig.yaml`
 
 Configure a `redirectUrl` in the keelconfig.yaml with the URL you want authentication to redirect after it has completed like so:
 
@@ -83,7 +83,7 @@ auth:
 
 After the user has successfully authenticated with the provider, the provider will redirect the user back to the `redirectUrl` configured in the `keelconfig.yaml` file and pass some query params along with it. The `code` query param is the one we are interested in. This is the authorization code which we will use to get a Keel access token.
 
-### Setting the `callbackUrl` with the provider
+### Setting the `callbackUrl` with the Provider
 
 Configure the callbackUrl below to the client's allowed redirect URLs. This can be found at GET /auth/providers:
 
@@ -98,7 +98,7 @@ Configure the callbackUrl below to the client's allowed redirect URLs. This can 
 ]
 ```
 
-### Setting the client secret
+### Setting the Client Secret
 
 SSO Login flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client. This secret must be set as a secret in your environment.
  - For local CLI use, `keel secrets set development MY_SECRET 'my-value'` is used to set a secret

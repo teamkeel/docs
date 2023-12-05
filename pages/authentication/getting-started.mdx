@@ -12,21 +12,6 @@ We currently support two flows for authenticating with third-party providers.
 
 These flows are both enabled by default. All you need to do is configure your providers. For newer applications, we recommend using the SSO Login flow as it is simpler to set up and use.  However, if you already have an existing authentication flow, then you can use the OIDC Token flow.
 
-## Supported Providers
-
-You can configure **any OpenID Connect authentication provider** to work with Keel, however we have already preconfigured some of the popular providers for you.  
-
-The table below lists the providers we support out of the box, however **you can configure any OpenID Connect provider you want** using the `oidc` and `oidc` provider type.
-
-| Provider        | Type       | SSO Login | OIDC Token | 
-|-----------------|------------|-----------|------------|
-| Google          | `google`   | ✅        | ✅          | 
-| Facebook        | `facebook` | ✅        | ✅          |
-| GitLab          | `gitlab`   | ✅        | ✅          |
-| _Custom Provider_   | `oidc`     | ✅        | ✅          | 
-
-## Getting Started
-
 These are the basic steps you need to follow when setting up a new authentication provider.  
 
  1. Set up the client with your provider
@@ -37,7 +22,7 @@ We will cover each of these below.
 
 ### Set up the client with your provider
 
-To use an authentication flow with an external service, you will need to set up a client with each of the third-party providers you have configured. For example, to setup "Login with Google" authentication flow, you'll need to create a [Google client](http://localhost:3000/authentication/providers/google#client-setup). You'll need to do similar things on [Facebook](https://developers.facebook.com/docs/facebook-login/guides/access-tokens/), [GitHub](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authenticating-to-the-rest-api-with-an-oauth-app#registering-your-app), and any other provider you want to use.
+To use an authentication flow with an external service, you will need to set up a client with each of the third-party providers you have configured. For example, to setup "Login with Google" authentication flow, you'll need to create a [Google client](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid). You'll need to do similar things on [Facebook](https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow), [Gitlab](https://docs.gitlab.com/ee/integration/oauth_provider.html), and any other provider you want to use.
 
 Once you've done this, you will be provided with the following:
  - Client ID:  An identifier for your app with the external service. This is how they know your app is communicating with them. This needs to be configured in your `keelconfig.yaml` as shown in the next section.
@@ -67,19 +52,19 @@ If you would like to configure your own custom provider, please read the [Config
 
 If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
-Secrets for authentication providers follow this pattern: `KEEL_AUTH_SECRET_{{provider name}}` where `{{provider name}} is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
+Secrets for authentication providers follow this pattern: `KEEL_AUTH_SECRET_{{provider name}}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
 
 #### Locally
 
 If you are running Keel locally, you can set the client secret by setting the environment variable `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to the client secret you obtained from your provider. Then, you'll need to add it to your local Keel backend. You can do so by running the following command using the [Keel CLI](/cli).
 
-```bash
+```
 keel secrets set development KEEL_AUTH_SECRET_GOOGLE_EXAMPLE <your client secret>
 ```
 
 The `secrets` command has the following signature:
 
-```bash
+```
 keel secrets set <env> <key> <value>
 ```
 
@@ -91,9 +76,9 @@ If you're hosting your app on Keel, you can set the client secret by going to th
 
 Every subsequent deployment will have access to this secret.
 
-## Authenticate your users!
+## Authenticate your Users
 
 Now that you are all configured, the next step is to authenticate using one of our flows:
 
- * [OIDC Token flow](/authentication/flows/oidc-token)
- * [SSO Login flow](/authentication/flows/sso-login)
+ * [Single Sign-on flow](/authentication/flows/sso-login)
+ * [OpenID Connect flow](/authentication/flows/oidc-token)

@@ -21,7 +21,7 @@ Each token's lifespan is [configurable via the `keelconfig.yaml` file](/authenti
 
 In your applications, you should always store the refresh token securely and never expose it to the user. If you need to store it in a cookie, make sure it's an HTTP-only cookie that can't be accessed by JavaScript. The access token should ideally live in browser/client memory only and not be stored anywhere. Since the access token is returned to you with an expiry time, you can use that to determine when to request a new access token using the refresh token and silently refresh the access token in the background while your users are using your application. If they close the browser and come back later, then you can silently request a new access token using the refresh token before they begin using the application again.
 
-## Requesting a new access token
+## Requesting a New Access Token
 
 Access tokens can be refreshed using the standard token endpoint with the `refresh_token` grant.
 
