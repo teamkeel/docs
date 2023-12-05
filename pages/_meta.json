@@ -32,6 +32,7 @@
   "envvars": "Environment Variables",
   "secrets": "Secrets",
   "keelconfig": "keelconfig.yaml",
+  "internal-tools": "Internal tools",
   "-- tools": {
     "title": "Tools",
     "type": "separator"
