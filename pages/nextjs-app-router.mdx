@@ -131,16 +131,16 @@ A best practice with Keel is to create an instance of a Keel client per request.
 ```tsx
 import { APIClient } from '../../keelClient';
 
-if (!process.env.KEEL_API_URL) {
-    throw new Error('KEEL_API_URL environment variable not set.');
-}
-
 export const createClient = () => {
-    const client = new APIClient({
-        baseUrl: process.env.KEEL_API_URL,
-    });
+	if (!process.env.KEEL_API_URL) {
+		throw new Error('KEEL_API_URL environment variable not set.');
+	}
 
-    return client;
+	const client = new APIClient({
+		baseUrl: process.env.KEEL_API_URL,
+	});
+
+	return client;
 };
 ```
 
@@ -166,20 +166,20 @@ import { createClient } from '@/utils/createClient';
 import { revalidatePath } from 'next/cache';
 
 export const createTaskAction = async (formData: FormData) => {
-    const client = createClient();
-    const description = formData.get('description');
+	const client = createClient();
+	const description = String(formData.get('description'));
 
-    if (!description) {
-        throw new Error("No description provided.")
-    }
+	if (!description) {
+		throw new Error('No description provided.');
+	}
 
-    const response = await client.api.mutations.createTask({ description });
+	const response = await client.api.mutations.createTask({ description });
 
-    if (response.data) {
-        revalidatePath('/');
-    } else {
-        throw new Error(response.error);
-    }
+	if (response.data) {
+		revalidatePath('/');
+	} else {
+		throw new Error(response.error.message);
+	}
 };
 ```
 
