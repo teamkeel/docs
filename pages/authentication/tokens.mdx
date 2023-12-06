@@ -1,3 +1,5 @@
+import { Callout } from "nextra/components";
+
 # Tokens
 
 When an ID token or authorization code is exchanged for a set of Keel access and refresh tokens using the `/api/token` endpoint, it will always respond with both an access token and a refresh token.  
@@ -46,7 +48,7 @@ fetch('https://{your-project}.keel.so/auth/token', {
     'content-type': 'application/x-www-form-urlencoded'
   },
   data: new URLSearchParams({
-    grant_type: 'refresh_token,
+    grant_type: 'refresh_token',
     subject_token: '{{refresh_token}}'
   })
 }).then(function (response) {
@@ -74,5 +76,9 @@ If the refresh token is still valid, then a new access token will be minted and 
 Refresh token rotation is a technique for getting new access tokens using refresh tokens that goes beyond silent authentication. Refresh tokens are typically longer-lived and can be used to request new access tokens after the shorter-lived access tokens expire. Refresh tokens are often used in native applications on mobile devices in conjunction with short-lived access tokens to provide seamless UX without having to issue long-lived access tokens.
 
 With refresh token rotation enabled in Keel, every time an application exchanges a refresh token to get a new access token, a new refresh token is also returned. Therefore, you no longer have a long-lived refresh token that, if compromised, could provide illegitimate access to resources. As refresh tokens are continually exchanged and invalidated, the threat is reduced.
+
+<Callout type="info">
+Keel does not yet support a full [Proof Key of Code Exchange (PKCE)](https://cloudentity.com/developers/basics/oauth-extensions/authorization-code-with-pkce/#:~:text=The%20Proof%20Key%20of%20Code%20Exchange%20(PKCE)%20is%20an%20extension,vulnerable%20to%20reverse%20engineering%20practices.) flow, while this work is planned. By using one-time-only refresh tokens that rotate, you don't need a full PKCE flow because each token rotation inherently adds an extra layer of security, reducing the risk associated with token interception and replay attacks, which PKCE primarily aims to mitigate.
+</Callout>
 
 This setting is enabled by default in Keel. You can disable it in the [`keelconfig.yaml` file](/authentication/configuration) though we don't recommend it.

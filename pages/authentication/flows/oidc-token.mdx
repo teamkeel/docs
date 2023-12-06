@@ -54,12 +54,12 @@ fetch('https://{your-project}.keel.so/auth/token', {
   headers: {
     'content-type': 'application/x-www-form-urlencoded'
   },
-  data: new URLSearchParams({
-    grant_type: 'token_exchange,
+  body: new URLSearchParams({
+    grant_type: 'token_exchange',
     subject_token: '{{provider_id_token}}'
   })
 }).then(function (response) {
-  console.log(response.data);
+  return response.json();
 }).catch(function (error) {
   console.error(error);
 });

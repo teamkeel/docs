@@ -52,7 +52,7 @@ If you would like to configure your own custom provider, please read the [Config
 
 If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
-Secrets for authentication providers follow this pattern: `KEEL_AUTH_SECRET_{{provider name}}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
+Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_{provider name}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
 
 #### Locally
 
@@ -72,7 +72,7 @@ So here, we're setting the `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to your secrent for
 
 #### In Production on the Keel Console
 
-If you're hosting your app on Keel, you can set the client secret by going to the **Environment variables** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` as the key and your client secret as the value.
+If you're hosting your app on Keel, you can set the client secret by going to the **Secrets** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` as the key and your client secret as the value.
 
 Every subsequent deployment will have access to this secret.
 
