@@ -1,0 +1,36 @@
+# Lookup fields
+Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry, so that they don't need to type in the value manually.
+
+```keel
+model Author {
+    fields: {
+        title Text
+    }
+    actions: {
+        create createAuthor() with (title)
+
+        // enables lookup on Author mutation pages
+        list listBooks()
+    }
+}
+```
+
+```keel
+model Author {
+    fields {
+        book Book
+    }
+    actions {
+        create createAuthor() with (book)
+    }
+}
+model Book {
+    fields {
+        author Author
+    }
+    actions {
+        // enables lookup on createAuthor
+        list listBooks()
+    }
+}
+```

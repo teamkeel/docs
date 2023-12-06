@@ -1,8 +1,8 @@
+import { Callout } from "nextra/components";
+
 # Internal tools
 
 Internal tools give you a simple and secure user interface to interact with your data. Building them requires no extra effort, as they are automatically generated from [APIs](/apis) that Keel creates and exposes from your schema. And because they are generated you get the great Keel user experience out-of-the-box.
-
-import { Callout } from "nextra/components";
 
 <Callout type="info" emoji="⚒️">
   A tool is an [action](/actions) that can be accessed and run via the [Keel Console](https://console.keel.so)
@@ -21,202 +21,19 @@ Keel creates a page with a route for each action in the schema. This 'tool' then
 
 By defining a collection of actions of [all types](/actions#action-types) you assemble a UI optimised for efficient data manipulation and navigation through a unique flow of actions.
 
-### Model list page
-A model with a `list` action creates a page that lists entries for that model. If this action has inputs, it generates an inputs panel with a form that (re-)runs the action.
-```keel
-model Book {
-    actions {
-        // get getBook(id)
-        list listBooks()
-        // list listClassicBooks(...)
-        // create createBook() with (...)
-    }
-}
-```
-<Callout type="info" emoji="ℹ️">
-    A `get` action creates a link to listed entries
-  {/* (the first in the list of actions of the same model) */}
-</Callout>
-<Callout type="info" emoji="ℹ️">
-    Additional `list` actions create a dropdown menu to switch between them 
-</Callout>
-<Callout type="info" emoji="ℹ️">
-    `create` actions create a button with links
-</Callout>
-<Callout type="info" emoji="ℹ️">
-  Enables shortcuts for navigating via model name in the directory
-</Callout>
+### Toolbar
+Each tool may have [additional actions](/internal-tools/linked-actions) that are automatically linked for you. You will also see more options to favourite the action so that it stays in the sidebar for easy access, and open the action in the API explorer, which will show you examples of the types of API endpoints you can use in your own apps.
 
-### Single entry page
-A model with a `get` action creates a page that renders a single entry. If action has inputs, it generates an inputs panel with a form that (re-)runs the action.
-```keel
-model Book {
-    actions {
-        get getBook(id)
-        // update updateBook(id) with (...)
-        // delete deleteBook(id)
-    }
-}
-```
-<Callout type="info" emoji="ℹ️">
-    Additional `get` actions create a dropdown menu to switch between them 
-</Callout>
-<Callout type="info" emoji="ℹ️">
-  `update` and `delete` actions with `id` as input create a link and pre-populate the input
-</Callout>
-<Callout type="info" emoji="ℹ️">
-  A `list` action creates a link to the Model list page
-</Callout>
-
-### Mutation pages
-A model with a `create`/`update`/`delete` action creates a page that renders a form with inputs to the action. Submitting the form runs the action and displays the response.
-```keel
-model Book {
-    fields {
-        name Text
-    }
-    actions {
-        create createBook() with (name)
-        update updateBook() with (name)
-        delete deleteBook(id)
-    }
-}
-```
-
-
-{/* 
-`read` & `write`? */}
-
-### Relationships
-<Callout type="info" emoji="ℹ️">
-  Related model with a `get` or a `list` action with original model `id` as input creates a link from pages of the original model.
-</Callout>
-
-#### One to one
-```keel
-model Book {
-    fields {
-        author Author
-    }
-    actions {
-        ...
-    }
-}
-
-model Author {
-    fields {
-        book Book @unique
-    }
-    actions {
-        // enables link to Author on Book action pages
-        get getAuthor(book.id)
-        // list listAuthors(book.id) if not @unique?
-    }
-}
-```
-#### One to many
-```keel
-model Book {
-    fields {
-        author Author
-    }
-    actions {
-        // enables link to Book on Author action pages
-        list listBooks(author.id)
-    }
-}
-
-model Author {
-    fields {
-        books Book[]
-    }
-    actions {
-        // actions
-    }
-}
-```
-
-#### Many to many
-```keel
-model Book {
-    fields {
-        author BookAuthor[]
-    }
-    actions {
-        // enables link to Book on BookAuthor action pages
-        list listBooks(author.id)
-    }
-}
-
-model BookAuthor {
-    fields {
-        book Book @unique
-        author Author @unique
-    }
-    actions {
-        ...
-    }
-}
-
-model Author {
-    fields {
-        books Book[]
-    }
-    actions {
-        // enables link to Author on BookAuthor action pages
-        list listAuthors(book.id)
-    }
-}
-```
-
-## Nested inputs
-Support for nested inputs, such as [nested create](/actions#creating-nested-records)
-
-## Lookup fields
-Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry, so that they don't need to type in the value manually.
-
-```keel
-model Author {
-    fields: {
-        title Text
-    }
-    actions: {
-        create createAuthor() with (title)
-
-        // enables lookup on Author mutation pages
-        list listBooks()
-    }
-}
-
-```
-
-```keel
-model Author {
-    fields {
-        book Book
-    }
-    actions {
-        create createAuthor() with (book)
-    }
-}
-model Book {
-    fields {
-        author Author
-    }
-    actions {
-        // enables lookup on createAuthor
-        list listBooks()
-    }
-}
-```
+### Input field options
+The input field components have been configured to match the input type you have written in your schema. 
+- If a field is optional, a `null` button will be displayed within that input field. Clicking this will set the field to null.
+- Once an input field has a value, but you use the clear button to completely unset the field.
+- For boolean fields, a yes/no toggle button will appear. You can set these to null if optional or clear the field and leave it unset.
+- For repeated fields as inputs, you will be add multiple items entries on the form.
+- For id inputs, you may have a lookup button to help find an id so you don't have to type in the value manually. See [here](/internal-tools/lookups) for more details.
 
 ## Order
 Internal tools consider the order of fields and actions in the model and will render them accordingly. They assume a descending order from most to least important.
-
-Does it respect order of inputs? How do they work together?
-
-
-
 
 ## Permissions
 Since internal tools just tap into the APIs, they respect the [permission](/permissions) logic from the schema and provide the context of the [Identity](/identity) logged into the Console. This way you have complete control over who has access to which actions.
@@ -224,7 +41,4 @@ Since internal tools just tap into the APIs, they respect the [permission](/perm
 
 {/* <Callout type="info" emoji="ℹ️">
   Multiple `list` actions in a single model will create a menu to switch between them
-</Callout>
-<Callout type="info" emoji="ℹ️">
-  One or multiple `create` actions in the same model will create a link
 </Callout> */}
