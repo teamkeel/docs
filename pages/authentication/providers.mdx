@@ -1,0 +1,18 @@
+# Providers
+
+The table below lists the providers we support out of the box, however **you can configure any OpenID Connect provider you want** using the `oidc` provider type.
+
+| Provider        | Type       | SSO Login | OIDC Token | 
+|-----------------|------------|----------|------------|
+| Google          | `google`   | ✅        | ✅          | 
+| Facebook        | `facebook` | ✅        | ✅          |
+| GitLab          | `gitlab`   | ✅        | ✅          |
+| _Custom OIDC_   | `oidc`     | ✅        | ✅          | 
+
+To use these providers with Keel, you'll need to setup client applications for each provider. You can find instructions for each provider at their respective documentation pages:
+
+- [Google](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid)
+- [Facebook](https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow)
+- [Gitlab](https://docs.gitlab.com/ee/integration/oauth_provider.html)
+
+Other providers also typically have documentation on how to setup client applications for their services.

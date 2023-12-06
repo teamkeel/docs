@@ -1,0 +1,74 @@
+# Configuration
+
+All configuration for authentication your Keel application is done in the `keelconfig.yaml` file.
+
+## Configuring Tokens
+
+You can configure your tokens like so:
+
+```yaml
+auth:
+  tokens:
+    # Lifespan of the access token in seconds. Default is 24 hours.
+    accessTokenExpiry: 3600
+    # Lifespan of the refresh token in seconds. Default is 3 months.
+    refreshTokenExpiry: 604800
+    # Enable refresh token rotation. Default is true.
+    refreshTokenRotationEnabled: false
+```
+
+It's recommended to keep the lifespan of an access token extremely short, since if they're stolen they can be used to access your application as a specific user. Refresh tokens are used to acquire new access tokens, and can live longer.
+
+## Redirect URL
+
+For Single Sign-on (SSO) Login, make sure to configure the `redirectUrl`.  Users will be sent here after the `auth/authorize/{provider}` flow has successfully completed. An auth code will be provided in the query parameter `code`, which can then be used at the token endpoint to acquire an access and refresh token. We go into more detail about this on the [SSO Login page](/authentication/flows/sso-login).
+
+## Providers
+
+Various providers can be configured.  Depending on the `type` various other fields may be required.  
+
+| Parameter Name | Description                                |
+|----------------|--------------------------------------------|
+| `type`     | The type of provider |
+| `name`  | The unique name you give to this provider       |
+| `clientId`  | The client ID given to you by your provider    |
+
+### Types of Providers
+
+We support various out-of-the-box provider types (such as `google`, `facebook`, etc.) - please see [the providers page](/authentication/providers) for more.
+
+You can also configure your own custom OpenId Connect (`oidc`) provider type. Read on for more.
+
+### Out of the Box Providers
+
+No additional fields need to be provided.
+
+```yaml
+auth:
+  providers:
+    - type: google
+      name: 'My google client'
+      clientId: hfjuwaa3a2983h1hfsdf
+```
+
+### Custom OpenID Connect Provider
+
+| Parameter Name | Description                                |
+|----------------|--------------------------------------------|
+| `issuerUrl`     | The provider's issuer URL used for discovery purposes |
+
+```yaml
+auth:
+  providers:
+    # Custom OIDC
+    - type: oidc
+      name: Baidu
+      issuerUrl: 'https://dev-skhlutl45lbqkvhv.us.auth0.com'
+      clientId: 'kasj28fnq09ak'
+```
+
+### Client Secret Configuration
+
+This is only necessary for the [SSO Login flow](/authentication/flows/sso-login).
+
+The name of the secret has the format `KEEL_AUTH_PROVIDER_SECRET_{name}` where `{name}` is the UPPER_SNAKE_CASEd name of the provider as configured in your `keelconfig.yaml` file. See the SSO Login page for more.

@@ -1,0 +1,85 @@
+# OpenID Connect (OIDC) Token
+
+With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow you would have already performed the necessary authentication steps to get an access and ID token.  For example, if you're authenticating with Google, then you'll most likely have implemented the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in. 
+
+These are the general steps:
+
+ 1. Perform the relevant authentication flow with your provider
+ 2. Extract the `id_token` from the successful token endpoint response
+ 3. Perform "token exchange" with our `/auth/token` endpoint to authenticate
+ 4. Use the access and refresh tokens to query your Keel API
+
+## Retrieving the ID Token
+
+import { Callout } from "nextra/components";
+
+<Callout type="info">
+  An ID token is an artifact that proves that a user has been authenticated. It was introduced by OpenID Connect (OIDC), an open standard for authentication used by many identity providers such as Google and Facebook.
+</Callout>
+
+For OpenID Connect-compatible providers, the ID token will normally be returned from the provider's token endpoint. For example, this is the response from Auth0's token endpoint after successfully authenticating:
+
+```json
+{
+	"access_token": "{{provider_access_token}}",
+	"id_token": "{{provider_id_token}}",
+	"scope": "openid profile email address phone",
+	"expires_in": 86400, // one day
+	"token_type": "Bearer"
+}
+```
+
+If an ID token is not returned with your providers token endpoint, then you might need to request it by providing the scope value `openid`.
+
+## Getting Access Tokens
+
+Once you have obtained the ID token, you must then exchange it for a Keel access token. This is done by calling the `/auth/token` endpoint with the `token_exchange` grant.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['cURL', 'JavaScript']}>
+  <Tab>
+```bash
+curl --request POST \
+  --url 'https://{your-project}.keel.so/auth/token' \
+  --header 'content-type: application/x-www-form-urlencoded' \
+  --data grant_type=token_exchange \
+  --data subject_token={{provider_id_token}}
+```
+  </Tab>
+  <Tab>
+```js
+fetch('https://{your-project}.keel.so/auth/token', {
+  method: 'POST',
+  headers: {
+    'content-type': 'application/x-www-form-urlencoded'
+  },
+  body: new URLSearchParams({
+    grant_type: 'token_exchange',
+    subject_token: '{{provider_id_token}}'
+  })
+}).then(function (response) {
+  return response.json();
+}).catch(function (error) {
+  console.error(error);
+});
+```
+  </Tab>
+</Tabs>
+
+If you are successfully authenticated, the token endpoint will respond with `HTTP 200` and an `application/json` response body.
+
+```json filename="HTTP 200"
+{
+  "access_token": "{{keel_access_token}}",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "{{keel_refresh_token}}"
+}
+```
+
+If the ID token cannot be verified, then you will receive an `HTTP 401` response. These are some reasons as to why the ID token would fail to authenticate:
+ - The ID token has expired (they typically have a short lifespan).
+ - The provider is not configured - visit the [Configuration page](/authentication/configuration) for more.
+ - The ID token was issued by a different client to what is configured in your Keel app.
+ - The ID token was not legitimately issued by the provider. We perform various handshakes to ensure this is the case.
