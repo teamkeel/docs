@@ -1,0 +1,8 @@
+{
+  "queries": "Queries",
+  "mutations": "Mutations",
+  "relationships": "Relationships",
+  "lookups": "Lookup Input Fields",
+  "linked-fields": "Linked Fields",
+  "linked-actions": "Linked Actions"
+}
