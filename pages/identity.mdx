@@ -1,6 +1,13 @@
+import { Callout } from "nextra/components"
+
 # Identity
 
-Almost every application require authentication and for this purpose Keel comes with a built-in `Identity` model. This model represents the different **identities** that have **authenticated** with your app and includes a few actions that can be used to build authentication into your product.
+Almost every application requires authentication and for this purpose Keel comes with a built-in `Identity` model. This model represents the different **identities** that have **authenticated** with your app and includes a few actions that can be used to build authentication into your product.
+
+<Callout emoji="ℹ️" type="info">
+  The `Identity` model is intended to be a building block for further authentication logic and is not intended to be a complete authentication solution. 
+</Callout>
+
 
 ## Usage in models
 
@@ -15,6 +22,23 @@ model Customer {
 ```
 
 When using `Identity` like this you will probably want to **mark the field as unique**, so that an identity relates to a single customer.
+
+### Working with application users 
+
+To use the `Identity` model for authentication, you can associate it with a `User` model. A `User` model represents a user in the context of your application, and may have additional fields such as `name`, `email`, `avatar`, etc.
+
+```keel
+model User {
+  fields {
+    name String
+    email String
+    avatar String
+    identity Identity @unique
+  }
+}
+```
+
+Then in your application, after a user has authenticated, you can create an `Identity` for them and associate it with their `User` record. {/* @todo in a separate PR: We cover this in more detail in the authentication section.*/}
 
 ## Usage in expressions
 
@@ -46,7 +70,7 @@ model Post {
 
 Note that filtering records like this is different from defining [**permissions**](/permissions).
 
-### Setting a field to the callers Identity
+### Setting a field to the caller's Identity
 
 When `Identity` is used in a model as a relationship field, you should always use `ctx.identity` to set it, rather than trying to accept it as an input (which won't work).
 

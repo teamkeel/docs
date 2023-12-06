@@ -1,3 +1,13 @@
+<!-- 
+
+Docs to add:
+- [ ] OIDC/SSO flows
+- [ ] Identity <> Application Users
+- [ ] keelconfig.yaml 
+- [ ] Authenticating generated clients
+- [ ] CLI all commands that aren't documented, including secrets
+
+-->
 <p align="center">
   <a href="https://keel.so/">
     <img alt="Keel" src="static/keel.svg" width="300" />
@@ -78,3 +88,4 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+
