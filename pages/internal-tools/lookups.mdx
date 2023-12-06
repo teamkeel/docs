@@ -1,6 +1,16 @@
-# Lookup fields
-Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry, so that they don't need to type in the value manually.
+import { Callout } from "nextra/components";
 
+# Lookup fields
+Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry on the id input field, so that they don't need to type in the value manually.
+
+<Callout type="info" emoji="ℹ️">
+  The lookup button defaults to using a list action on the other model that doesn't have any required inputs. This is so that all possible fields are displayed on default.
+  If no list actions without required fields exists in your schema, it will use the first list action it can find.
+</Callout>
+
+Clicking on a lookup button will open the list action view in a modal. Clicking on a row entry result will fill the id input for you.  
+
+Here is an example of a Keel schema with list actions that enable the lookup button on id input fields:
 ```keel
 model Author {
     fields: {
