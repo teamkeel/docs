@@ -1,0 +1,98 @@
+# Relationships
+
+## One to one
+
+When a model has a one to one relationship, the API will return the id of that related model when an entry is fetched. 
+On the internal tool page, when these fields are displayed, Keel will automatically link that id to the `get` action for that related model (if the `get` action exists in the schema).
+
+In the Keel schema example below, for both `Book` and `Author` related action pages will display the linked id relationship field.
+
+```keel
+model Book {
+    fields {
+        author Author
+    }
+
+    actions {
+      get getBook(id)
+    }
+}
+
+model Author {
+    fields {
+        book Book
+    }
+
+    actions {
+        get getAuthorByBook(book.id)
+    }
+}
+```
+
+Find out more about one to one [relationships](/models#one-to-one-relationships)
+
+## One to many
+
+If you have a schema where there is a one to many relationship, the one side of the relationship will return the related id (as above), but the many side does not automatically fetch all of the related entries.
+The internal tools will display the "many" relationship as a link to the "list" action of that model, so that you can easily list the related entries.
+
+<Callout type="info" emoji="ℹ️">
+  To enable this link in the tool, you must have a list action on the other model which has an id input field of the related model. See below for an example of this.
+</Callout>
+
+```keel
+model Book {
+    fields {
+        author Author
+    }
+
+    actions {
+        // enables link to Book on Author action pages
+        list listBooks(author.id)
+    }
+}
+
+model Author {
+    fields {
+        books Book[]
+    }
+}
+```
+
+Find out more about one to many [relationships](/models#one-to-many-relationships)
+
+## Many to many
+
+The internal tools will display these relationships as a link to the "list" action of that model, so that you can easily list the related entries.
+
+<Callout type="info" emoji="ℹ️">
+  To enable this link in the tool, you must have a list action on the join model which has an id input field of the related models. See below for an example of this.
+</Callout>
+
+```keel
+model Book {
+    fields {
+        author BookAuthor[]
+    }
+}
+
+model BookAuthor {
+    fields {
+        book Book @unique
+        author Author @unique
+    }
+
+    actions {
+        // enables link to BookAuthor on Book and Author action pages
+        list listBookAuthor(book.id?, author.id?)
+    }
+}
+
+model Author {
+    fields {
+        books Book[]
+    }
+}
+```
+
+Find out more about many to many [relationships](/models#many-to-many-relationships)
