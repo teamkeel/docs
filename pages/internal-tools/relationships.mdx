@@ -5,7 +5,11 @@ import { Callout } from "nextra/components";
 ## One to one
 
 When a model has a one to one relationship, the API will return the id of that related model when an entry is fetched. 
-On the internal tool page, when these fields are displayed, Keel will automatically link that id to the `get` action for that related model (if the `get` action exists in the schema).
+On the internal tool page, when these fields are displayed, Keel will automatically link that id to the `get` action for that related model.
+
+<Callout type="info" emoji="ℹ️">
+  To enable this link in the tool, you must have a get action on this model which has an id input field. See below for an example of this.
+</Callout>
 
 In the Keel schema example below, for both `Book` and `Author` related action pages will display the linked id relationship field.
 
@@ -26,6 +30,7 @@ model Author {
     }
 
     actions {
+        get getAuthor(id)
         get getAuthorByBook(book.id)
     }
 }
