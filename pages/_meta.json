@@ -5,6 +5,7 @@
       "breadcrumb": false
     }
   },
+  "quickstart": "Quickstart",
   "-- get-started": {
     "title": "Get Started",
     "type": "separator"
