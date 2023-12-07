@@ -11,30 +11,33 @@ On the internal tool page, when these fields are displayed, Keel will automatica
   To enable this link in the tool, you must have a get action on this model which has an id input field. See below for an example of this.
 </Callout>
 
-In the Keel schema example below, for both `Book` and `Author` related action pages will display the linked id relationship field.
+In the Keel schema example below, for `Author` action page will display the linked book id relationship field.
 
 ```keel
 model Book {
     fields {
+        name Text
         author Author
     }
 
     actions {
-      get getBook(id)
+        get getBook(id)
     }
 }
 
 model Author {
     fields {
-        book Book
+        name Text
+        book Book @unique
     }
 
     actions {
         get getAuthor(id)
-        get getAuthorByBook(book.id)
     }
 }
 ```
+
+![One to one](/one-to-one-linked-field.png)
 
 Find out more about one to one [relationships](/models#one-to-one-relationships).
 
@@ -50,6 +53,7 @@ The internal tools will display the "many" relationship as a link to the "list" 
 ```keel
 model Book {
     fields {
+        name Text
         author Author
     }
 
@@ -61,10 +65,13 @@ model Book {
 
 model Author {
     fields {
+        name Text
         books Book[]
     }
 }
 ```
+
+![One to many](/one-to-many-linked-field.png)
 
 Find out more about one to many [relationships](/models#one-to-many-relationships).
 
@@ -85,8 +92,8 @@ model Book {
 
 model BookAuthor {
     fields {
-        book Book @unique
-        author Author @unique
+        book Book 
+        author Author 
     }
 
     actions {
@@ -97,7 +104,7 @@ model BookAuthor {
 
 model Author {
     fields {
-        books Book[]
+        books BookAuthor[]
     }
 }
 ```
