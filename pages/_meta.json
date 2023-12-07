@@ -5,37 +5,53 @@
       "breadcrumb": false
     }
   },
-  "quickstart": "Quickstart",
   "-- get-started": {
     "title": "Get Started",
     "type": "separator"
   },
+  "quickstart": "Quickstart",
   "what-is-keel": "What is Keel?",
-  "local-environment": "Getting Started",
-  "tutorial": "Tutorial",
-  "advanced-tutorial": "Advanced Tutorial",
-  "-- tutorials": {
-    "title": "Tutorials",
-    "type": "separator"
-  },
-  "nextjs-app-router": "Next.js (App Router)",
+  "local-environment": "Local Development",
   "-- docs": {
-    "title": "Documentation",
+    "title": "Concepts",
     "type": "separator"
   },
   "models": "Models",
   "actions": "Actions",
   "identity": "Identity",
-  "authentication": "Authentication",
   "permissions": "Permissions",
   "functions": "Functions",
-  "apis": "APIs",
   "jobs": "Jobs",
   "events": "Events",
+  "-- features": {
+    "title": "Features",
+    "type": "separator"
+  },
+  "authentication": "Authentication",
+  "apis": "APIs",
   "envvars": "Environment Variables",
   "secrets": "Secrets",
+  "-- tools": {
+    "title": "Tools",
+    "type": "separator"
+  },
   "cli": "CLI",
+  "-- guides": {
+    "title": "Guides",
+    "type": "separator"
+  },
   "testing": "Testing",
+  "-- tutorials": {
+    "title": "Tutorials",
+    "type": "separator"
+  },
+  "tutorial": "Basic Tutorial",
+  "advanced-tutorial": "Advanced Tutorial",
+  "nextjs-app-router": "Next.js (App Router)",
+  "-- misc": {
+    "title": "Misc",
+    "type": "separator"
+  },
   "release-notes": "Release Notes",
   "website": {
     "title": "Homepage",
