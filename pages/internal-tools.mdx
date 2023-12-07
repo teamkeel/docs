@@ -22,13 +22,13 @@ Keel creates a page with a route for each action in the schema. This 'tool' then
 By defining a collection of actions of [all types](/actions#action-types) you assemble a UI optimised for efficient data manipulation and navigation through a unique flow of actions.
 
 ### Toolbar
-Each tool may have [additional actions](/internal-tools/linked-actions) that are automatically linked for you. You will also see more options to favourite the action so that it stays in the sidebar for easy access, and open the action in the API explorer, which will show you examples of the types of API endpoints you can use in your own apps.
+Each tool may have [additional actions](/internal-tools/linked-actions) that are automatically linked for you. You will also see more options here, such as an option to favourite the tool so that it stays in the sidebar for easy access, and open the action in the API explorer, which will show you examples of the types of API endpoints you can use in your own apps.
 
 ### Input field options
-The input field components have been configured to match the input type you have written in your schema. 
+For actions that have inputs, the input field components have been configured to match the input type you have written in your schema. 
 - If a field is optional, a `null` button will be displayed within that input field. Clicking this will set the field to null.
 - Once an input field has a value, but you use the clear button to completely unset the field.
-- For boolean fields, a yes/no toggle button will appear. You can set these to null if optional or clear the field and leave it unset.
+- For boolean fields, a yes/no toggle button will appear. You can set these to null if your field type is optional or clear the field and leave it unset if your input field is optional.
 - For repeated fields as inputs, you will be add multiple items entries on the form.
 - For id inputs, you may have a lookup button to help find an id so you don't have to type in the value manually. See [here](/internal-tools/lookups) for more details.
 
