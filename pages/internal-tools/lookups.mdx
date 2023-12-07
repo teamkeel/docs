@@ -12,7 +12,7 @@ Clicking on a lookup button will open the list action view in a modal. Clicking 
 
 Here is an example of a Keel schema with list actions that enable the lookup button on id input fields:
 
-```keel
+```keel {10, 24}
 model Author {
     fields {
         name Text
@@ -32,6 +32,7 @@ model Book {
         title Text
         author Author
     }
+
     actions {
         get getBook(id?, author.id?) 
         // enables lookup on createAuthor
@@ -41,5 +42,7 @@ model Book {
 ```
 
 This example will allow you to look up the id fields of the other model or on the same model.
+
 On the `get` action of `Author`, you will find an input field for the author id. The lookup button will use listAuthors to display all possible authors and to be able to select an id.
+
 On the `create` action of `Author`, you will find an input field for the book id, so that it can link the `Book` to `Author`. 

@@ -14,10 +14,12 @@ model Order {
 ## Request
 If this action has inputs, it generates an inputs panel with a form that runs the action.
 This form will also include the cursor pagination fields, which Keel provides for all list actions. These will soon be moved to be table pagination buttons and removed from the input form.
+
 For any of the id input fields, if the model has a relevant list action, you will see a "lookup" action button within the input field to help you quickly find an entry. Learn more [here](/internal-tools/lookups)
 
 ## Response
 All fields from the model will be rendered as rows inside a table, ordered in the same way as your Keel schema fields are listed. Any fields that are linked to other models will render a [relationship](/internal-tools/relationships) field.
+
 Clicking on a row will take you to the single entry get action page, with the id field pre-filled so that you can quickly view that entry and find other relevant mutation actions to run on that entry.
 
 ## Pagination
@@ -25,4 +27,5 @@ Coming soon.
 
 ## Extras
 This tool will also show you a `create` action button in the toolbar, if your Keel schema includes a create action on the same model. 
+
 In the toolbar, you can also find a dropdown menu with other list actions for the same model. Find out more [here](/internal-tools/linked-actions). 
