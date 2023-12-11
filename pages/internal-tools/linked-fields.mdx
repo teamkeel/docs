@@ -8,13 +8,14 @@ Linked fields are id fields that you can click on to view all of the data for th
   ID fields will only appear linked if you have a `get` action in your schema for that id's model.
 </Callout>
 
-For the below example, when an `Author` entry is fetched, you will see a "book id" field. The `id` will be linked to the `getBook` action so that you can view all of the book data.
+For the below example, when an `Author` entry is fetched, you will see an "agent id" field returned. The `id` will be linked to the `getAgent` action so that you can view all of the book data.
 
 ```keel
 model Author {
     fields {
         name Text
-        book Book
+        books Book[]
+        agent Agent?
     }
 
     actions {
@@ -22,14 +23,16 @@ model Author {
     }
 }
 
-model Book {
+model Agent {
     fields {
-        title Text
-        author Author
+        name Text
     }
 
     actions {
-        get getBook(id?, author.id?) 
+        get getAgent(id) 
     }
 }
 ```
+
+![Linked field id example](/linked-field-example.png)
+
