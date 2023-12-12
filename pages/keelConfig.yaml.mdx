@@ -1,0 +1,58 @@
+# `keelconfig.yaml`
+
+The `keelconfig.yaml` file is expected at the root of your project and is used to configure your Keel backend. It enables configuring the following options:
+
+- Environment variables
+- Secrets 
+- Authentication
+
+Let's walk through how you can configure each of these options.
+
+## Environment variables
+
+Environment variables are values that are passed to your application at runtime, dependent on the environment in which it is running. For example, you may have a `EXTERNAL_API_URL` environment variable that points to some external API in your development environment, but points to a different API in your production environment and yet another API in your staging environment.
+
+This can be configured like so in your `keelconfig.yaml` file:
+
+```yaml
+environment:
+  staging:
+    - name: EXTERNAL_API_URL
+      value: "https://staging.some-api.com"
+  production:
+    - name: DB_URL
+      value: "https://some-api.com"
+```
+
+We cover this in more detail under the [Environment Variables](/envvars) section of the docs.
+
+## Secrets
+
+Secrets are similar to environment variables, but are used to store sensitive information such as API keys, passwords, etc. In your `keelconfig.yaml`, you can store names of secrets that your application will depend on, while their values are stored in your Keel backend.
+
+Secrets can be configured like so in your `keelconfig.yaml` file:
+
+```yaml filename="keelconfig.yaml"
+secrets:
+  - name: MY_SECRET
+  - name: MY_OTHER_SECRET
+```
+
+To set a secret locally, you can use the `keel secret set` command from the Keel [CLI](/cli), and to set a secret in your deployed backend on Keel, you can use the **Secrets** page in the console.
+
+We cover secrets in more detail in its dedicated [page](/secrets).
+
+## Authentication
+
+Authentication enables users to sign up and log in to your application using a number of open paradigms, such as SSO (Single Sign-on), OpenID Connect, and more. Keel supports a number of authentication providers out of the box, and you can configure them in your `keelconfig.yaml` file like so:
+
+```yaml filename="keelconfig.yaml"
+auth:
+  redirectUrl: http://localhost:8000/callback
+  providers:
+    - type: google
+      name: google
+      clientId: 1234
+```
+
+We cover authentication in more detail in its dedicated [page](/authentication/getting-started).

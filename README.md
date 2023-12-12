@@ -1,9 +1,6 @@
-<!-- 
+<!--
 
 Docs to add:
-- [ ] OIDC/SSO flows
-- [ ] Identity <> Application Users
-- [ ] keelconfig.yaml 
 - [ ] Authenticating generated clients
 - [ ] CLI all commands that aren't documented, including secrets
 
@@ -23,7 +20,9 @@ Docs to add:
 ---
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-13-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Documentation
@@ -88,4 +87,3 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
-
