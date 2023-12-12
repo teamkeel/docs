@@ -1,0 +1,68 @@
+import { Callout } from 'nextra/components'
+
+# 18 December, 2023
+
+These changes have been released with version `0.374` of the CLI.
+
+## Starting a new project with `keel init`
+
+The `keel init` command guides you through setting up a new project from scratch. It also supports templates, which means you can get started with a working Keel schema and functions. 
+
+![keel init](/release-notes/0-374-keel-init.gif)
+
+These starter templates can be found at [https://github.com/teamkeel/starter-templates](https://github.com/teamkeel/starter-templates). We only support one template for the moment.
+
+## Support for nested creates in functions
+
+This change means that model inputs for relationships work in `create` functions (as in, they are handled automatically for you).
+
+Given this schema (permissions omitted)
+```
+model Author {
+  fields {
+    name Text
+    books Book[]
+  }
+  actions {
+    create createAuthor(name, books.title) @function
+  }
+}
+
+model Book {
+  fields {
+    author Author
+    title Text
+  }
+}
+```
+
+And this API request.
+```jsonc
+// POST /api/json/createAuthor
+{
+  "name": "Emily Bronte",
+  "books": [
+    {
+      "title": "Wuthering Heights"
+    }
+  ]
+}
+```
+
+An author record would be created with a linked book record!
+
+## Fixes and Improvements
+
+We've also released [a bunch of fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.374.0) to our CLI and to our VS Code extension. 
+
+## Next Steps
+
+To upgrade to the latest version, please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
