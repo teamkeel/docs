@@ -40,7 +40,7 @@ npm install
 
 ## Build your backend with Keel
 
-Keel utilizes a schema-driven approach to application development. This means that all you need to construct a fully managed backend is to define a [schema](https://docs.keel.so/what-is-keel#schema) comprising data models, APIs, and permissions.
+Keel utilizes a schema-driven approach to application development. This means that all you need to construct a fully managed backend is to define a [schema](./what-is-keel#schema) comprising data models, APIs, and permissions.
 
 In this guide, you’ll quickly set up a CRUD backend for a basic task manager.
 
@@ -91,7 +91,7 @@ Ensure Docker is running.
 docker ps
 ```
 
-With Docker running, you can run the backend using the [Keel CLI](https://docs.keel.so/cli?utm_medium=blog&utm_id=demola).
+With Docker running, you can run the backend using the [Keel CLI](./cli).
 
 ```bash
 keel run
@@ -104,7 +104,7 @@ You should see a success message on your terminal and the API endpoints.
 
 Sign in to your GitHub account, create a repository, and copy the corresponding Git URL.
 
-With that done, create a project on Keel by going to [console.keel.so](https://console.keel.so/?utm_medium=blog&utm_id=demola), select the **Existing code** option, input details, authorize GitHub, and select the repository you just created.
+With that done, create a project on Keel by going to [console.keel.so](https://console.keel.so), select the **Existing code** option, input details, authorize GitHub, and select the repository you just created.
 
 
 Next, add the Git remote URL to the Vue project.
@@ -121,11 +121,11 @@ git commit -m "keel backend deploy"
 git push origin main
 ```
 
-Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so/?utm_medium=blog&utm_id=demola), navigate to the API explorer tab to see all your actions appear as API endpoints.
+Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so), navigate to the API explorer tab to see all your actions appear as API endpoints.
 
 ## Integrate Keel with Vue
 
-To use your Keel APIs in your Vue project, Keel can generate a fully type-safe API client based on your schema using the [Keel CLI](https://docs.keel.so/cli?utm_medium=blog&utm_id=demola).
+To use your Keel APIs in your Vue project, Keel can generate a fully type-safe API client based on your schema using the [Keel CLI](./cli).
 
 ```bash
 keel client --output ./src
