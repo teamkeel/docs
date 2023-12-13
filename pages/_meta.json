@@ -41,6 +41,9 @@
     "title": "Guides",
     "type": "separator"
   },
+  "keel-remix": "Keel with Remix",
+  "keel-nuxt": "Keel with Nuxt",
+  "keel-vue": "Keel with Vue",
   "testing": "Testing",
   "-- tutorials": {
     "title": "Tutorials",
