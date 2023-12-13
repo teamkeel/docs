@@ -31,10 +31,14 @@
   "apis": "APIs",
   "envvars": "Environment Variables",
   "secrets": "Secrets",
-  "keelconfig": "keelconfig.yaml",
-  "internal-tools": "Internal tools",
-  "-- tools": {
-    "title": "Tools",
+  "keelconfig.yaml": "keelconfig.yaml",
+  "-- internal-tools": {
+    "title": "Internal tools",
+    "type": "separator"
+  },
+  "internal-tools": "Overview",
+  "-- developer-tools": {
+    "title": "Developer Tools",
     "type": "separator"
   },
   "cli": "CLI",
