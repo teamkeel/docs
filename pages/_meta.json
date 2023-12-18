@@ -31,7 +31,7 @@
   "apis": "APIs",
   "envvars": "Environment Variables",
   "secrets": "Secrets",
-  "keelconfig.yaml": "keelconfig.yaml",
+  "keelconfig": "keelconfig.yaml",
   "-- tools": {
     "title": "Tools",
     "type": "separator"
