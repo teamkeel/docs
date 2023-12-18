@@ -1,0 +1,326 @@
+import { Callout } from "nextra/components"
+
+# Keel + Vue
+
+In this guide, you'll learn how to set up a Keel-powered Vue application.
+
+## Create Vue project
+
+Create a Vue project by running the command below:
+
+```bash
+npm create vue@latest
+```
+
+Upon running the command, you'll have to answer a few questions. Answer them as shown below:
+
+```bash
+Project name: vue-guide
+Add TypeScript? <Yes>
+Add JSX Support? <No>
+Add Vue Router for Single Page Application development? <No>
+Add Pinia for state management? <No>
+Add Vitest for Unit testing? <No>
+Add an End-to-End Testing Solution? <No>
+Add ESLint for code quality? <No>
+Add Prettier for code formatting? <No>
+```
+
+After completing this step, you should have a `vue-guide` directory containing the Vue project. Now, navigate to that directory with the command below.
+
+```bash
+cd vue-guide
+```
+
+Finally, install the project dependencies.
+
+```bash
+npm install
+```
+
+## Build your backend with Keel
+
+Keel utilizes a schema-driven approach to application development. This means that all you need to construct a fully managed backend is to define a [schema](/what-is-keel#schema) comprising data models, APIs, and permissions.
+
+In this guide, you'll quickly set up a CRUD backend for a basic task manager.
+
+### The schema
+
+Create a new file called `schema.keel` in the project root directory and insert the snippet below:
+
+```keel
+model Task {
+    fields {
+        description Text
+    }
+
+    actions {
+        create createTask() with (description)
+        get getTask(id)
+        update updateTask(id) with (description)
+        delete deleteTask(id)
+        list listTask() {
+            @orderBy(createdAt: desc)
+        }
+    }
+
+    @permission(
+        actions: [create, get, update, delete, list],
+        expression: true
+    )
+}
+```
+
+The schema above creates a Task model with a description field and some actions that let you interact with tasks over the API.
+
+<Callout type="info" emoji="ℹ️">
+💡 All models have `id`, `createdAt` and `updatedAt` fields by default.
+</Callout>
+
+By default, your Keel APIs are secure and private unless you explicitly define permission rules to access them. For this example, the API permission allows it to be accessible publicly (e.g., without auth) by setting a permission rule using `expression: true`. Learn more about permissions in its [dedicated page](/permissions).
+
+From this schema, Keel will create a fully managed API that can be used via JSON endpoints or GraphQL.
+
+Keel supports running a local Keel instance with Docker and a cloud instance on the Keel console.
+
+### Running your backend locally
+
+Ensure Docker is running.
+
+```bash
+docker ps
+```
+
+With Docker running, you can run the backend using the [Keel CLI](/cli).
+
+```bash
+keel run
+```
+
+You should see a success message on your terminal and the API endpoints.
+
+
+### Deploying your backend to Keel
+
+Sign in to your GitHub account, create a repository, and copy the corresponding Git URL.
+
+With that done, create a project on Keel by going to [console.keel.so](https://console.keel.so), select the **Existing code** option, input details, authorize GitHub, and select the repository you just created.
+
+Next, add the Git remote URL to the Vue project.
+
+```bash
+git remote add origin <REPLACE WITH THE COPIED URL>
+```
+
+With that done, push the code to the repository by running the commands below:
+
+```bash
+git add .
+git commit -m "keel backend deploy"
+git push origin main
+```
+
+Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so), navigate to the API explorer tab to see all your actions appear as API endpoints.
+
+## Integrate Keel with Vue
+
+To use your Keel APIs in your Vue project, Keel can generate a fully type-safe API client based on your schema using the [Keel CLI](/cli).
+
+```bash
+keel client --output ./src
+```
+
+Running that command will create a `keelClient.ts` file in the `src` directory.
+
+### Create a Keel client
+
+A best practice with Keel is creating a Keel client instance per request. Create a `src/utils/createClient.ts` file to create and return a Keel instance.
+
+```tsx
+import { APIClient } from "../keelClient";
+
+export const createClient = () => {
+    if (!import.meta.env.VITE_APP_KEEL_API_URL) {
+        throw new Error(
+            "VITE_APP_KEEL_API_URL environment variable not set."
+        );
+    }
+
+    const client = new APIClient({
+        baseUrl: import.meta.env.VITE_APP_KEEL_API_URL,
+    });
+
+    return client;
+}
+```
+
+Finally, create a `.env` file in the project root and add the Keel API root. Note that the URL should end with just `/api`.
+
+```bash
+#Using Keel in your local
+VITE_APP_KEEL_API_URL=http://localhost:8000/api
+```
+
+## Build a task management app
+
+With the APIs running, let's utilize Keel in a basic task management application that supports creating and listing tasks.
+
+### Create a task
+
+Create a `src/components/CreateTaskForm.vue` file and add the code snippet below. This code will use `createTask` method to process the form for creating tasks.
+
+```vue
+<script lang="ts">
+import { defineComponent } from "vue"
+import { createClient } from "../utils/createClient";
+
+export default defineComponent({
+    data() {
+        return {
+            description: "",
+            errorMsg: "",
+            isLoading: false
+        }
+    },
+
+    methods: {
+        async onSubmit() {
+            this.isLoading = true;
+            const client = createClient();
+            const response = await client.api.mutations.createTask({ description: this.description });
+
+            if (response.data) {
+                this.$emit("task-created", response.data);
+                this.isLoading = false;
+                this.description = "";
+                this.errorMsg= "";
+            } else {
+                this.isLoading = false;
+                this.errorMsg = response.error.message;
+            }
+        }
+    }
+})
+</script>
+
+<template>
+    <form @submit.prevent="onSubmit">
+        <p v-if="errorMsg !== ''">{{ errorMsg }}</p>
+        <textarea name="description" cols="30" rows="2" placeholder="Enter task description" required
+            v-model="description" />
+        <button type="submit" :disabled="isLoading">Create</button>
+    </form>
+</template>
+```
+
+### Viewing tasks
+
+To display available tasks, create a `src/components/TaskList.vue` file and insert the snippet below:
+
+```vue
+<script lang="ts">
+import type { Task } from "../keelClient";
+import { defineComponent, type PropType } from "vue"
+
+export default defineComponent({
+    props: {
+        tasks: {
+            type: Array as PropType<Task[]>,
+            default: () => [],
+        },
+    },
+
+    setup(props) {
+        return { props };
+    }
+})
+</script>
+
+<template>
+    <ul>
+        <li v-for="task in props.tasks" :key="task.id">
+            <div>
+                <p>{{ task.description }}</p>
+                <div>
+                    <button>
+                        <p>Edit</p>
+                    </button>
+                    <button>
+                        <p>Delete</p>
+                    </button>
+                </div>
+            </div>
+        </li>
+    </ul>
+</template>
+```
+
+Note how on line 2 you can import the `Task` type from the generated client, making your app fully type-safe.
+
+## Putting it all together
+
+Update the `src/App.vue` file to include the components and display all the tasks.
+
+```vue
+<script lang="ts">
+import { defineComponent } from "vue"
+import type { Task } from "./keelClient";
+import { createClient } from "./utils/createClient";
+import CreateTaskForm from "./components/CreateTaskForm.vue";
+import TaskList from "./components/TaskList.vue";
+
+export default defineComponent({
+  components: { CreateTaskForm, TaskList },
+
+  data() {
+    return {
+      tasks: [] as Task[],
+      errorMsg: ""
+    };
+  },
+
+  methods: {
+    async fetchData() {
+      const client = createClient();
+      const response = await client.api.queries.listTask();
+      if (response.data) {
+        this.tasks = response.data.results;
+        this.errorMsg = "";
+      }
+      else {
+        this.errorMsg = response.error.message;
+      }
+    },
+    handleTaskCreated(createdTask: Task) {
+      this.tasks.unshift(createdTask);
+    }
+  },
+  mounted() {
+    this.fetchData();
+  },
+})
+</script>
+
+<template>
+  <main>
+    <div>
+      <div>
+        <CreateTaskForm @task-created="handleTaskCreated" />
+        <section>
+          <p v-if="errorMsg !== ''">{{ errorMsg }}</p>
+          <p v-else-if="tasks.length === 0">No tasks yet!</p>
+          <TaskList v-else :tasks="tasks" />
+        </section>
+      </div>
+    </div>
+  </main>
+</template>
+```
+
+Once completed, run the local server with the command `npm run dev` and test it on a browser using `localhost:5173`.
+
+## Next steps
+
+Great job! You have successfully set up a Keel-powered Vue application. You can extend the application further by adding custom CSS and support for updating and deleting tasks.
+
+Check out the [examples repository](https://github.com/teamkeel/examples) with several real-world examples of using Keel with various frameworks and libraries.

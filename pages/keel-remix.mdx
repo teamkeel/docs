@@ -1,0 +1,288 @@
+import { Callout } from "nextra/components"
+
+# Keel + Remix
+
+In this guide, you’ll learn how to quickly set up a Keel-powered application using the Remix full-stack web framework.
+
+## Create Remix project
+
+Create a Remix project by running the command below:
+
+```bash
+npx create-remix@latest
+```
+
+On running the command, you’ll have to answer a few questions. Answer them as shown below:
+
+```bash
+Where should we create your new project? ./remix-guide
+Initialize a new git repository? <Yes>
+Install dependencies with npm? <Yes>
+```
+
+After completing this step, you should have a `remix-guide` directory containing the Remix project. Now, navigate to that directory with the command below.
+
+```bash
+cd remix-guide
+```
+
+## Build your backend with Keel
+
+Keel utilizes a schema-driven approach to application development. This means that all you need to construct a fully managed backend is to define a [schema](/what-is-keel#schema) comprising data models, APIs, and permissions.
+
+In this guide, you'll learn to quickly set up a CRUD backend for a basic task manager.
+
+### The schema
+
+Create a new file called `schema.keel` in the project root directory and insert the snippet below:
+
+```keel
+model Task {
+    fields {
+        description Text
+    }
+
+    actions {
+        create createTask() with (description)
+        get getTask(id)
+        update updateTask(id) with (description)
+        delete deleteTask(id)
+        list listTask() {
+            @orderBy(createdAt: desc)
+        }
+    }
+
+    @permission(
+        actions: [create, get, update, delete, list],
+        expression: true
+    )
+}
+```
+
+The schema above creates a `Task` model with a `description` field and some actions that let you interact with tasks over the API.
+
+<Callout type="info" emoji="ℹ️">
+💡 All models have `id`, `createdAt` and `updatedAt` fields by default.
+</Callout>
+
+By default, your Keel APIs are secure unless you explicitly define permission rules to access them. For this example, the API permission is set to be accessible publicly (e.g., without auth) by setting a permission rule that always allows access using `expression: true`. Learn more about permissions in its [dedicated page](/permissions).
+
+From this schema, Keel will create a fully managed API that can be used via JSON endpoints or GraphQL.
+
+Keel supports running a local instance of your backend with Docker. Let's explore how we can get our backend up running locally.
+
+### Running your backend locally
+
+Ensure Docker is running.
+
+```bash
+docker ps
+```
+
+With Docker running, you can run the backend using the [Keel CLI](/cli).
+
+```bash
+keel run
+```
+
+You should see a success message on your terminal and API endpoints to interact with your Keel backend. If it runs locally, it will run in the cloud. Let's look at how we can deploy it to the cloud.
+
+### Deploying your backend to Keel
+
+Sign in to your GitHub account, create a repository, and copy the corresponding Git URL.
+
+With that done, create a project on Keel by going to [console.keel.so](https://console.keel.so), select the **Existing code** option, input details, authorize GitHub, and select the repository you just created.
+
+Next, add the Git remote URL to the Remix project.
+
+```bash
+git remote add origin <REPLACE WITH COPIED URL>
+```
+
+With that done, push the code to the repository by running the commands below:
+
+```bash
+git add .
+git commit -m "keel backend deploy"
+git push origin main
+```
+
+Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so), navigate to the API explorer tab, and all your actions will appear as API endpoints.
+
+## Integrate Keel with Remix
+
+To use your Keel APIs in your Remix project, Keel can generate a fully type-safe API client based on your schema using the [Keel CLI](/cli).
+
+```bash
+keel client .
+```
+
+With that, you should see a `keelClient.ts` file at the root of your project.
+
+### Create a Keel client
+
+A best practice with Keel is to create an instance of a Keel client per request to keep things isolated between requests. Create an `app/utils/createClient.ts` file to create and return a Keel instance.
+
+```tsx
+import { APIClient } from '../../keelClient';
+
+export const createClient = () => {
+    if (!process.env.KEEL_API_URL) {
+        throw new Error('KEEL_API_URL environment variable not set.');
+    }
+
+    const client = new APIClient({
+        baseUrl: process.env.KEEL_API_URL,
+    });
+
+    return client;
+};
+```
+
+Finally, create a `.env` file in the project root and add the Keel API root. Note that the URL should end with just `/api`.
+
+```bash
+# Using Keel in your local
+KEEL_API_URL=http://localhost:8000/api
+```
+
+## Build a task management app
+
+With the APIs running, let's utilize Keel in a basic task management application that supports creating and listing tasks.
+
+### Create the application components
+
+Create an `app/components/CreateTaskForm.tsx` file and add the code snippet below. This code will use the [Form](https://remix.run/docs/en/main/components/form) component to handle the form for creating tasks.
+
+```tsx
+import { Form } from '@remix-run/react';
+
+export const CreateTaskForm = () => {
+    return (
+        <Form method='post'>
+            <textarea
+                name='description'
+                cols={30}
+                rows={2}
+                placeholder='Enter task description'
+                required
+            />
+            <button type='submit'>Create</button>
+        </Form>
+    );
+};
+```
+
+Finally, create an `app/components/TaskList.tsx` file to display the available tasks.
+
+```tsx
+import { SerializeFrom } from '@remix-run/node';
+import { Link } from '@remix-run/react';
+import { Task } from 'keelClient';
+
+type TaskListType = {
+    tasks: SerializeFrom<Task[]>;
+};
+
+export const TaskList = ({ tasks }: TaskListType) => {
+    return (
+        <ul>
+            {tasks.map((task) => (
+                <li key={task.id}>
+                    <div>
+                        <p>{task.description}</p>
+                        <div>
+                            <Link to={task.id}>
+                                <p>Edit</p>
+                            </Link>
+                            <button>
+                                <p>Delete</p>
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            ))}
+        </ul>
+    );
+};
+```
+
+Note how on line 3 you can import the `Task` type from the generated client, making your app fully type-safe.
+
+## Putting it all together
+
+Update the `app/routes/_index.tsx` file to include a `loader` to get the list of tasks and an `action` that the `CreateTaskForm` component will use to create tasks and render the components.
+
+```tsx
+import {
+    json,
+    type ActionFunctionArgs,
+    type MetaFunction,
+} from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import { CreateTaskForm } from '~/components/CreateTaskForm';
+import { TaskList } from '~/components/TaskList';
+import { createClient } from '~/utils/createClient';
+
+export const meta: MetaFunction = () => {
+    return [
+        { title: 'New Remix App' },
+        { name: 'description', content: 'Welcome to Remix!' },
+    ];
+};
+
+//add a loader to get a list of tasks
+export const loader = async () => {
+    const client = createClient();
+    const response = await client.api.queries.listTask();
+
+    if (response.data) {
+        const tasks = response.data?.results ?? [];
+        return json(tasks);
+    } else {
+        throw new Error(response.error.message);
+    }
+};
+
+//add an action to create tasks
+export const action = async ({ request }: ActionFunctionArgs) => {
+    const client = createClient();
+    const formData = await request.formData();
+    const description = String(formData.get('description'));
+
+    if (!description) {
+        throw new Error('No description provided.');
+    }
+
+    const response = await client.api.mutations.createTask({ description });
+    if (response.data) {
+        return null;
+    } else {
+        throw new Error(response.error.message);
+    }
+};
+
+export default function Index() {
+    const tasks = useLoaderData<typeof loader>();
+    return (
+        <div>
+            <CreateTaskForm />
+            <section>
+                {tasks.length === 0 ? (
+                    <p>No tasks yet!</p>
+                ) : (
+                    <TaskList tasks={tasks} />
+                )}
+            </section>
+        </div>
+    );
+}
+```
+
+Once completed, run the local server with the command `npm run dev` and test it on a browser using `localhost:3000`.
+
+## Next steps
+
+Well done! You have successfully set up a Keel-powered application using the Remix full-stack web framework. You can extend the application further by adding custom CSS and support for updating and deleting tasks.
+
+Check out the [examples repository](https://github.com/teamkeel/examples) with several real-world examples of using Keel with various frameworks and libraries.

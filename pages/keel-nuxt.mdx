@@ -1,0 +1,345 @@
+import { Callout } from "nextra/components"
+
+# Keel + Nuxt
+
+In this guide, you'll learn how to set up a Keel-powered Nuxt application.
+
+## Create Nuxt project
+
+Create a Nuxt project by running the command below:
+
+```bash
+npx nuxi@latest init nuxt-guide
+```
+
+On running the command, you'll have to answer a few questions. Answer them as shown below:
+
+```bash
+Which package manager would you like to use? <npm>
+Initialize git repository? <Yes>
+```
+
+After completing this step, you should have a `nuxt-guide` directory containing the Nuxt project. Now, navigate to that directory with the command below.
+
+```bash
+cd nuxt-guide
+```
+
+## Build your backend with Keel
+
+Keel utilizes a schema-driven approach to application development. This implies that all you need to construct a fully managed backend is to define a [schema](/what-is-keel#schema) comprising of data models, APIs, and permissions.
+
+In this guide, you'll quickly set up a CRUD backend for a basic task manager.
+
+### The schema
+
+Create a new file called `schema.keel` in the project root directory and insert the snippet below:
+
+```keel
+model Task {
+    fields {
+        description Text
+    }
+
+    actions {
+        create createTask() with (description)
+        get getTask(id)
+        update updateTask(id) with (description)
+        delete deleteTask(id)
+        list listTask() {
+            @orderBy(createdAt: desc)
+        }
+    }
+
+    @permission(
+        actions: [create, get, update, delete, list],
+        expression: true
+    )
+}
+```
+
+The schema above creates a `Task` model with a `description` field and some actions that let you interact with tasks over the API.
+
+<Callout type="info" emoji="ℹ️">
+💡 All models have `id`, `createdAt` and `updatedAt` fields by default.
+</Callout>
+
+By default, your Keel APIs are secure unless you explicitly define permission rules to access them. For this example, the API permission is set to be accessible publicly (e.g., without auth) by setting a permission rule that always allows access using the `expression: true`. Learn more about permissions in its [dedicated page](/permissions).
+
+From this schema, Keel will create a fully managed API that can be used via JSON endpoints or GraphQL.
+
+Keel supports running a local instance of your backend with Docker and a cloud instance on the Keel console.
+
+### Running your backend locally
+
+Ensure Docker is running.
+
+```bash
+docker ps
+```
+
+With Docker running, you can run the backend using the [Keel CLI](/cli).
+
+```bash
+keel run
+```
+
+You should see a success message on your terminal and the API endpoints.
+
+### Deploying your backend to Keel
+
+Sign in to your GitHub account, create a repository, and copy the corresponding Git URL.
+
+With that done, create a project on Keel by going to [console.keel.so](https://console.keel.so), select the **Existing code** option, input details, authorize GitHub, and select the repository you just created.
+
+Next, add the Git remote URL to the Nuxt project.
+
+```bash
+git remote add origin <REPLACE WITH COPIED URL>
+```
+
+With that done, push the code to the repository by running the commands below:
+
+```bash
+git add .
+git commit -m "keel backend deploy"
+git push origin main
+```
+
+Once the repository is updated, Keel will use the schema to build and deploy your backend. In the [Keel console](https://console.keel.so), navigate to the API explorer tab to see all your actions appear as API endpoints.
+
+## Integrate Keel with Nuxt
+
+To use your Keel APIs in your Nuxt project, Keel can generate a fully type-safe API client based on your schema using the [Keel CLI](/cli).
+
+```bash
+keel client .
+```
+
+With that, you should see a `keelClient.ts` file at the root of your project.
+
+### Create a Keel client
+
+A best practice with Keel is to create an instance of a Keel client per request. Create an `app/utils/createClient.ts` file to create and return a Keel instance.
+
+```tsx
+import { APIClient } from "../keelClient";
+
+export const createClient = () => {
+    const config = useRuntimeConfig();
+
+    if (!config.public.keelApiUrl) {
+        throw new Error(
+            "NUXT_PUBLIC_KEEL_API_URL environment variable is not set."
+        );
+    }
+
+    const client = new APIClient({
+        baseUrl: config.public.keelApiUrl,
+    });
+
+    return client;
+};
+```
+
+Next, update the `nuxt.config.ts` file to define a runtime configuration the application will use to load environment variables.
+
+```tsx
+// https://nuxt.com/docs/api/configuration/nuxt-config
+export default defineNuxtConfig({
+  devtools: { enabled: true },
+  runtimeConfig: {
+    public: {
+      keelApiUrl: "",
+    },
+  },
+});
+```
+
+Finally, create a `.env` file in the project root and add the Keel API root. Make sure that the URL should end with just `/api`.
+
+```bash
+# Using Keel locally
+NUXT_PUBLIC_KEEL_API_URL=http://localhost:8000/api
+```
+
+## Build a task management app
+
+With the APIs running, let's show off what Keel can do in a basic task management application that supports creating and listing tasks.
+
+### Create a task
+
+Create a `server/api/createTask.ts` file and add the code snippet below. This code will use Nuxt's [Server Handler](https://nuxt.com/docs/guide/directory-structure/server) to process the form for creating tasks.
+
+```tsx
+import { createClient } from "~/utils/createClient";
+import { Task } from "~/keelClient";
+
+type ApiResponse<T> = {
+    status: number;
+    message: string;
+    data?: T;
+    error?: {
+        message: string;
+    };
+};
+
+export default defineEventHandler(async (event) => {
+    const client = createClient();
+    const { description } = await readBody(event);
+
+    if (!description) {
+        const emptyDescriptionResponse: ApiResponse<string> = {
+            status: 400,
+            message: "failed",
+            error: {
+                message: "No description provided.",
+            },
+        };
+        return emptyDescriptionResponse;
+    }
+
+    const response = await client.api.mutations.createTask({ description });
+
+    if (response.data) {
+        const successResponse: ApiResponse<Task> = {
+            status: 201,
+            message: "success",
+            data: response.data,
+        };
+        return successResponse;
+    } else {
+        const failureResponse: ApiResponse<string> = {
+            status: 500,
+            message: "failed",
+            error: {
+                message: response.error?.message || "Internal Server Error",
+            },
+        };
+        return failureResponse;
+    }
+});
+```
+
+Notice how on line 2 you can import the `Task` type from the generated client, making your app fully type-safe.
+
+Finally, create a `components/CreateTaskForm.vue` file to implement task creation using the `createTask` server handler.
+
+```vue
+<script setup lang="ts">
+const description = ref<string>("");
+const errorMsg = ref<string>("");
+const emit = defineEmits();
+
+const onSubmit = async () => {
+    const response = await $fetch("/api/createTask", {
+        method: "POST",
+        body: { description: description.value }
+    })
+    if (response.status === 201) {
+        emit("task-created", response.data);
+        description.value = "";
+        errorMsg.value = "";
+    } else {
+        errorMsg.value = String(response.error?.message)
+    }
+}
+</script>
+
+<template>
+    <form @submit.prevent="onSubmit">
+        <p v-if="errorMsg !== ''">{{ errorMsg }}</p>
+        <textarea name="description" cols="30" rows="2" placeholder="Enter task description" required
+            v-model="description" />
+        <button type="submit">Create</button>
+    </form>
+</template>
+```
+
+### Viewing tasks
+
+To display available tasks, create a `components/TaskList.vue` file and insert the snippet below:
+
+```vue
+<script setup lang="ts">
+import type { Task } from "../keelClient";
+
+const props = defineProps<{
+    tasks: Task[]
+}>();
+</script>
+
+<template>
+    <ul>
+        <li v-for="task in props.tasks" :key="task.id">
+            <div>
+                <p>{{ task.description }}</p>
+                <div>
+                    <nuxt-link :to="`/${task.id}`">
+                        <p>Edit</p>
+                    </nuxt-link>
+                    <button>
+                        <p>Delete</p>
+                    </button>
+                </div>
+            </div>
+        </li>
+    </ul>
+</template>
+```
+
+## Putting it all together
+
+Let's wrap things up by updating the `app.vue` file to include the components and display all the tasks.
+
+```vue
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import type { Task } from "./keelClient";
+import { createClient } from "./utils/createClient";
+
+const tasks = ref<Task[]>([]);
+const errorMsg = ref<string>("");
+
+const fetchData = async () => {
+  const client = createClient();
+  const response = await client.api.queries.listTask();
+  if (response.data) {
+    tasks.value = response.data.results;
+  } else {
+    errorMsg.value = response.error.message;
+  }
+};
+
+const handleTaskCreated = (createdTask: Task) => {
+  tasks.value.unshift(createdTask);
+};
+
+onMounted(() => {
+  fetchData();
+});
+</script>
+
+<template>
+  <div>
+    <div>
+      <div>
+        <create-task-form @task-created="handleTaskCreated" />
+        <section>
+          <p v-if="errorMsg !== ''">{{ errorMsg }}</p>
+          <p v-else-if="tasks.length === 0">No tasks yet!</p>
+          <task-list v-else :tasks="tasks" />
+        </section>
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+Once completed, run the local server with the command `npm run dev` and test it on a browser using `localhost:3000`.
+
+## Next steps
+
+Congrats, you have successfully set up a Keel-powered Nuxt application! You can extend the application further by adding custom CSS and support for updating and deleting tasks.
+
+Check out the [examples repository](https://github.com/teamkeel/examples) with several real-world examples of using Keel with various frameworks and libraries.
