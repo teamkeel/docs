@@ -12,17 +12,19 @@ The `keel init` command guides you through setting up a new project from scratch
 
 These starter templates can be found at [https://github.com/teamkeel/starter-templates](https://github.com/teamkeel/starter-templates). We only support one template for the moment.
 
-## Support for nested creates in functions
+## Support for creating nested records with functions
 
-This change means that model inputs for relationships work in `create` functions (as in, they are handled automatically for you).
+Up to now we have supported [creating nested records with built-in actions](/actions#creating-nested-records). We now support this with functions.
 
-Given this schema (permissions omitted)
-```
+Take this schema, for example.
+
+```keel
 model Author {
   fields {
     name Text
     books Book[]
   }
+
   actions {
     create createAuthor(name, books.title) @function
   }
@@ -36,7 +38,8 @@ model Book {
 }
 ```
 
-And this API request.
+The following API request will create an author and a linked book record.
+
 ```jsonc
 // POST /api/json/createAuthor
 {
@@ -48,8 +51,6 @@ And this API request.
   ]
 }
 ```
-
-An author record would be created with a linked book record!
 
 ## Fixes and Improvements
 
