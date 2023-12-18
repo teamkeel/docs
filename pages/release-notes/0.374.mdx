@@ -14,7 +14,7 @@ These starter templates can be found at [https://github.com/teamkeel/starter-tem
 
 ## Support for creating nested records with functions
 
-Up to now we have supported [creating nested records with built-in actions](/actions#creating-nested-records). We now support this with functions.
+Up to now we have supported [creating nested records](/actions#creating-nested-records) for built-in actions. We have now extended support of this feature to functions!
 
 Take this schema, for example.
 
@@ -38,7 +38,7 @@ model Book {
 }
 ```
 
-The following API request will create an author and a linked book record.
+The following API request will now create both the author and the linked book record.
 
 ```jsonc
 // POST /api/json/createAuthor
