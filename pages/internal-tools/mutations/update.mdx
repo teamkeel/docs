@@ -1,0 +1,39 @@
+# Update actions
+
+A model with a `update` action creates a page that renders a form with all the inputs for this action. Submitting the form runs the action and displays the response.
+
+An example of a Keel schema model with an update action.
+```keel
+model Order {
+    fields {
+      status OrderStatus? {
+          @default(OrderStatus.New)
+      }
+      deliveryAddress Text
+      customer Customer
+      payments Payment[]
+      items OrderItem[]
+    }
+
+    actions {
+      update updateOrder(id) with (
+        status,
+        deliveryAddress,
+        customer.id,
+        payments.id,
+        items.id,
+      )
+    }
+}
+```
+
+![Update action tool](/update-action-tool.png)
+
+## Request
+Input fields for the inputs provided in the schema will be rendered. Read more about input fields [here](/internal-tools#input-field-options).
+
+## Response
+Once you submit the form, the newly created entry and all of its fields will be displayed.
+
+## Extras
+A button to update another entry will be rendered in the toolbar.

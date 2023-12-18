@@ -1,0 +1,49 @@
+import { Callout } from "nextra/components";
+
+# Internal tools
+
+Internal tools give you a simple and secure user interface to interact with your data. Building them requires no extra effort, as they are automatically generated from [APIs](/apis) that Keel creates and exposes from your schema. And because they are generated you get the great Keel user experience out-of-the-box.
+
+<Callout type="info" emoji="⚒️">
+  A tool is an [action](/actions) that can be accessed and run via the [Keel Console](https://console.keel.so)
+</Callout>
+
+## Directory
+
+The default API and each [additional one](/tutorial#apis) will create their own directory of tools. You can access the directory (or directories) in the **Operate** section of the [Keel Console](https://console.keel.so).
+
+## Tool
+Keel creates a page with a route for each action in the schema. This 'tool' then allows a user to:
+1. Enter any inputs to the action
+2. Run the action
+3. Render the response
+4. Navigate to related actions (with pre-populated inputs)
+
+By defining a collection of actions of [all types](/actions#action-types), you assemble a UI optimised for efficient data manipulation and navigation through a unique flow of actions.
+
+_Example of a "List Orders" tool_
+![Tools example](/tools-example.png)
+
+You may see a blue information icon along the way. This will appear if you are missing an action that makes links between fields and actions possible.
+
+![Tools info icon](/tools-info-icon.png)
+
+
+### Toolbar
+Each tool may have [additional actions](/internal-tools/linked-actions) that are automatically linked for you. You will also see more options here, such as an option to favourite the tool so that it stays in the sidebar for easy access. Another option shown is for opening the action in the API explorer, which is another part of the Console that shows you examples of the types of API endpoints you can use in your own apps.
+
+![Toolbar example](/tools-toolbar-example.png)
+
+### Input field options
+For actions that have inputs, the input field components have been configured to match the input type you have written in your schema. 
+- If a field is optional, a `null` button will be displayed within that input field. This gives you the option to explicitly set that field to null.
+- If an input field has a value but you want to set that field to be undefined, use the clear button to completely unset the field.
+- For boolean fields, a yes/no toggle button will appear. You can set these to null if your model field type is optional, or clear the field and leave it unset if your input field for that action is optional.
+- For repeated fields as inputs, you will have the option to add multiple items entries on the form.
+- For id inputs, you may have a lookup button to help find an id so you don't have to type in the value manually. See [here](/internal-tools/lookups) for more details.
+
+## Order
+Internal tools consider the order of fields and actions in the model and will render them accordingly. Any fields relating to other models ([relationships](/models#one-to-one-relationships)) will always be displayed last.
+
+## Permissions
+Since internal tools just tap into the APIs, they respect the [permission](/permissions) logic from the schema and provide the context of the [Identity](/identity) logged into the Console. This way you have complete control over who has access to which actions.

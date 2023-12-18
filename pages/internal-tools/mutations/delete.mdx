@@ -1,0 +1,23 @@
+# Delete actions
+
+A model with a `delete` action creates a page that renders a form with the unique input that you provided in the schema. 
+
+An example of a Keel schema model with a delete action.
+```keel
+model Order {
+    actions {
+      delete deleteOrder(id)
+    }
+}
+```
+
+![Delete action tool](/delete-action-tool.png)
+
+## Request
+For `id` input fields, if the model has a relevant list action, you will see a "lookup" action button within the input field to help you quickly find the correct entry. Learn more [here](/internal-tools/lookups)
+
+## Response
+Displays whether the deletion was successful or not.
+
+## Extras
+A button to delete another entry will be rendered in the toolbar.

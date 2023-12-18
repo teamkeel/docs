@@ -1,0 +1,16 @@
+import { Callout } from "nextra/components";
+
+# Linked actions
+For some types of actions, the toolbar allows easy access to other relevant actions. These options will be generated for you depending on what other actions you have in your schema for the same model.
+
+## List actions
+For list action tools, a shortcut to the `create` action of that model will be rendered, and/or a dropdown menu with any other `list` actions.
+
+![Linked actions for list](/tools-list-linked-actions.png)
+
+## Get actions
+For get action tools, once a entry has been fetched, you can quickly go to the `update` or `delete` action for that model, if you have these actions in your schema.
+
+Any unique field inputs for those actions will be prefilled with the data from the `get` action.
+
+![Linked actions for get](/tools-get-linked-actions.png)

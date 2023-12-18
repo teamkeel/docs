@@ -1,0 +1,54 @@
+import { Callout } from "nextra/components";
+
+# Lookup fields
+Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry on the id input field, so that they don't need to type in the value manually.
+
+<Callout type="info" emoji="ℹ️">
+  The lookup button defaults to using a list action on the relevant model that doesn't have any required inputs. This is so that all possible fields are displayed on default.
+  If no list actions without required fields exists in your schema, it will use the first list action it can find on the model.
+</Callout>
+
+Clicking on a lookup button will open the list action view in a modal. Clicking on a row entry result will fill the id input for you.  
+
+Here is an example of a Keel schema with list actions that enable the lookup button on id input fields:
+
+```keel {10, 24}
+model Author {
+    fields {
+        name Text
+        book Book
+    }
+
+    actions {
+        get getAuthor(id) 
+        // enables lookup on getBook and getAuthor
+        list listAuthors()
+        create createAuthor() with (book.id)
+    }
+}
+
+model Book {
+    fields {
+        title Text
+        author Author
+    }
+
+    actions {
+        get getBook(id?, author.id?) 
+        // enables lookup on createAuthor
+        list listBooks()
+    }
+}
+```
+
+This example will allow you to look up the id fields of the other model or on the same model.
+
+![Lookup get id example](/tools-lookup-get-example.png)
+
+On the `get` action of `Author`, you will find an input field for the author id. The lookup button will use `listAuthors` to display all possible authors and to be able to select an id.
+
+![Lookup list example](/tools-lookup-list-example.png)
+
+Also, on the `create` action of `Author`, you will find an input field for the book id, so that it can link the `Book` to `Author`. 
+
+![Lookup create example](/tools-lookup-create-example.png)

@@ -1,0 +1,38 @@
+import { Callout } from "nextra/components";
+
+# Linked fields
+
+Linked fields are id fields that you can click on to view all of the data for that entry. It will prefill the id input for the `get` action with the id that you have clicked on and fetch the data.
+
+<Callout type="info" emoji="ℹ️">
+  ID fields will only appear linked if you have a `get` action in your schema for that id's model.
+</Callout>
+
+For the below example, when an `Author` entry is fetched, you will see an "agent id" field returned. The `id` will be linked to the `getAgent` action so that you can view all of the book data.
+
+```keel
+model Author {
+    fields {
+        name Text
+        books Book[]
+        agent Agent?
+    }
+
+    actions {
+        get getAuthor(id) 
+    }
+}
+
+model Agent {
+    fields {
+        name Text
+    }
+
+    actions {
+        get getAgent(id) 
+    }
+}
+```
+
+![Linked field id example](/tools-linked-field-example.png)
+

@@ -1,0 +1,37 @@
+# Get actions
+
+A model with a `get` action creates a page that renders a single entry. If the action does not have required inputs, the tool will automatically fetch the data. 
+
+This is an example of a Keel schema model with a get action, which will create a tool with the `id` as an input field and return a single `Order` entry.
+```keel {15}
+model Order {
+    fields {
+        status OrderStatus? @default(OrderStatus.New)
+        deliveryAddress Text
+        customer Customer
+        payments Payment[]
+        items OrderItem[]
+        deliveryNotes Text?
+        repeatOrder Boolean?
+        additionalOrderDetails AdditionalOrderDetails?
+        orderCompletedAt Timestamp?
+        orderSentBy Date?
+    }
+
+    actions {
+        get getOrder(id)
+    }
+}
+```
+![Get action tool](/tools-get-action.png)
+
+## Request
+If this action has inputs, it generates an inputs panel with a form that runs the action. 
+
+For any of the id input fields, if the model has a relevant list action, you will see a "lookup" action button within the input field to help you quickly find an entry. Learn more [here](/internal-tools/lookups).
+
+## Response
+All fields from the model will be displayed, ordered in the same way as your Keel schema fields are listed, except for relationship fields. Any repeated fields that are linked to other models will render a linked [relationship](/internal-tools/relationships) field. These are listed at the end.
+
+## Extras
+This tool will also show you `update` and/or `delete` action buttons in the toolbar, if your Keel schema includes these actions on the same model. Find out more [here](/internal-tools/linked-actions). 
