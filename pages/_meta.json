@@ -30,13 +30,9 @@
   "authentication": "Authentication",
   "apis": "APIs",
   "envvars": "Environment Variables",
+  "internal-tools": "Internal tools",
   "secrets": "Secrets",
   "keelconfig": "keelconfig.yaml",
-  "-- internal-tools": {
-    "title": "Internal tools",
-    "type": "separator"
-  },
-  "internal-tools": "Overview",
   "-- tools": {
     "title": "Tools",
     "type": "separator"
@@ -54,6 +50,7 @@
   "tutorial": "Basic Tutorial",
   "advanced-tutorial": "Advanced Tutorial",
   "nextjs-app-router": "Next.js (App Router)",
+  "internal-tools-tutorial": "Internal Tools Tutorial",
   "-- misc": {
     "title": "Misc",
     "type": "separator"

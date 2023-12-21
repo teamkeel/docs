@@ -1,0 +1,109 @@
+# Unique records
+
+## Showing a product
+Since we want to manage stock for individual products, we need a way to view a single product. Adding a `get` action creates a page that displays all fields for a single product.
+
+```keel {4,8}
+model Product {
+    actions {
+        ...
+        get getProduct(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [..., get]
+    )
+}
+```
+
+![Get product tool](/internal-tools-tutorial-get-product-with-inputs.png)
+
+It also links to single products in the data table of your `List products` tool (incl. passing the appropriate `id`).
+
+![Linked list & get](/internal-tools-tutorial-get-product.gif)
+
+### Linking fields
+Now we want to be able to find all the stock associated with a product. Adding a `list` action to `StockItem` with `product.id` as input creates a link to list them.
+
+```keel {17,21}
+model Product {
+    fields {
+        ...
+        stock StockItem[]
+    }
+    actions {
+        ...
+    }
+}
+model StockItem {
+    fields {
+        ...
+        product Product
+    }
+    actions {
+        ...
+        list listStockItems(product.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [..., list]
+    )
+}
+```
+
+![Linked field](/internal-tools-tutorial-linked-field.gif)
+
+![Linked field in list](/internal-tools-tutorial-list-product-linked.gif)
+
+## Schema
+
+```keel filename="schema.keel" {9,15,27,31}
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+    actions {
+        get getProduct(id)
+        list listProducts()
+        create createProduct() with (name, description?, imageUrl?, stock.quantity, stock.location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, get]
+    )
+}
+
+model StockItem {
+    fields {
+        product Product
+        quantity Number
+        location StockLocation
+    }
+    actions {
+        create createStockItem() with (quantity, product.id, location.id)
+        list listStockItems(product.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [create, list]
+    )
+}
+
+model StockLocation {
+    fields {
+        name Text @unique
+        items StockItem[]
+    }
+    actions {
+        list listStockLocations()
+        create createStockLocation() with (name)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create]
+    )
+}
+```
