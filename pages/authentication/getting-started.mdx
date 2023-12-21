@@ -42,7 +42,7 @@ Authentication providers are all configured in your `keelconfig.yaml` file.  For
 auth:
   providers:
     - type: google
-      name: 'Google Example'
+      name: google_client
       clientId: {{clientId}}
 ```
 
@@ -52,14 +52,14 @@ If you would like to configure your own custom provider, please read the [Config
 
 If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
-Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_{provider name}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE`.
+Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_{provider name}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT`.
 
 #### Locally
 
-If you are running Keel locally, you can set the client secret by setting the environment variable `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to the client secret you obtained from your provider. Then, you'll need to add it to your local Keel backend. You can do so by running the following command using the [Keel CLI](/cli).
+If you are running Keel locally, you can set the client secret by setting the environment variable `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` to the client secret you obtained from your provider. Then, you'll need to add it to your local Keel backend. You can do so by running the following command using the [Keel CLI](/cli).
 
 ```
-keel secrets set development KEEL_AUTH_SECRET_GOOGLE_EXAMPLE <your client secret>
+keel secrets set development AUTH_PROVIDER_SECRET_GOOGLE_CLIENT <your client secret>
 ```
 
 The `secrets` command has the following signature:
@@ -68,11 +68,11 @@ The `secrets` command has the following signature:
 keel secrets set <env> <key> <value>
 ```
 
-So here, we're setting the `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` to your secrent for the `development` environment. You can also set alternate secrets for other environments, such as `testing`.
+So here, we're setting the `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` to your secrent for the `development` environment. You can also set alternate secrets for other environments, such as `testing`.
 
 #### In Production on the Keel Console
 
-If you're hosting your app on Keel, you can set the client secret by going to the **Secrets** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `KEEL_AUTH_SECRET_GOOGLE_EXAMPLE` as the key and your client secret as the value.
+If you're hosting your app on Keel, you can set the client secret by going to the **Secrets** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` as the key and your client secret as the value.
 
 Every subsequent deployment will have access to this secret.
 
