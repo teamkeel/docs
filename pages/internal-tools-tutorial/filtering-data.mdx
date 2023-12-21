@@ -1,0 +1,95 @@
+# Filtering data
+
+## Listing out-of-stock products
+Now we want to list products that have no stock. We can do this by adding `stock.id` input to the `listProducts` action. It generates a panel that let's you set input values. Setting it to `null` in the tool will let you find products where no stock exists.
+```keel {8}
+model Product {
+    fields {
+        ...
+        stock StockItem[]
+    }
+    actions {
+        ...
+        list listProducts(stock.id?)
+    }
+}
+```
+
+![Inputs](/internal-tools-tutorial-inputs.gif)
+
+Let's keep the original list action as it was and create a second list action. When many actions of the same type exist in a model, the tool generates a panel that let's you quickly switch between them.
+```keel {8-9}
+model Product {
+    fields {
+        ...
+        stock StockItem[]
+    }
+    actions {
+        ...
+        list listProducts()
+        list listProductsWhereStock(stock.id)
+    }
+}
+```
+
+![Inputs](/internal-tools-tutorial-list-switcher.gif)
+
+
+## Schema
+
+```keel filename="schema.keel" {11}
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+    actions {
+        get getProduct(id)
+        list listProducts(stock.id)
+        list listProductsWhereStock(stock.id)
+        create createProduct() with (name, description?, imageUrl?, stock.quantity, stock.location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, get]
+    )
+}
+
+model StockItem {
+    fields {
+        product Product
+        quantity Number
+        location StockLocation
+    }
+    actions {
+        list listStockItems(product.id)
+        update updateStockItem(id) with (quantity)
+        delete deleteStockItem(id)
+        get getStockItem(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, update, delete, get]
+    )
+}
+
+model StockLocation {
+    fields {
+        name Text @unique
+        items StockItem[]
+    }
+    actions {
+        list listStockLocations()
+        create createStockLocation() with (name)
+        update updateStockLocation() with (name)
+        delete deleteStockLocation(name)
+        get getStockLocation(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, update, delete, get]
+    )
+}
+```

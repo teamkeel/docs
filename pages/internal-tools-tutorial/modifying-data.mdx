@@ -1,0 +1,119 @@
+# Modifying data
+
+## Modifying a stock item
+Now that we can create a product and navigate to its stock items, let's generate a way to update the quantity of a stock item or to remove it completely, e.g. once it's shipped. You should be familiar with how to do this, as `update` & `delete` actions generate and behave in the same way as `create`.
+
+```keel {8,9,11-14}
+model StockItem {
+    fields {
+        ...
+        quantity Number
+    }
+    actions {
+        ...
+        update updateStockItem(id) with (quantity)
+        delete deleteStockItem(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [..., update, delete]
+    )
+}
+```
+
+![](/internal-tools-tutorial-delete.gif)
+
+### Linking update & delete actions
+We can generate links to `update` & `delete` actions on pages that show a unique entry (`get` action pages). We have already added a `get` action to `Product`, let's add one to `StockItem` and `StockLocation` as well. These links will pass the selected `id` as input.
+
+```keel {4,8,14,18}
+model StockItem {
+    actions {
+        ...
+        get getStockItem(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [..., get]
+    )
+```
+
+![](/internal-tools-tutorial-linked-update.gif)
+
+## Manage stock locations
+You will probably update or delete stock locations independently from creating products, e.g. when you are setting up your warehouse. Let's generate tools for that too in the same way as we did for a product.
+```keel {7-9,13}
+model StockLocation {
+    fields {
+        name @unique
+    }
+    actions {
+        ...
+        update updateStockLocation() with (name)
+        delete deleteStockLocation(name)
+        get getStockLocation(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [..., update, delete, get]
+    )
+}
+```
+
+## Schema
+
+```keel filename="schema.keel" {27-29,33, 45-48, 51}
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+    actions {
+        get getProduct(id)
+        list listProducts()
+        create createProduct() with (name, description?, imageUrl?, stock.quantity, stock.location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, get]
+    )
+}
+
+model StockItem {
+    fields {
+        product Product
+        quantity Number
+        location StockLocation
+    }
+    actions {
+        list listStockItems(product.id)
+        update updateStockItem(id) with (quantity)
+        delete deleteStockItem(id)
+        get getStockItem(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, update, delete, get]
+    )
+}
+
+model StockLocation {
+    fields {
+        name Text @unique
+        items StockItem[]
+    }
+    actions {
+        list listStockLocations()
+        create createStockLocation() with (name)
+        update updateStockLocation() with (name)
+        delete deleteStockLocation(name)
+        get getStockLocation(id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, update, delete, get]
+    )
+}
+```

@@ -1,0 +1,66 @@
+# Wrapping up
+
+As you have seen, tools heavily utilise all actions types. A great starting point when thinking about tools is to create an action of each type per each model. Happy building!
+
+## Final schema
+
+```keel
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+    actions {
+        get getProduct(id)
+        list listProducts()
+        list listProductsWhereStock(stock.id)
+        create createProduct() with (name, description?, imageUrl?, stock.quantity, stock.location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, get]
+    )
+}
+
+model StockItem {
+    fields {
+        product Product
+        quantity Number
+        location StockLocation
+    }
+    actions {
+        list listStockItems(product.id)
+        update updateStockItem(id) with (quantity)
+        delete deleteStockItem(id)
+        create createStockItem() with (quantity, product.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, update, delete, create]
+    )
+}
+
+model StockLocation {
+    fields {
+        name Text @unique
+        items StockItem[]
+    }
+    actions {
+        list listStockLocations()
+        create createStockLocation() with (name)
+        update updateStockLocation() with (name)
+        delete deleteStockLocation(name)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list, create, update, delete]
+    )
+}
+```
+
+## Further reading
+
+* [Internal tools documentation](/internal-tools)
+* [Actions](/actions)
