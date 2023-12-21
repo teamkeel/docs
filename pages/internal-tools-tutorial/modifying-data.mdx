@@ -62,7 +62,7 @@ model StockLocation {
 
 ## Schema
 
-```keel filename="schema.keel" {27-29,33, 45-48, 51}
+```keel filename="schema.keel" {28-30,34, 46-49, 52}
 model Product {
     fields {
         name Text
@@ -88,6 +88,7 @@ model StockItem {
         location StockLocation
     }
     actions {
+        create createStockItem() with (quantity, product.id, location.id)
         list listStockItems(product.id)
         update updateStockItem(id) with (quantity)
         delete deleteStockItem(id)
@@ -95,7 +96,7 @@ model StockItem {
     }
     @permission(
         expression: ctx.isAuthenticated,
-        actions: [list, update, delete, get]
+        actions: [create, list, update, delete, get]
     )
 }
 

@@ -1,6 +1,6 @@
 # Unique records
 
-## Querying a product
+## Showing a product
 Since we want to manage stock for individual products, we need a way to view a single product. Adding a `get` action creates a page that displays all fields for a single product.
 
 ```keel {4,8}
@@ -25,7 +25,7 @@ It also links to single products in the data table of your `List products` tool 
 ### Linking fields
 Now we want to be able to find all the stock associated with a product. Adding a `list` action to `StockItem` with `product.id` as input creates a link to list them.
 
-```keel {17,19-22}
+```keel {17,21}
 model Product {
     fields {
         ...
@@ -46,7 +46,7 @@ model StockItem {
     }
     @permission(
         expression: ctx.isAuthenticated,
-        actions: [list]
+        actions: [..., list]
     )
 }
 ```
@@ -57,7 +57,7 @@ model StockItem {
 
 ## Schema
 
-```keel filename="schema.keel" {9,15,25-31}
+```keel filename="schema.keel" {9,15,27,31}
 model Product {
     fields {
         name Text
@@ -83,11 +83,12 @@ model StockItem {
         location StockLocation
     }
     actions {
+        create createStockItem() with (quantity, product.id, location.id)
         list listStockItems(product.id)
     }
     @permission(
         expression: ctx.isAuthenticated,
-        actions: [list]
+        actions: [create, list]
     )
 }
 

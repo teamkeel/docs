@@ -69,7 +69,7 @@ model StockLocation {
 
 ![Lookup fields](/internal-tools-tutorial-lookups.gif)
 
-## Manage stock locations
+## Create stock locations
 You will probably create stock locations independently from creating products, e.g. when you are setting up your warehouse. Let's generate that tool too in the same way as we did for a product.
 ```keel {7,11}
 model StockLocation {
@@ -87,9 +87,28 @@ model StockLocation {
 }
 ```
 
+## Create stock items
+When you want to re-stock an existing product, you want to create a new stock item and relate it to a product and a location.
+```keel {7-13}
+model StockItem {
+    fields {
+        quantity Number
+        product Product
+        location StockLocation
+    }
+    actions {
+        create createStockItem() with (quantity, product.id, location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [create]
+    )
+}
+```
+
 ## Schema
 
-```keel filename="schema.keel" {10,14,31-38}
+```keel filename="schema.keel" {10,14,24-30,38-45}
 model Product {
     fields {
         name Text
@@ -113,6 +132,13 @@ model StockItem {
         quantity Number
         location StockLocation
     }
+    actions {
+        create createStockItem() with (quantity, product.id, location.id)
+    }
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [create]
+    )
 }
 
 model StockLocation {

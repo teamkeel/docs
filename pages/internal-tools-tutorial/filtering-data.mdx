@@ -64,6 +64,7 @@ model StockItem {
         location StockLocation
     }
     actions {
+        create createStockItem() with (quantity, product.id, location.id)
         list listStockItems(product.id)
         update updateStockItem(id) with (quantity)
         delete deleteStockItem(id)
