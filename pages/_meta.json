@@ -51,6 +51,9 @@
   "advanced-tutorial": "Advanced Tutorial",
   "nextjs-app-router": "Next.js (App Router)",
   "internal-tools-tutorial": "Internal Tools Tutorial",
+  "keel-remix": "Remix",
+  "keel-nuxt": "Nuxt",
+  "keel-vue": "Vue",
   "-- misc": {
     "title": "Misc",
     "type": "separator"
