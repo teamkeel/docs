@@ -31,7 +31,7 @@ This will also create a **create button** in the console to create products from
 ![Create product tool](/internal-tools-tutorial-create-product-link.png)
 
 ### Nested records
-When we create a product, we might want to add new stock items using the same form. We can use [dot notation on action inputs](/actions#creating-nested-records) to do this.
+When we create a product, we might want to add new stock items using the same form. Since `StockItem` relates to the `Product` model we can use [dot notation on action inputs](/actions#creating-nested-records) to do this.
 
 ```keel {6, 11, 20-33}
 model Product {
