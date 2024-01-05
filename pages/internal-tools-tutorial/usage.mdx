@@ -1,7 +1,7 @@
-# Filtering data
+# Using the internal tools
 
-## Listing out-of-stock products
-Now we want to list products that have no stock. We can do this by adding `stock.id` input to the `listProducts` action. It generates a panel that let's you set input values. Setting it to `null` in the tool will let you find products where no stock exists.
+A common use case for an inventory management system is to list products that have no stock. To do this, we can add `stock.id` as an input to the `listProducts` action. It generates a panel that let's you set input values.
+
 ```keel {8}
 model Product {
     fields {
@@ -14,6 +14,8 @@ model Product {
     }
 }
 ```
+
+In the generated tool, setting this input value to `null` will let you find products where no stock exists.
 
 ![Inputs](/internal-tools-tutorial-inputs.gif)
 
@@ -32,10 +34,18 @@ model Product {
 }
 ```
 
+We can switch between list views using the generated user interface using the new dropdown element:
+
 ![Inputs](/internal-tools-tutorial-list-switcher.gif)
 
+## Putting it all together
 
-## Schema
+Now, we've got a complete end-to-end stock management solution with zero application code written: we had to write no frontend logic or backend logic, but instead declaratively described our application with a schema, and generated an entire backoffice tool from it to let our business run smoothly.
+
+
+### Schema
+
+The adjusted schema looks like this:
 
 ```keel filename="schema.keel" {11}
 model Product {
@@ -94,3 +104,9 @@ model StockLocation {
     )
 }
 ```
+
+## Next steps
+
+This tutorial has shown you how to use Keel to build an end-to-end inventory management system. You can now use the generated tool to manage your stock. You can also use the generated GraphQL API to build a frontend application if you so choose.
+
+Let's wrap up.

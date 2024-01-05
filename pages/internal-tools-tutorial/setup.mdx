@@ -2,16 +2,20 @@ import { Callout } from "nextra/components";
 
 # Setup
 
-<Callout type="info" emoji="💡">
-  Create a [new blank project](https://console.keel.so/start?type=blank) in your Keel Console. Once you deploy a schema, you will be able to access internal tools in the **Operate** section of the sidebar.
-</Callout>
+To begin, we will create a [new blank project](https://console.keel.so/start?type=blank) in your Keel Console. Once you deploy a schema, you will be able to access internal tools in the **Operate** section of the sidebar.
 
-## Basic models
+![Operate section](/internal-tools-tutorial-sidebar.webp)
 
-### Product
 
-Let's first create a `Product` for which we want to manage stock. We'll give it a name, an optional description and an optional image URL.
-```keel {1-7}
+## Creating a schema
+
+Before we use this section, let's create a schema with some models and fields.
+
+### The `Product` model
+
+Let's first create a `Product` model for which we want to manage stock. We'll give it a name, an optional description and an optional image URL.
+
+```keel
 model Product {
     fields {
         name Text
@@ -21,16 +25,20 @@ model Product {
 }
 ```
 
-### StockItem
+### The `StockItem` model
 
-Since we want to track how many products we have in stock, let's create a `StockItem` with a quantity field and a relationship to the `Product` (a product can have many stock items).
-```keel {4,7-12}
+Since we want to track how many products we have in stock, let's create a `StockItem` model with a quantity field and a [one-to-many](/models#one-to-many) relationship to the `Product` (a product can have many stock items).
+
+```keel {6, 10-16}
 model Product {
     fields {
-        ...
+        name Text
+        description Text?
+        imageUrl Text?
         stock StockItem[]
     }
 }
+
 model StockItem {
     fields {
         product Product
@@ -39,28 +47,11 @@ model StockItem {
 }
 ```
 
-### StockLocation
+### The `StockLocation` model
 
 And lastly, we want to know where the stock is located. Let's create a `StockLocation` with an identifiable name and a relationship to `StockItem` (a location can keep many items).
-```keel {4, 7-12}
-model StockItem {
-    fields {
-        ...
-        location StockLocation
-    }
-}
 
-model StockLocation {
-    fields {
-        name Text @unique
-        items StockItem[]
-    }
-}
-```
-
-## Schema 
-
-```keel filename="schema.keel" {1-23}
+```keel {14, 18-23}
 model Product {
     fields {
         name Text
@@ -86,12 +77,36 @@ model StockLocation {
 }
 ```
 
-## Preview tools
+### Putting it all together
 
-<Callout type="info" emoji="💡">
-  Deploy your schema to generate internal tools in the [Keel Console](https://console.keel.so)
-</Callout>
+Now, we have the complete schema that drives our stock management application:
 
- If you navigate to `All tools` in the Console, you see that, apart from the built-in `Identity` tools, we haven't created any custom tools yet, because we haven't added any actions.
+```keel filename="schema.keel"
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+}
 
-![No custom tools](/internal-tools-tutorial-empty.png)
+model StockItem {
+    fields {
+        product Product
+        quantity Number
+        location StockLocation
+    }
+}
+
+model StockLocation {
+    fields {
+        name Text @unique
+        items StockItem[]
+    }
+}
+```
+
+## Previewing internal tools
+
+With this schema, we can now deploy our project and start using the internal tools in the [Keel Console](https://console.keel.so). If you navigate to `All tools` in the Console per the screenshot above, you see that, apart from the built-in `Identity` tools, we haven't created any custom tools yet. Tools are generated from **actions** that you define in your schema, so let's create some in the next section.

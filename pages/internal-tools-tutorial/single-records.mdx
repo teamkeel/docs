@@ -1,6 +1,5 @@
-# Unique records
+# Single records
 
-## Showing a product
 Since we want to manage stock for individual products, we need a way to view a single product. Adding a `get` action creates a page that displays all fields for a single product.
 
 ```keel {4,8}
@@ -16,14 +15,19 @@ model Product {
 }
 ```
 
+Now, when we deploy the schema, we can view a single proudct by its ID.
+
 ![Get product tool](/internal-tools-tutorial-get-product-with-inputs.png)
 
-It also links to single products in the data table of your `List products` tool (incl. passing the appropriate `id`).
+It also links to single products in the data table of our `List products` tool that we created [earlier](/internal-tools-tutorial/listing-data).
 
 ![Linked list & get](/internal-tools-tutorial-get-product.gif)
 
+Notice how the Stock field displays a `ⓘ Missing 'list' action` message? We'll fix that next.
+
 ### Linking fields
-Now we want to be able to find all the stock associated with a product. Adding a `list` action to `StockItem` with `product.id` as input creates a link to list them.
+
+Let's go deeper and explore how we can find all the stock associated with a product. Adding a `list` action to `StockItem` with `product.id` as input creates a link to list them.
 
 ```keel {17,21}
 model Product {
@@ -35,6 +39,7 @@ model Product {
         ...
     }
 }
+
 model StockItem {
     fields {
         ...
@@ -51,11 +56,21 @@ model StockItem {
 }
 ```
 
+Now, our single product page displays a user interface element linking to this product's relevant stock items.
+
 ![Linked field](/internal-tools-tutorial-linked-field.gif)
+
+Our list of products also links to the list of stock items for each product with this one change to our schema:
 
 ![Linked field in list](/internal-tools-tutorial-list-product-linked.gif)
 
-## Schema
+## Putting it all together
+
+With a few simple changes to our schema, we can now dive deeper into a single product and its related data from a list. We can also link to a list of stock items for each product's single product page, all with zero code outside of our single Keel schema.
+
+The full schema after all these changes is below.
+
+### Schema
 
 ```keel filename="schema.keel" {9,15,27,31}
 model Product {
@@ -107,3 +122,7 @@ model StockLocation {
     )
 }
 ```
+
+## Next steps
+
+Okay, we've nearly got a full stock management solution—however, we cannot yet update or delete products or stock items. Let's fix that in the next section.

@@ -27,10 +27,10 @@
     "title": "Features",
     "type": "separator"
   },
+  "internal-tools": "Internal tools",
   "authentication": "Authentication",
   "apis": "APIs",
   "envvars": "Environment Variables",
-  "internal-tools": "Internal tools",
   "secrets": "Secrets",
   "keelconfig": "keelconfig.yaml",
   "-- tools": {
@@ -49,8 +49,8 @@
   },
   "tutorial": "Basic Tutorial",
   "advanced-tutorial": "Advanced Tutorial",
+  "internal-tools-tutorial": "Internal Tools",
   "nextjs-app-router": "Next.js (App Router)",
-  "internal-tools-tutorial": "Internal Tools Tutorial",
   "keel-remix": "Remix",
   "keel-nuxt": "Nuxt",
   "keel-vue": "Vue",

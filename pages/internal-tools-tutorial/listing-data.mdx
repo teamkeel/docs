@@ -1,40 +1,10 @@
 # Listing data
 
-## List products
 Let's create a tool called `List products` by adding a simple `list` action to the `Product` model. This will display a data table with a list of all Products in the database.
-```keel {2-4}
-model Product {
-    actions {
-        list listProducts()
-    }
-}
-```
-![First action](/internal-tools-tutorial-first-action.png)
 
-![No permission set](/internal-tools-tutorial-no-permission.png)
+As we recall, this is our full schema from the previous section:
 
-### Setting permissions
-In order for a Console user to be able to run any action they need [permissions](/permissions). Since the Keel Console provides the context of authenticated user, you can safely use `ctx.isAuthenticated` with no extra configuration.
-
-```keel {5-8}
-model Product {
-    actions {
-        list listProducts()
-    }
-    @permission(
-        expression: ctx.isAuthenticated,
-        actions: [list]
-    )
-}
-```
-
-Now we can run the list action and see the results. Since we haven't created any entries yet, the list is empty.
-
-![List products (no entries)](/internal-tools-tutorial-list-no-products.png)
-
-## Schema
-
-```keel filename="schema.keel" {8-14}
+```keel
 model Product {
     fields {
         name Text
@@ -42,13 +12,6 @@ model Product {
         imageUrl Text?
         stock StockItem[]
     }
-    actions {
-        list listProducts()
-    }
-    @permission(
-        expression: ctx.isAuthenticated,
-        actions: [list]
-    )
 }
 
 model StockItem {
@@ -66,3 +29,66 @@ model StockLocation {
     }
 }
 ```
+
+## Creating a list action
+
+Let's augment it with a `list` action on the `Product` model:
+
+```keel {9-11}
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+
+    actions {
+        list listProducts()
+    }
+}
+
+// Other models omitted for brevity
+```
+
+Now, if we `git push` this and deploy it to Keel, we can see the new action in the Console:
+
+![First action](/internal-tools-tutorial-first-action.png)
+
+However, when we try to run this action, we get an error:
+
+![No permission set](/internal-tools-tutorial-no-permission.png)
+
+This is because Keel is secure by default and requires you to explicitly set permissions for each action. Let's do that now.
+
+## Setting permissions
+
+In order for a Console user to be able to run any action they need [permissions](/permissions). If you want to just allow anyone with access to your Keel project to run an action you can use the expression `ctx.isAuthenticated`. If you want only certain members of your team to be able to use an action you can use [roles](/permissions#roles).
+
+```keel {13-16}
+model Product {
+    fields {
+        name Text
+        description Text?
+        imageUrl Text?
+        stock StockItem[]
+    }
+
+    actions {
+        list listProducts()
+    }
+
+    @permission(
+        expression: ctx.isAuthenticated,
+        actions: [list]
+    )
+}
+
+// Other models omitted for brevity
+```
+
+Now we can run the list action and see the results. Since we haven't created any entries yet, the list is empty.
+
+![List products (no entries)](/internal-tools-tutorial-list-no-products.png)
+
+Let's explore how we can create products and insert them into our database using generated internal tools in the next section.

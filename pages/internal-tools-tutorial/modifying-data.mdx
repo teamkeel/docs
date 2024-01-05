@@ -1,7 +1,6 @@
 # Modifying data
 
-## Modifying a stock item
-Now that we can create a product and navigate to its stock items, let's generate a way to update the quantity of a stock item or to remove it completely, e.g. once it's shipped. You should be familiar with how to do this, as `update` & `delete` actions generate and behave in the same way as `create`.
+Now that we can create a product and navigate to its stock items, let's generate a way to update the quantity of a stock item or to remove it completely, for example when a stock item for a product is shipped and therefore no longer in stock. If we're somewhat familiar with a Keel schema, this should be pretty clear as `update` & `delete` actions generate and behave in the same way as `create`.
 
 ```keel {8,9,11-14}
 model StockItem {
@@ -21,10 +20,18 @@ model StockItem {
 }
 ```
 
-![](/internal-tools-tutorial-delete.gif)
+This change to the schema will generate two new pages in the Keel console:
 
-### Linking update & delete actions
-We can generate links to `update` & `delete` actions on pages that show a unique entry (`get` action pages). We have already added a `get` action to `Product`, let's add one to `StockItem` and `StockLocation` as well. These links will pass the selected `id` as input.
+1. A page where we can delete a stock item by providing its `id` property, and
+2. A page where we can update a stock item by providing its `id` property and the new `quantity` value.
+
+![Deleting a stock item](/internal-tools-tutorial-delete.gif)
+
+These new user interfaces are generated automatically based on the schema with no additional code required. The only thing we need to do is to add the `update` & `delete` actions to the `@permission` annotation so that they are accessible to authenticated users.
+
+## Linking update & delete actions
+
+If we [create single-record pages](/internal-tools-tutorial/single-records) for stock items, we can generate links to `update` & `delete` actions directly from those pages. We have already added a `get` action to our `Product` model. Let's add one to `StockItem` and `StockLocation` as well.
 
 ```keel {4,8,14,18}
 model StockItem {
@@ -38,10 +45,16 @@ model StockItem {
     )
 ```
 
-![](/internal-tools-tutorial-linked-update.gif)
+With this change, we now get a page to view a single stock item and can update and delete stock items straight from there.
 
-## Manage stock locations
-You will probably update or delete stock locations independently from creating products, e.g. when you are setting up your warehouse. Let's generate tools for that too in the same way as we did for a product.
+![New UI elements to update and delete stock items](/internal-tools-tutorial-linked-update.gif)
+
+Let's make our tool more robust by doing the same for stock locations, as we may add new locations or shut down existing ones as the business grows.
+
+## Stock locations
+
+You will probably update or delete stock locations independently from creating products, e.g. when you are setting up your warehouse. Let's generate tools for that too in the same way as we did for a product and for stock items above.
+
 ```keel {7-9,13}
 model StockLocation {
     fields {
@@ -60,7 +73,17 @@ model StockLocation {
 }
 ```
 
-## Schema
+Now, we can update and delete stock locations from the list page and view a single stock location from the single-record page. We've got a robust solution to manage our stock locations.
+
+## Putting it all together
+
+With this, we have a complete tool to manage our stock. We can create products, add stock items to them, and update or delete stock items and stock locations. We can also view a single product, stock item, or stock location. 
+
+As is the Keel promise, **we have an entire business application with a complete user interface and a complete backend with zero application code**. We wrote a Keel schema and nothing more, yet we can now focus on building our business and not worry about the technical details of building an entire business application with a full engineering team.
+
+### Schema
+
+Here's our schema so far:
 
 ```keel filename="schema.keel" {28-30,34, 46-49, 52}
 model Product {
@@ -118,3 +141,7 @@ model StockLocation {
     )
 }
 ```
+
+## Next steps
+
+Okay, we've got a full tool to manage our stock. Let's look at how it can provide value immediately by putting it to use with a practical use case in the next section.
