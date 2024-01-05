@@ -63,7 +63,7 @@ This is because Keel is secure by default and requires you to explicitly set per
 
 ## Setting permissions
 
-In order for a Console user to be able to run any action they need [permissions](/permissions). Since the Keel Console provides the context of authenticated user, you can safely use `ctx.isAuthenticated` with no extra configuration.
+In order for a Console user to be able to run any action they need [permissions](/permissions). If you want to just allow anyone with access to your Keel project to run an action you can use the expression `ctx.isAuthenticated`. If you want only certain members of your team to be able to use an action you can use [roles](/permissions#roles).
 
 ```keel {13-16}
 model Product {
