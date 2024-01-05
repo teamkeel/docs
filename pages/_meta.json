@@ -27,7 +27,7 @@
     "title": "Features",
     "type": "separator"
   },
-  "internal-tools": "Automatic Internal tools",
+  "internal-tools": "Internal tools",
   "authentication": "Authentication",
   "apis": "APIs",
   "envvars": "Environment Variables",
