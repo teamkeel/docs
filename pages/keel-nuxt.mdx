@@ -120,7 +120,11 @@ With that, you should see a `keelClient.ts` file at the root of your project.
 
 ### Create a Keel client
 
-A best practice with Keel is to create an instance of a Keel client per request. Create an `app/utils/createClient.ts` file to create and return a Keel instance.
+A best practice with Keel when using the client on the server side is to create an instance of a Keel client per request to keep things isolated between requests. 
+
+This is because clients are stateful and contain an access token as part of their instances. If we share clients across server-side requests and requests may service distinct clients if a serverless function is warm and reused, then that presents a risk of leaking tokens between requests. Thus, it's safer to create clients and associate access tokens per request.
+
+Create an `app/utils/createClient.ts` file to create and return a Keel instance.
 
 ```tsx
 import { APIClient } from "../keelClient";
