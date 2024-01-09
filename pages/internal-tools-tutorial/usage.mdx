@@ -57,7 +57,7 @@ model Product {
     }
     actions {
         get getProduct(id)
-        list listProducts(stock.id)
+        list listProducts()
         list listProductsWhereStock(stock.id)
         create createProduct() with (name, description?, imageUrl?, stock.quantity, stock.location.id)
     }
