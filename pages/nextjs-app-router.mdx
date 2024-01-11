@@ -14,12 +14,12 @@ npx create-next-app@latest
 
 On running the command, you must answer a few questions. Answer them as shown below:
 
-```bash
+```
 What is your project named? my-app
 Would you like to use TypeScript?  <Yes>
 Would you like to use ESLint? <No>
 Would you like to use Tailwind CSS? <Yes>
-Would you like to use `src/` directory? <Yes>
+Would you like to use 'src/' directory? <Yes>
 Would you like to use App Router? (recommended) <Yes>
 Would you like to customize the default import alias (@/*)? <Yes>
 What import alias would you like configured? @/* <Press Enter>
@@ -27,7 +27,7 @@ What import alias would you like configured? @/* <Press Enter>
 
 After completing this step you should have a new directory containing a Next.js app so change into that directory, for example.
 
-```
+```bash
 cd my-app
 ```
 
@@ -41,7 +41,7 @@ In this guide, you’ll quickly set up a CRUD backend for a basic task manager.
 
 Create a new file called `schema.keel` in the project root directory and insert the snippet below:
 
-```protobuf
+```keel
 model Task {
     fields {
         description Text
@@ -66,8 +66,8 @@ model Task {
 
 The schema above creates a `Task` model with a `description` field as well as some actions that will allow us to interact with tasks over our API.
 
-<Callout type="info" emoji="ℹ️">
-💡 All models have `id`, `createdAt` and `updatedAt` fields built-in.
+<Callout type="info" emoji="💡">
+All models have `id`, `createdAt` and `updatedAt` fields built-in.
 </Callout>
 
 By default, your Keel API’s are secure unless you explicitly define permission rules to access them. For this example we just want our API’s to be accessible publicly (e.g. without auth) so we’ve added a permission rule that always allows access using `expression: true`.
@@ -84,7 +84,7 @@ Ensure Docker is running.
 docker ps
 ```
 
-With docker running, you can run the backend using the Keel CLI.
+With Docker running, you can run the backend using the Keel CLI.
 
 ```bash
 keel run
@@ -130,7 +130,7 @@ A best practice with Keel when using the client on the server side is to create 
 
 This is because clients are stateful and contain an access token as part of their instances. If we share clients across server-side requests and requests may service distinct clients if a serverless function is warm and reused, then that presents a risk of leaking tokens between requests. Thus, it's safer to create clients and associate access tokens per request.
 
-Create an `app/utils/createClient.ts` file to create and return a Keel instance.
+Create an `src/utils/createClient.ts` file to create and return a Keel instance.
 
 ```tsx
 import { APIClient } from '../../keelClient';
@@ -151,7 +151,7 @@ export const createClient = () => {
 Finally, let's create a `.env` file in the project root and add the Keel API root. Note that the URL should end with just `/api`. 
 
 ```bash
-# Using Keel in your local
+# Using Keel on your local
 KEEL_API_URL=http://localhost:8000/api 
 ```
 
