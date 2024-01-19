@@ -352,6 +352,61 @@ export default DeleteProduct({
 });
 ```
 
+### Named inputs
+
+Given the following schema, we have a `get` function called `latestRelease` that takes a `director` input.
+
+```keel filename="schema.keel"
+model Film {
+  fields {
+    director Text
+    releaseDate Date
+  }
+  actions {
+    get latestRelease(director) @function
+  }
+}
+```
+
+In this case, `director` is a field on the model. Sometimes, we may need to pass inputs to functions that are not fields on the model. For example, we may want to pass a `yearLimit` input to this `get` function to find the latest release *within* a given year for directors who have released multiple films in that year.
+
+To do this, add a specific input to this function that the function will receive that is not a field on the model. This is called a *named input*. We can do this like so.
+
+```keel filename="schema.keel" {7}
+model Film {
+  fields {
+    director Text
+    releaseDate Date
+  }
+  actions {
+    get latestRelease(director, yearLimit: Number) @function
+  }
+}
+```
+
+Now, the hooks for this function will receive a property called `yearLimit` on their `inputs` argument that can be used for further filtering.
+
+```typescript filename="functions/latestRelease.ts" {11,12}
+import { ListFilms } from "@teamkeel/sdk";
+
+export default ListFilms({
+  async beforeQuery(ctx, inputs, query) {
+    const allFilms = await query.where({
+      title: {
+        endsWith: "phantom menace",
+      },
+    });
+
+    // filter the films by yearLimit
+    const films = allFilms.filter((f) => f.releaseDate.getFullYear() <= inputs.yearLimit);
+
+    return films;
+  },
+});
+```
+
+We use `inputs.yearLimit` to filter the films by the year limit provided by the caller of the function even though `yearLimit` is not necessarily a field on the model. This is the value of named inputs.
+
 ## Custom functions
 
 There may be cases where you want to define a function that returns custom data or needs to receive unknown data as input. For these situations, you can use the `read` and `write` action types with `messages`.
