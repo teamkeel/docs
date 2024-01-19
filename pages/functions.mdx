@@ -392,8 +392,8 @@ import { ListFilms } from "@teamkeel/sdk";
 export default ListFilms({
   async beforeQuery(ctx, inputs, query) {
     const allFilms = await query.where({
-      title: {
-        endsWith: "phantom menace",
+      director: {
+        endsWith: "Waititi",
       },
     });
 
