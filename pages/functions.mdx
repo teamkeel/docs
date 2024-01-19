@@ -370,7 +370,7 @@ model Film {
 
 In this case, `director` is a field on the model. Sometimes, we may need to pass inputs to functions that are not fields on the model. For example, we may want to pass a `yearLimit` input to this `get` function to find the latest release *within* a given year for directors who have released multiple films in that year.
 
-To do this, add a specific input to this function that the function will receive that is not a field on the model. This is called a *named input*. We can do this like so.
+To do this, we can add a specific input to this function that the function will receive that is not a field on the model. This is called a *named input*. We can do this like so.
 
 ```keel filename="schema.keel" {7}
 model Film {
