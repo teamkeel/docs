@@ -94,7 +94,7 @@ model StockLocation {
     actions {
         list listStockLocations()
         create createStockLocation() with (name)
-        update updateStockLocation() with (name)
+        update updateStockLocation(id) with (name)
         delete deleteStockLocation(name)
         get getStockLocation(id)
     }
