@@ -2,7 +2,7 @@
 
 We provide the following authentication endpoints to support our various authentication flows and access token requests:
  - `/auth/providers`: lists all the configured providers and their URLs
- - `/auth/token`: returns access and refresh tokens in exchange for either [ID tokens](/authentication/flows/oidc-token#getting-access-tokens) or [authorization codes](/authentication/flows/sso-login#getting-access-tokens)
+ - `/auth/token`: returns an access and refresh token in exchange for either an [ID token](/authentication/flows/id-token#getting-access-tokens), [authorization code](/authentication/flows/sso#getting-access-tokens), or [username and password](/authentication/flows/password#getting-access-tokens).
  - `/auth/authorize/{name}`: redirects to the provider's login page
  - `/auth/callback/{name}`: to be configured as the redirect URL with the provider
  - `/auth/revoke`: revoke a refresh token to prevent it from being used to get a new access token
@@ -30,12 +30,12 @@ This endpoint lists all the configured 3rd-party authentication providers along 
 
 ## `/auth/token`
 
-The token endpoint is used to get access tokens, which are subsequently used to access your Keel API. To request an access token, make a POST request to `/auth/token` using form-encoded data. For example,
+The token endpoint is used to get access tokens, which are subsequently used to access your Keel API. To request an access token, make a POST request to `/auth/token` using either form-encoded data or as `application/json`. For example,
 
 ```bash
 curl --request POST \
   --url 'https://{your-project}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
 ```
@@ -44,17 +44,19 @@ curl --request POST \
 
 | Parameter Name | Description                                |
 |----------------|--------------------------------------------|
-| `grant_type`     | Either `refresh_token`, `token_exchange`, or `authorization_code` |
+| `grant_type`     | Either `refresh_token`, `token_exchange`, `authorization_code`, or `password` |
 | `refresh_token`  | Only required for `refresh_token` grant    |
 | `subject_token`  | Only required for `token_exchange` grant   |
 | `code`  | Only required for `authorization_code` grant   |
+| `username`  | Only required for `password` grant   |
+| `password`  | Only required for `password` grant   |
 
-We currently support three types of _grants_:
+We currently support four types of _grants_:
 
  - The `refresh_token` grant type to [refresh your access token](/authentication/tokens).
- - The `token_exchange` grant type to perform [OIDC Token authentication](/authentication/flows/oidc-token). 
- - The `authorization_code` grant type to perform [SSO Login authentication](/authentication/flows/sso-login). 
-
+ - The `token_exchange` grant type to perform [ID Token authentication](/authentication/flows/id-token). 
+ - The `authorization_code` grant type to perform [Single Sign-On authentication](/authentication/flows/sso). 
+ - The `password` grant type to perform [Password authentication](/authentication/flows/password). 
 
 ### Response
 
@@ -78,9 +80,8 @@ To revoke a refresh token, make a POST request to `/auth/revoke` using form-enco
 ```bash
 curl --request POST \
   --url 'https://{your-domain}/auth/revoke' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data token=REFRESH_TOKEN 
 ```
 
 The refresh token will no longer be available and any attempt to use it to get a new access token with this refresh token will fail. Users will need to re-authenticate to get a new refresh token.
-

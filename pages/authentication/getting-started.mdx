@@ -4,39 +4,42 @@ import { Callout } from "nextra/components";
 
 In order for users to securely interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly integrating with third-party authentication providers, such as Google, Facebook and GitHub.  
 
-We currently support two flows for authenticating with third-party providers.
+We currently support three authentication flows, two of which for authenticating with third-party providers.
 
- - [**Single-Sign On (SSO) Login:**](/authentication/flows/sso-login) Use this flow if you want Keel to perform the authentication handshake and flow automatically for you with your preferred provider. 
+ - [**Single Sign-On (SSO):**](/authentication/flows/sso) Use this flow if you want Keel to handle the authentication handshake with your preferred 3rd-party authentication provider (e.g. Google).
 
- - [**OpenID Connect (OIDC) Tokens:**](/authentication/flows/oidc-token) Use this flow if you have already built the authenticatation steps with your preferred provider (probably using [Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)) and you have an ID Token.
+ - [**ID Token:**](/authentication/flows/id-token) If you have already built 3rd-party authenticatation into your application (probably using [Authorization Code Flow](https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow)) and you have an ID Token.
 
-These flows are both enabled by default. All you need to do is configure your providers. For newer applications, we recommend using the SSO Login flow as it is simpler to set up and use.  However, if you already have an existing authentication flow, then you can use the OIDC Token flow.
+ - [**Password:**](/authentication/flows/password) Basic username and password authentication.
 
-These are the basic steps you need to follow when setting up a new authentication provider.  
+## Configuring 3rd-party authentication
 
- 1. Set up the client with your provider
+To get set up with Single Sign-On or ID Token authentication, you will need to follow these steps:
+
+ 1. Create a new OAuth client with your provider
  2. Configure your `keelconfig.yaml`
  3. Authenticate your users! 🚀
+ 4. Perform authenticated requests to your Keel APIs
 
 We will cover each of these below.
 
-### Set up the client with your provider
+### Create a new OAuth client with your provider
 
-To use an authentication flow with an external service, you will need to set up a client with each of the third-party providers you have configured. For example, to setup "Login with Google" authentication flow, you'll need to create a [Google client](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid). You'll need to do similar things on [Facebook](https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow), [Gitlab](https://docs.gitlab.com/ee/integration/oauth_provider.html), and any other provider you want to use.
+To use an authentication flow with an external service, you will need to set up a client with each of the third-party providers you have configured. For example, to setup "Login with Google" authentication flow, you'll need to create a [Google client](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid). You'll need to do similar things on [Facebook](https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow), [GitLab](https://docs.gitlab.com/ee/integration/oauth_provider.html), and any other provider you want to use.
 
 Once you've done this, you will be provided with the following:
  - Client ID:  An identifier for your app with the external service. This is how they know your app is communicating with them. This needs to be configured in your `keelconfig.yaml` as shown in the next section.
- - Client secret: Your app's password on the external service. This should always be kept a secret. This needs to be configured in your host, as discussed soon.
+ - Client Secret: Your app's password on the external service. This should always be kept a secret. This needs to be configured in your host, as discussed soon.
 
 <Callout emoji="ℹ️" type="info">
-  If you only intend to use OIDC Token authentication, then you can ignore the client secret. It is only necessary for SSO Login. 
+  If you only intend to use ID Token authentication, then you can ignore the client secret. It is only necessary for Single Sign-On. 
 </Callout>
 
-Providers usually have decent documentation on how to set this up, but we've documented the exact steps on how to do this for some the popular providers.  Visit the [Providers section](/authentication/providers) for more.
+Visit the [Providers page](/authentication/providers) for more information.
 
 ### Configure your `keelconfig.yaml`
 
-Authentication providers are all configured in your `keelconfig.yaml` file.  For example, let's enable Google:
+3rd-party authentication providers are all configured in your `keelconfig.yaml` file.  For example, let's enable Google:
 
 ```yaml filename="keelconfig.yaml"
 auth:
@@ -48,9 +51,9 @@ auth:
 
 If you would like to configure your own custom provider, please read the [Configuration page](/authentication/configuration) for more details on how to do this.
 
-### Setting Secrets
+### Setting secrets
 
-If you plan to use the SSO Login flow, then you will need to configure the client secret on every host on which your Keel app will run.  
+If you plan to use the Single Sign-On flow, then you will need to configure the client secret on every host on which your Keel app will run.  
 
 Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_{provider name}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT`.
 
@@ -72,13 +75,27 @@ So here, we're setting the `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` to your secrent 
 
 #### In Production on the Keel Console
 
-If you're hosting your app on Keel, you can set the client secret by going to the **Secrets** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` as the key and your client secret as the value.
+If you're hosting your app with Keel, you can set the client secret by going to the **Secrets** tab on the [Keel Console](https://console.keel.xyz), where you can find an "Add secret" button. Clicking this will give you two form fields: key and value. There, you can add `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` as the key and your client secret as the value.
 
 Every subsequent deployment will have access to this secret.
 
-## Authenticate your Users
+## Authenticate your users
 
-Now that you are all configured, the next step is to authenticate using one of our flows:
+Now that you are all configured, the next step is to authenticate users:
 
- * [Single Sign-on flow](/authentication/flows/sso-login)
- * [OpenID Connect flow](/authentication/flows/oidc-token)
+ * [Single Sign-On](/authentication/flows/sso)
+ * [ID Token](/authentication/flows/id-token)
+ * [Password](/authentication/flows/password)
+
+
+## Perform authenticated requests to your Keel APIs
+
+After authenticating, proceed to use the access token you have received to perform authenticated requests to your Keel APIs.  This is done by including the access token (prefixed with `Bearer`) in the `Authorization` header of the request.
+
+```bash
+curl --request POST \
+  --url 'http://localhost:8000/web/json/searchAuthors' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
+  --data '{ "where": { "name": { "startsWith": "Bob" } } }'
+```

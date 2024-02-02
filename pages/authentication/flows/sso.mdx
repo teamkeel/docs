@@ -1,7 +1,7 @@
 import { Callout } from "nextra/components";
 import { Tab, Tabs } from "nextra-theme-docs";
 
-# Single Sign-on
+# Single Sign-on authentication
 
 Keel provides an abstraction over all the complex OAuth gymnastics which you would normally need to build into for your application. This is especially useful if you want to support multiple different authentication providers (such as Google, Facebook, GitLab, etc.). What this means is that all you need to do is provide some simple configuration in your `keelconfig.yaml` file, integrate with a singular auth endpoint. Keel handles the rest.
 
@@ -100,7 +100,7 @@ Configure the callbackUrl below to the client's allowed redirect URLs. This can 
 
 ### Setting the Client Secret
 
-SSO Login flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client. This secret must be set as a secret in your environment.
+The Single Sign-On flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client. This secret must be set as a secret in your environment.
  - For local CLI use, `keel secrets set development MY_SECRET 'my-value'` is used to set a secret
  - For hosted environments, use the environment variables page in the Console
 
@@ -111,3 +111,15 @@ We cover this in much more detail in the broader [getting started section](/auth
 ## Other Considerations
 
 - Make sure to enable the Authorization Code Grant flow on the auth provider's console, if necessary. Auth0 requires this to be explicitly enabled.
+
+## Perform authenticated requests to your Keel APIs
+
+After authenticating, proceed to use the access token you have received to perform authenticated requests to your Keel APIs.  This is done by including the access token (prefixed with `Bearer`) in the `Authorization` header of the request.
+
+```bash
+curl --request POST \
+  --url 'http://localhost:8000/web/json/searchAuthors' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
+  --data '{ "where": { "name": { "startsWith": "Bob" } } }'
+```
