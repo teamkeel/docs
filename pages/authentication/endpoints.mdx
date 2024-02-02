@@ -16,14 +16,14 @@ This endpoint lists all the configured 3rd-party authentication providers along 
   {
     "name": "google",
     "type": "google",
-    "authorizeUrl": "https://mytestapp.keelapps.xyz/auth/authorize/google",
-    "callbackUrl": "https://mytestapp.keelapps.xyz/auth/callback/google"
+    "authorizeUrl": "http://localhost:8000/auth/authorize/google",
+    "callbackUrl": "http://localhost:8000/auth/callback/google"
   },
   {
     "name": "fb",
     "type": "facebook",
-    "authorizeUrl": "https://mytestapp.keelapps.xyz/auth/authorize/facebook",
-    "callbackUrl": "https://mytestapp.keelapps.xyz/auth/callback/facebook"
+    "authorizeUrl": "http://localhost:8000/auth/authorize/facebook",
+    "callbackUrl": "http://localhost:8000/auth/callback/facebook"
   }
 ]
 ```
@@ -34,7 +34,7 @@ The token endpoint is used to get access tokens, which are subsequently used to 
 
 ```bash
 curl --request POST \
-  --url 'https://{your-project}.keel.so/auth/token' \
+  --url 'http://localhost:8000/auth/token' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
@@ -79,9 +79,9 @@ To revoke a refresh token, make a POST request to `/auth/revoke` using form-enco
 
 ```bash
 curl --request POST \
-  --url 'https://{your-domain}/auth/revoke' \
+  --url 'http://localhost:8000/auth/revoke' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
-  --data token=REFRESH_TOKEN 
+  --data token={{keel_refresh_token}} 
 ```
 
-The refresh token will no longer be available and any attempt to use it to get a new access token with this refresh token will fail. Users will need to re-authenticate to get a new refresh token.
+The refresh token will no longer be available and any attempt to use it will fail. Users will need to re-authenticate to get a new refresh token.

@@ -41,18 +41,18 @@ import { Tab, Tabs } from "nextra-theme-docs";
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{your-project}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
 ```
   </Tab>
   <Tab>
 ```js
-fetch('https://{your-project}.keel.so/auth/token', {
+fetch('http://localhost:8000/auth/token', {
   method: 'POST',
   headers: {
-    'content-type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded'
   },
   body: new URLSearchParams({
     grant_type: 'token_exchange',
@@ -90,7 +90,7 @@ After authenticating, proceed to use the access token you have received to perfo
 
 ```bash
 curl --request POST \
-  --url 'http://localhost:8000/web/json/searchAuthors' \
+  --url 'http://localhost:8000/api/json/searchAuthors' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
   --data '{ "where": { "name": { "startsWith": "Bob" } } }'

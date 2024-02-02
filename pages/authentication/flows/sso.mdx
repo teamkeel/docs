@@ -29,19 +29,19 @@ You can trade the authorization `code` for a set of Keel tokens by calling the `
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{yourProject}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=authorization_code \
   --data subject_token={{auth_code}}
 ```
   </Tab>
   <Tab>
 ```js
-fetch('https://{yourProject}.keel.so/auth/token', {
+fetch('http://localhost:8000/auth/token', {
   method: 'POST',
   url: ,
   headers: {
-    'content-type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded'
   },
   data: new URLSearchParams({
     grant_type: 'authorization_code,
@@ -56,7 +56,7 @@ fetch('https://{yourProject}.keel.so/auth/token', {
   </Tab>
 </Tabs>
 
-The expected `content-type` of the `/auth/token` endpoint is `application/x-www-form-urlencoded` because this is enforced by the OAuth standard. After making this request, if you are successfully authenticated, the token endpoint will respond with `HTTP 200` and the following `application/json` response body.
+The expected `Content-Type` of the `/auth/token` endpoint is `application/x-www-form-urlencoded` because this is enforced by the OAuth standard, however we also support `application/json` for convenience.  After making this request, if you are successfully authenticated, the token endpoint will respond with `HTTP 200` and the following `application/json` response body.
 
 ```json filename="HTTP 200"
 {
@@ -118,7 +118,7 @@ After authenticating, proceed to use the access token you have received to perfo
 
 ```bash
 curl --request POST \
-  --url 'http://localhost:8000/web/json/searchAuthors' \
+  --url 'http://localhost:8000/api/json/searchAuthors' \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
   --data '{ "where": { "name": { "startsWith": "Bob" } } }'

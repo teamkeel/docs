@@ -33,19 +33,19 @@ import { Tab, Tabs } from "nextra-theme-docs";
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{your-project}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=refresh_token \
   --data subject_token={{refresh_token}}
 ```
   </Tab>
   <Tab>
 ```js
-fetch('https://{your-project}.keel.so/auth/token', {
+fetch('http://localhost:8000/auth/token', {
   method: 'POST',
   url: ,
   headers: {
-    'content-type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded'
   },
   data: new URLSearchParams({
     grant_type: 'refresh_token',
