@@ -1,0 +1,43 @@
+import { Callout } from 'nextra/components'
+
+# 02 February, 2024
+
+These changes have been released with version `0.378` of the CLI.
+
+## Improved error tracing
+
+We have recently shipped the [Local Console](/release-notes/0.376) - a really powerful feature that gives you __almost__ full Console ([https://console.keel.so](https://console.keel.so)) support when running the Keel CLI locally. 
+
+We've been enhancing the Monitoring page as we've seen that it's become a very useful tool for local debugging.  
+
+### `console.error()` tracing
+
+Calling `console.error()` from within your function code will now be captured and traced as an error, and the message will become available in the relevant span.
+
+![console.error tracing](/release-notes/0-378-console-error-tracing.png)
+
+### Error filtering
+
+You can now filter out successful traces on the Monitoring page to only see errors. 
+
+![error filtering](/release-notes/0-378-error-filtering.png)
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.378.0) to the CLI.
+
+# ⚠️ Upcoming Breaking Changes
+
+Until now, we have supported passing in an OpenID Connect ID Token as a bearer token when making a request to your Keel API. We will be deprecating this change on 16 February. Please migrate to using [ID Token authentication](/authentication/getting-started).
+
+## Next Steps
+
+To upgrade to the latest version, please run the following command:
+
+```bash
+brew upgrade keel
+```
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
