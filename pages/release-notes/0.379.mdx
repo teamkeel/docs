@@ -1,0 +1,55 @@
+import { Callout } from 'nextra/components'
+
+# 12 February, 2024
+
+These changes have been released with version `0.379` of the CLI.
+
+## Keel on NPM 
+
+We have moved the [Keel CLI to NPM](https://www.npmjs.com/package/keel)!
+
+This does mean that we will no longer be updating the Homebrew tap with new versions of the CLI.
+
+Let's get set up.
+
+### Remove Homebrew
+
+First, let's remove the Homebrew installation of Keel.
+
+```bash
+$ brew uninstall keel
+$ brew untap teamkeel/homebrew-keel
+```
+
+### Install Keel from NPM
+
+Next, let's install Keel from NPM.
+
+```bash
+$ npm install -g keel
+```
+
+Let's see if it all worked.  If you run the following command, you should see the ouput of `v0.379.1`
+
+```bash
+$ keel -v
+v0.379.1
+```
+
+## Keel on Windows
+
+Keel is now supported on Windows. And with our move to NPM, installation is a piece of cake.
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.379.1) to the CLI, Console Tools, and VS Code extension.
+
+## ⚠️ Upcoming Breaking Changes
+
+The built-in action `authenticate()` will be deprecated by the next release (earliest 19th February). Please migrate to using [the Password authentication flow](/authentication/flows/password).
+
+## Next steps
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
