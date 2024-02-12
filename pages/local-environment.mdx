@@ -1,36 +1,14 @@
 # Local environment setup
 
-
 When developing your Keel app locally there are two things which you'll probably want to setup - our CLI and our VSCode extension. Our CLI lets you run your project and develop against your APIs locally whilst our VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files.
-
-## Install the CLI
-The easiest way to install our CLI is via [Homebrew](https://brew.sh/).
-
-```bash
-$ brew tap teamkeel/homebrew-keel
-$ brew install keel
-```
-
-You can check the installation by running `keel -v` or `keel --version` in your terminal.
-
-```bash
-$ keel -v
-v0.378.0
-```
-
-import { Callout } from 'nextra/components'
-
-<Callout type="info" emoji="ℹ️">
-  In the future we'll support other installation methods for the CLI (such as npm) and also platforms other than Mac.
-  In the interim, linux users can install the CLI via Homebrew, and Windows users can do the same via [WSL](https://learn.microsoft.com/en-us/windows/wsl/install).
-</Callout>
 
 ### Dependencies
 
 You will need to install the following dependencies in order to use the Keel CLI locally:
 
 #### Node.js
-Node.js is used for running your functions and tests. We require Node version 18 or higher.
+
+Node.js is used for running your functions and tests, and NPM is required to install Keel.  We require Node version 18 or higher.
 
 import { Tab, Tabs } from 'nextra-theme-docs'
 
@@ -72,6 +50,23 @@ Docker is used by the CLI to run an instance of PostgreSQL. We only require that
 There are a few ways to get Docker installed and running on your local machine, however Docker Desktop is the easiest way to get started. Follow the [installation instructions for Docker Desktop](https://docs.docker.com/desktop/) to get set up.
 
 Please also make sure that Docker is running. You can test this by running `docker ps` in your terminal. 
+
+## Install the CLI
+
+Install the CLI globally:
+
+```bash
+$ npm install --global keel
+```
+
+If the CLI has installed correctly, the following command will respond with the current version number:
+
+```bash
+$ keel -v
+v0.379.1
+```
+
+
 
 ## VSCode Extension
 
