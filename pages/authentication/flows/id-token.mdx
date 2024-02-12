@@ -1,6 +1,6 @@
-# OpenID Connect (OIDC) Token
+# ID Token authentication
 
-With OIDC Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow you would have already performed the necessary authentication steps to get an access and ID token.  For example, if you're authenticating with Google, then you'll most likely have implemented the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in. 
+With ID Token authentication, we are able to securely authenticate a user with just an ID token from a third-party provider.  With this flow you would have already performed the necessary authentication steps to get an access and ID token.  For example, if you're authenticating with Google, then you'll most likely have implemented the [Authorization Code Flow](https://developers.google.com/identity/protocols/oauth2/javascript-implicit-flow) to sign the user in. 
 
 These are the general steps:
 
@@ -24,7 +24,7 @@ For OpenID Connect-compatible providers, the ID token will normally be returned 
 	"access_token": "{{provider_access_token}}",
 	"id_token": "{{provider_id_token}}",
 	"scope": "openid profile email address phone",
-	"expires_in": 86400, // one day
+	"expires_in": 86400,
 	"token_type": "Bearer"
 }
 ```
@@ -41,18 +41,18 @@ import { Tab, Tabs } from "nextra-theme-docs";
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{your-project}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=token_exchange \
   --data subject_token={{provider_id_token}}
 ```
   </Tab>
   <Tab>
 ```js
-fetch('https://{your-project}.keel.so/auth/token', {
+fetch('http://localhost:8000/auth/token', {
   method: 'POST',
   headers: {
-    'content-type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded'
   },
   body: new URLSearchParams({
     grant_type: 'token_exchange',
@@ -83,3 +83,15 @@ If the ID token cannot be verified, then you will receive an `HTTP 401` response
  - The provider is not configured - visit the [Configuration page](/authentication/configuration) for more.
  - The ID token was issued by a different client to what is configured in your Keel app.
  - The ID token was not legitimately issued by the provider. We perform various handshakes to ensure this is the case.
+
+## Perform authenticated requests to your Keel APIs
+
+After authenticating, proceed to use the access token you have received to perform authenticated requests to your Keel APIs.  This is done by including the access token (prefixed with `Bearer`) in the `Authorization` header of the request.
+
+```bash
+curl --request POST \
+  --url 'http://localhost:8000/api/json/searchAuthors' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
+  --data '{ "where": { "name": { "startsWith": "Bob" } } }'
+```

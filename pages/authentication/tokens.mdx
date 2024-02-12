@@ -33,19 +33,19 @@ import { Tab, Tabs } from "nextra-theme-docs";
   <Tab>
 ```bash
 curl --request POST \
-  --url 'https://{your-project}.keel.so/auth/token' \
-  --header 'content-type: application/x-www-form-urlencoded' \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=refresh_token \
   --data subject_token={{refresh_token}}
 ```
   </Tab>
   <Tab>
 ```js
-fetch('https://{your-project}.keel.so/auth/token', {
+fetch('http://localhost:8000/auth/token', {
   method: 'POST',
   url: ,
   headers: {
-    'content-type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/x-www-form-urlencoded'
   },
   data: new URLSearchParams({
     grant_type: 'refresh_token',
@@ -81,4 +81,4 @@ With refresh token rotation enabled in Keel, every time an application exchanges
 Keel does not yet support a full [Proof Key of Code Exchange (PKCE)](https://cloudentity.com/developers/basics/oauth-extensions/authorization-code-with-pkce/#:~:text=The%20Proof%20Key%20of%20Code%20Exchange%20(PKCE)%20is%20an%20extension,vulnerable%20to%20reverse%20engineering%20practices.) flow, while this work is planned. By using one-time-only refresh tokens that rotate, you don't need a full PKCE flow because each token rotation inherently adds an extra layer of security, reducing the risk associated with token interception and replay attacks, which PKCE primarily aims to mitigate.
 </Callout>
 
-This setting is enabled by default in Keel. You can disable it in the [`keelconfig.yaml` file](/authentication/configuration) though we don't recommend it.
+This setting is enabled by default in Keel. You can disable it in the [`keelconfig.yaml`](/authentication/configuration) file though we don't recommend it.
