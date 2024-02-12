@@ -57,18 +57,16 @@ The Keel VS Code extension provides sytax highlighting and inline validation of 
 </Callout>
 
 ## Installing the Keel CLI
-Next up, we need to install the keel CLI to our local machine, we can do this by running the following commands:
 
-### Homebrew
+Next up, we need to install the Keel CLI to our local machine.  We can do this by running the following command:
 
-The easiest way to install the Keel CLI is via [Homebrew](https://brew.sh/).
+Install the CLI globally from NPM:
 
 ```bash
-$ brew tap teamkeel/homebrew-keel
-$ brew install keel
+$ npm install --global keel
 ```
 
-You can check the installation by running `keel -v` or `keel --version` in your terminal.
+If the CLI has installed correctly, the following command will respond with the current version number:
 
 ```bash
 $ keel -v
