@@ -161,15 +161,15 @@ That's it! Our backend is up and running! Let's interact with it using the Graph
 
 ## Authenticating
 
-Let's start by authenticating with the API so we can create a user. To do this, you can call the token endpoint using the `password` flow:
+Let's start by authenticating with the API so we can create a user. To do this, you can call the token endpoint using the [password flow](authentication/flows/password):
 
 ```bash
 curl --request POST \
   --url 'http://localhost:8000/auth/token' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=password \
-  --data username={{email}} \
-  --data password={{password}}
+  --data username='test@keel.xyz' \
+  --data password='superSecr3t!'
 ```
 
 If all went well, we should receive a response that looks something like this:
@@ -189,9 +189,9 @@ That `access_token` is what will let us use the rest of the API.
 
 Great! Now that we have an [**Identity**](/identity) we can start querying our API.
 
-Let's navigate to the GraphQL playground by going to http://localhost:8000/api/graphiql(opens in a new tab).
+Let's navigate to the GraphQL playground by going to http://localhost:8000/api/graphiql(opens in a new tab), and then query the `createUser` action to create a new `User`. 
 
-Let's use it to create `User` from our data model at the application level. To do this, we'll run the following query:
+To do this, we'll run the following query:
 
 ```graphql
 mutation createUser {
