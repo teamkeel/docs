@@ -159,48 +159,39 @@ Each API has feature parity, so you can use whichever you prefer. For this guide
 
 That's it! Our backend is up and running! Let's interact with it using the GraphQL playground.
 
+## Authenticating
 
-## Interacting with the GraphQL API
+Let's start by authenticating with the API so we can create a user. To do this, you can call the token endpoint using the `password` flow:
 
-Let's start by authenticating with the API so we can create a user. To do this, let's first navigate to the GraphQL playground by going to http://localhost:8000/api/graphiql. From there, we'll need to run the following query:
-
-```graphql
-mutation authenticate {
-# We're calling the authenticate mutation
-  authenticate(
-    # It takes an `input` argument
-    input: {
-        # We're authenticating with an email and password
-        createIfNotExists: true, 
-        emailPassword: {
-            email: "test@keel.xyz",
-            password: "superSecr3t!"
-        }
-    }
-  ) {
-    # We get back 
-    token # an authentication token
-    identityCreated # whether or not the identity was created
-  }
-}
+```bash
+curl --request POST \
+  --url 'http://localhost:8000/auth/token' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data grant_type=password \
+  --data username={{email}} \
+  --data password={{password}}
 ```
 
 If all went well, we should receive a response that looks something like this:
 
 ```json
 {
-  "data": {
-    "authenticate": {
-      "identityCreated": true,
-      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ"
-    }
-  }
+  "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ",
+  "token_type": "Bearer",
+  "expires_in": 86400,
+  "refresh_token": "Nw6KK5wZ3KwEusohLJoW4ZXi2MMeKSWkOEIiyOjo3p3QbvGmdzi2Amr92OSZANo8"
 }
 ```
 
-That `token` is what will let us use the rest of the API.
+That `access_token` is what will let us use the rest of the API.
 
-Great! Now we have an [**Identity**](/identity). Let's use it to create `User` from our data model at the application level. To do this, we'll run the following query:
+## Interacting with the GraphQL API
+
+Great! Now that we have an [**Identity**](/identity) we can start querying our API.
+
+Let's navigate to the GraphQL playground by going to http://localhost:8000/api/graphiql(opens in a new tab).
+
+Let's use it to create `User` from our data model at the application level. To do this, we'll run the following query:
 
 ```graphql
 mutation createUser {
@@ -214,11 +205,11 @@ mutation createUser {
 }
 ```
 
-It's important that we're authenticated here, so let's take the `token` from the previous `authenticate` function and add it to the Headers tab in the GraphQL playground:
+It's important that we're authenticated here, so let's take the `access_token` from the previous `token` query and add it to the Headers tab in the GraphQL playground:
 
 ```json
 {
-  "Authorization":"Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ"
+  "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrZWVsIiwic3ViIjoiMll0ckZPdnFjQmQyZzFKRFQzOE9WQW9qWmMxIiwiZXhwIjoxNzAxNDQyMDEyLCJpYXQiOjE3MDEzNTU2MTJ9.bFBsXXJIaVy4ELRKInBKKQoFEVtAwJ1DUNH9oCwo0aT-5r5lQA6kEXJUrDK35Ini-0rKJfahwz-FcOQ6uLToIxuvoWeTtCLvVjEeBVcJWvpEASxXfntnIvn3oZBOhR8icExbPecbKE0dMmxRxvWmrjr3XDD9gUeWpj1MO4ihCgCszHRFJRjcMdy-3QzQ81LZXn0_SeXVpMgdfKIx7HLR95B2mnQi45isNreg9_lpzpXNIzH6r6YAmgamEmZIBts7e908VI2GeMEgB_ebgr2nN5s9R7X1rOSuXs31dB7LBsJgf2xYJ8KkF8O4SUV3rVZl1smJeBUsuMS6aWvy6cnwkQ"
 }
 ```
 
