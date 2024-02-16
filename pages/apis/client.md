@@ -1,0 +1,250 @@
+# Generated TypeScript client
+
+The generated TypeScript client provides you with an end-to-end, typesafe client library which you can use to easily authenticate and query your Keel APIs for frontend projects.  It has the following primary features:
+ - A type-safe SDK of your Keel API
+ - Support for Password, ID Token and Single Sign-On Authentication
+ - Automatically refreshes your access token
+
+
+
+import { Callout } from "nextra/components";
+
+<Callout>
+Requires version **0.351.0** or higher of the Keel [CLI](/cli).
+</Callout>
+
+## Generating the client
+
+To generate the client, use the `client` command in the [CLI](/cli) from within a Keel project
+
+```bash
+ keel client
+```
+
+This will generate a single file with zero dependancies in your current directory.
+
+To output the client directly into your frontend project you can either pass an output path.
+
+```bash
+keel client --output ../myFrontend/src
+```
+
+Or by running the CLI from your frontend project and referencing the Keel directory
+
+```bash
+keel client -d ../myKeelApp
+```
+
+This will generate a client for the first API in your project. If you have multiple APIs you can specify which API to generate for with the `-a apiName` flag
+
+<Callout type="info">
+This client uses fetch so will only work in environments where fetch is available
+</Callout>
+
+## Using the client
+
+First, import `APIClient` from the generated file and create a new instance with the deployed url of your project (or the [localhost](http://localhost) address if running locally)
+
+<Callout emoji="ℹ️" type="info">
+This `baseUrl` url should include the API name path but not the protocol (e.g. json/rpc/gql). For a local environment with `keel run`, this will be `http://localhost:8000/api`.
+</Callout>
+
+```ts
+import { APIClient } from "../keelClient";
+
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
+});
+```
+
+### Navigating the Generated client
+
+The generated client is segmented into three parts; `api`, `auth`, and `client`.
+
+#### api
+
+This includes all the actions that you have specified in your Keel schema. For example, if you have an action that lists all users, here is how you can use the generated client to execute this action on the client-side:
+
+```ts
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
+});
+
+// use generated client to execute the action on the client-side
+const allUsers = await client.api.queries.listUsers()
+
+// log response from API to console
+console.log(response.data?.results)
+```
+
+You can also use `.api.mutations` if you have actions that mutate data. For example, if you have an action that deletes a user, you can use it like so:
+
+```ts
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
+});
+
+// use generated client to execute the action on the client-side
+const response = await keel.api.mutations.createUser({ name: name, email: email});
+
+// log response from API to console
+console.log(response.data)
+```
+
+#### auth
+
+Here you are able to authenticate identities with any of our [supported authentication flows](authentication/getting-started), 
+
+- `providers()`: Returns the currently configured 3rd party authentication providers and their [Single Sign-On](/authentication/flows/sso) login URLs.
+- `authenticateWithPassword()`: Authenticate with the [password flow](/authentication/flows/id-token).
+- `authenticateWithIdToken()`: Authenticate with an [ID Token](/authentication/flows/id-token).
+- `authenticateWithSingleSignOn()`: Authenticate with an authorization code acquired from [Single Sign-On authentication](/authentication/flows/sso).
+- `isAuthenticated()`: Returns true if the session has not expired. If expired, it will attempt to refresh the session from the authentication server.
+- `refresh()`: Forcefully refreshes the session with the authentication server.
+- `logout()`: Logs out the session on the client and revokes the refresh token with the authentication server.
+
+#### client
+
+These are the core client actions that serve as configuration options for the client. They remain consistent across every Keel schema. They include:
+
+- `setHeaders()`
+- `setHeader()`
+- `setBaseUrl()`
+
+### Authenticating 
+
+Authentication is simple with the generated client because you don't need to worry about access tokens and refresh tokens at all.  It even automatically refreshes your tokens for you!
+
+The client stores the current session in memory by default, which means that when a new instance of the client is created, the session will be lost and authentication will need to take place again.  However, you can easily implement your own token persistence in order to retain session over a longer period (and between browser sessions, for example). 
+
+#### Password authentication
+
+Let's demonstrate by authenticating using the password flow.
+
+```ts
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
+});
+
+// authenticate the client with username and password
+await keel.auth.authenticateWithPassword(user, pass);
+
+// check that the client is authenticated
+const isAuthenticated = await keel.auth.isAuthenticated();
+
+// perform an authenticated request to your Keel API
+const response = await keel.api.mutations.createBlogPost({ title: title });
+```
+
+#### ID Token authentication
+
+With ID Token authentication, you would have already configured the 3rd-party authentication provider correctly in your `keelconfig.yaml` and you would have performed the necessary authentication flow with your 3rd-party provider in order to acquire an ID Token.  Once you have this ID Token, you can simple authenticate as follows:
+
+```ts
+// authenticate the client using an ID token from a 3rd-party provider
+await keel.auth.authenticateWithIDToken(idToken);
+```
+
+#### Single Sign-On authentication
+
+With Single Sign-On authentication, you would have started the authentication flow by redirecting the user's browser to the `authorizeUrl` URL found when calling `await keel.auth.providers()`.  When handling the callback (the `redirectUrl` as configured in your `keelconfig.yaml`), you can use the authorization code to authenticate.
+
+```ts
+// authenticate the client using an ID token from a 3rd-party provider
+await keel.auth.authenticateWithSingleSignOn(authCode);
+```
+
+#### Token refresh and expiry
+
+The client will automatically refresh your access token until such a point that the refresh token has expired.  This means that you do not need to concern yourself with refreshing at all.  It will also support **Refresh Token Rotation**, if enabled, and which we highly recommend.
+
+However, if the session has expired (i.e. the refresh token has expired), you will be required to reauthenticate the identity to start a new session.  
+
+```ts
+const response = await keel.api.mutations.createBlogPost({ title: title });
+
+if (response.error && response.error.type == "unauthorized") {
+  request.redirect(302, "/login");
+  return;
+} 
+```
+
+#### Session persistence
+
+Because the client only stores the session state in memory, you will need to reauthenticate each time the client is reinstantiated.  However, you can implement a custom token store to persist sessions.  This is done by implementing a very simple interface.  For example:
+
+```ts
+class LocalStorageStore {
+  #key = "keel-refresh-token";
+
+  get = () => {
+    return localStorage.get(#key);
+  };
+
+  set = (token: string | null): void => {
+    if (token) {
+      localStorage.set(#key, token);
+    } else {
+      localStorage.removeItem(#key);
+    }
+  };
+}
+```
+
+And then configuring the the client as following:
+
+```ts
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL,
+  refreshToken: new LocalStorageStore()
+});
+```
+
+Note that you can also provide a custom store implement for access tokens, however it's important to remember that access tokens are typically short-lived and only need to be stored if you're unable to reuse them between requests.
+
+```ts
+const client = new APIClient({
+  baseUrl: process.env.API_BASE_URL,
+  accessToken: new LocalStorageStore(),
+  refreshToken: new HttpOnlyCookieStore()
+});
+```
+
+### Error handling
+
+The response of an action is a promise that resolves to an object that either contains the data or an error object
+
+```tsx
+type Data<T> = {
+  data: T;
+  error?: never;
+};
+
+type Error = {
+  data?: never;
+  error: ErrorObj ;
+};
+
+type ErrorObj = {
+  type: "forbidden" | "not_found" | "internal_server_error" | "unknown" | "unauthorized" | "bad_request";
+  message: string;
+  requestId?: string; // can be used to access traces in the console
+};
+```
+
+You can then check the presence of the error object to handle any errors
+
+```tsx
+const myAction = await client.myAction({
+  input: "foo"
+});
+
+if (myAction.error) {
+  console.log("Failed", myAction.error.type);
+  return;
+}
+
+const { data } = myAction
+
+// Do things with the data
+```
