@@ -52,10 +52,10 @@ import { Callout } from 'nextra/components'
 
 ## Authentication
 
-All API endpoints use the same [JWT](https://jwt.io) (JSON Web Token)-based authentication. First you need to get a JWT by calling the built-in `authenticate` action. You can then pass this JWT in the `Authorization` header on all subsequent requests.
+All APIs use the same [JWT](https://jwt.io) (JSON Web Token)-based authentication. First you need to get an access token by [authenticating](authentication/getting-started). You can then pass this access token in the `Authorization` header on all subsequent requests.
 
 ``` filename="Example of authorization header"
-Authorization: Bearer <JWT token>
+Authorization: Bearer <access token>
 ```
 
 See the individual API docs for examples.
