@@ -1,0 +1,96 @@
+import { Callout } from 'nextra/components'
+
+# 19 February, 2024
+
+These changes have been released with version `0.380` of the CLI.
+
+## Revamped authorization on the generated TypeScript client
+
+We've made some significant changes to the generated client to better support our authentication flows and to take away the complexity of you having to deal with tokens.  We have built in support for:
+
+💡 Tokens all handled internally (no need to call `auth/token/`)
+🗝 Password authentication
+🗝 ID Token authentication
+🗝 Single Sign-On authentication
+♻️ Automatic refreshing of access tokens
+♻️ Support for Refresh Token Rotation
+🚪 Revokable refresh tokens
+❌ Migrated away from using the deprecated `authenticate` action
+
+Have a look at the [new Generated Client documention](apis/client) on how to go about using the revamped client!
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="❗️">
+  The API has changed a bit, which means that you will need to perform a minor migration. Please see the next section.
+</Callout>
+
+
+### Migration
+
+#### Calling `auth/token/` manually
+
+There is no need to call on our token endpoint anymore.  This happens implicitly when calling any of the new authenticate methods:
+
+```ts
+await client.auth.authenticateWithPassword(email, password);
+```
+
+```ts
+await client.auth.authenticateWithIdToken(idToken);
+```
+
+```ts
+await client.auth.authenticateWithSingleSignOn(idToken);
+```
+
+#### Setting tokens manually
+
+There is no need to set tokens anymore because the client will now handle all of this for you.  Previously it was necessary to call `client.setToken(accessToken)`.  This has been removed from the API.
+
+We have also removed `client.ctx.token` from the API.  If you do, for whatever reason, need to retrieve the tokens, then make a call to the token stores: `client.auth.accessToken.get()` and `client.auth.refreshToken.get()`.
+
+#### Checking for an active session
+
+Please use the `ctx.auth.isAuthenticated()` async function to check if a session is still active.  This approach is a lot more powerful, because if an access token has expired then it will be automatically refreshed at the server for you.  `client.ctx.isAuthenticated` has been removed from the API.
+
+```ts
+// Check if the session is still active and refresh it from the server if necessary
+if(await ctx.auth.isAuthenticated()) {
+    // Success!
+} else {
+    // Authenticate again
+}
+```
+
+#### Logging out
+
+Previously calling the method `client.auth.clearToken()` would remove the token from the client.  However, this wouldn't actually sign the session out.  This has been removed from the API in favour of the following.
+
+```ts
+// Sign out the session both in the client and from the authentication server
+await client.auth.logout();
+```
+
+#### Deprecated `authenticate()` action
+
+As we have previously announced, we have replaced the  built-in  `authenticate()` with our new authentication flows.  If you have been using the `authenticate()` action on the client, then please migrate to using the following:
+
+```ts
+// Authenticate with the password flow
+await client.auth.authenticateWithPassword(email, password);
+
+if(await ctx.auth.isAuthenticated()) {
+    // Success!
+}
+```
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.380.0) to the CLI, Console Tools, and VS Code extension.
+
+## Next steps
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
