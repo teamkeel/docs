@@ -4,18 +4,18 @@ import { Callout } from 'nextra/components'
 
 These changes have been released with version `0.380` of the CLI.
 
-## Revamped authorization on the generated TypeScript client
+## Revamped authorization on the generated client
 
-We've made some significant changes to the generated client to better support our authentication flows and to take away the complexity of you having to deal with tokens.  We have built in support for:
+We've made some significant upgrades to the generated TypeScript client to support our new [authentication flows](authentication/getting-started) and to take away the complexity of you having to deal with the token endpoint and refreshing tokens.  We have built in support for:
 
-💡 Tokens all handled internally (no need to call `auth/token/`)
-🗝 Password authentication
-🗝 ID Token authentication
-🗝 Single Sign-On authentication
-♻️ Automatic refreshing of access tokens
-♻️ Support for Refresh Token Rotation
-🚪 Revokable refresh tokens
-❌ Migrated away from using the deprecated `authenticate` action
+ - 💡 Tokens all handled implicitly and no need to call `auth/token/`
+ - 🗝 Password authentication
+ - 🗝 ID Token authentication
+ - 🗝 Single Sign-On authentication
+ - ♻️ Automatic refreshing of access tokens
+ - ♻️ Support for Refresh Token Rotation
+ - 🚪 Signing out on the server
+ - 👋 Migrated away from using the deprecated `authenticate` action
 
 Have a look at the [new Generated Client documention](apis/client) on how to go about using the revamped client!
 
@@ -23,21 +23,24 @@ Have a look at the [new Generated Client documention](apis/client) on how to go 
   The API has changed a bit, which means that you will need to perform a minor migration. Please see the next section.
 </Callout>
 
-### Migration
+### Migration steps
 
 #### Calling `auth/token/` manually
 
-There is no need to call on our token endpoint anymore.  This happens implicitly when calling any of the new authenticate methods:
+There is no need to call on our token endpoint anymore.  This happens implicitly when calling any of the new authenticate methods.
 
 ```ts
+// Signing in with an email and password
 await client.auth.authenticateWithPassword(email, password);
 ```
 
 ```ts
+// Signing in with a ID token
 await client.auth.authenticateWithIdToken(idToken);
 ```
 
 ```ts
+// Signing in with a Single Sign-On auth code
 await client.auth.authenticateWithSingleSignOn(idToken);
 ```
 
@@ -49,10 +52,10 @@ We have also removed `client.ctx.token` from the API.  If you do, for whatever r
 
 #### Checking for an active session
 
-Please use the `ctx.auth.isAuthenticated()` async function to check if a session is still active.  This approach is a lot more powerful, because if an access token has expired then it will be automatically refreshed at the server for you.  `client.ctx.isAuthenticated` has been removed from the API.
+Please use the `ctx.auth.isAuthenticated()` async function to check if a session is still active.  This new method is a lot more powerful because if an access token has expired then it will be automatically refreshed at the server for you.  `client.ctx.isAuthenticated` has been removed from the API.
 
 ```ts
-// Check if the session is still active and refresh it from the server if necessary
+// Check if the session is still active and refresh it if necessary
 if(await ctx.auth.isAuthenticated()) {
     // Success!
 } else {
@@ -62,7 +65,7 @@ if(await ctx.auth.isAuthenticated()) {
 
 #### Logging out
 
-Previously calling the method `client.auth.clearToken()` would remove the token from the client.  However, this wouldn't actually sign the session out.  This has been removed from the API in favour of the following.
+Previously calling the method `client.auth.clearToken()` would remove the token from the client.  However, this wouldn't actually sign the session out and revoke the refresh token for future use.  This has been removed from the API in favour of the following.
 
 ```ts
 // Sign out the session both in the client and from the authentication server
