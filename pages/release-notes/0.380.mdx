@@ -1,0 +1,104 @@
+import { Callout } from 'nextra/components'
+
+# 19 February, 2024
+
+These changes have been released with version `0.380` of the CLI.
+
+## Upgraded authentication on the generated client
+
+We've made some significant upgrades to the generated TypeScript client to support our new [authentication flows](authentication/getting-started) and to remove the need to interact with the token endpoint or to refreshing tokens yourself.  We have released support for:
+
+ - 🗝 Password authentication flow
+ - 🗝 ID Token authentication flow
+ - 🗝 Single Sign-On authentication flow
+ - 🤝 Access and refresh tokens handled implicitly
+ - ♻️ Automatic refreshing of access tokens
+ - ♻️ Support for Refresh Token Rotation
+ - 🚪 Signing out on the server (revoking a session)
+ - 👋 Migrated away from using the deprecated `authenticate` action
+
+Have a look at the [new Generated Client documention](apis/client) on how to go about using the revamped client!
+
+<Callout type="info" emoji="❗️">
+  The API has changed a bit, which means that you will need to perform a minor migration. Please see the next section.
+</Callout>
+
+### Migration steps
+
+#### Calling `auth/token/` manually
+
+There is no need to call on our token endpoint anymore.  This happens implicitly when calling any of the new authenticate methods.
+
+```ts
+// Signing in with an email and password
+await client.auth.authenticateWithPassword(email, password);
+```
+
+```ts
+// Signing in with a ID token
+await client.auth.authenticateWithIdToken(idToken);
+```
+
+```ts
+// Signing in with a Single Sign-On auth code
+await client.auth.authenticateWithSingleSignOn(idToken);
+```
+
+#### Setting tokens manually
+
+There is no need to set tokens anymore because the client will now handle this for you.  Previously it was necessary to call `client.setToken(accessToken)`.  This has been removed from the API.
+
+We have also removed `client.ctx.token`.  If you do, for whatever reason, need to retrieve the tokens, you can query each of the access the refresh token stores with `client.auth.accessToken.get()` and `client.auth.refreshToken.get()`.
+
+#### Checking for an active session
+
+Please use the `ctx.auth.isAuthenticated()` async function to check if a session is still active.  This new method is a lot more powerful because if an access token has expired then it will be automatically refreshed at the server for you.  `client.ctx.isAuthenticated` has been removed from the API.
+
+```ts
+// Check if the session is still active and refresh it if necessary
+if(await ctx.auth.isAuthenticated()) {
+    // Success!
+} else {
+    // Authenticate again
+}
+```
+
+#### Logging out
+
+Previously calling the method `client.auth.clearToken()` would remove the token from the client.  However, this wouldn't sign the session out by revoking the refresh token at the server.  This has been removed from the API in favour of the following.
+
+```ts
+// Sign out the session both in the client and from the authentication server
+await client.auth.logout();
+```
+
+#### Deprecated `authenticate()` action
+
+As we have previously announced, we have replaced the built-in `authenticate()` action with the new authentication flows.  If you have been using the `authenticate()` action on the client and you want to continue using email/password authentication, then please migrate to using the following:
+
+```ts
+// Authenticate with the password flow
+await client.auth.authenticateWithPassword(email, password);
+
+if(await ctx.auth.isAuthenticated()) {
+    // Success!
+}
+```
+
+Note that your existing Identities will be compatible with this flow.
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.380.0) to the CLI and VS Code extension.
+
+## Next steps
+
+Update to the latest version by updating Keel!
+
+```bash
+$ npm install -g keel
+```
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
