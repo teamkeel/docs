@@ -4,10 +4,11 @@ With ID Token authentication, we are able to securely authenticate a user with j
 
 These are the general steps:
 
- 1. Perform the relevant authentication flow with your provider
- 2. Extract the `id_token` from the successful token endpoint response
- 3. Perform "token exchange" with our `/auth/token` endpoint to authenticate
- 4. Use the access and refresh tokens to query your Keel API
+ 1. Configure the 3rd party provider's client ID into the `keelconfig.yaml` - see [here](/authentication/configuration).
+ 2. Perform the relevant authentication flow with your provider
+ 3. Extract the `id_token` from the successful token endpoint response
+ 4. Perform "token exchange" with our `/auth/token` endpoint to authenticate
+ 5. Use the access and refresh tokens to query your Keel API
 
 ## Retrieving the ID Token
 

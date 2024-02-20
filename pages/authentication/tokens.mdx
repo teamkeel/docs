@@ -2,7 +2,7 @@ import { Callout } from "nextra/components";
 
 # Tokens
 
-When an ID token or authorization code is exchanged for a set of Keel access and refresh tokens using the `/api/token` endpoint, it will always respond with both an access token and a refresh token.  
+When an username/password, ID token or authorization code is exchanged for a set of Keel access and refresh tokens using the `/api/token` endpoint, it will always respond with the following data. 
 
 ```json filename="HTTP 200"
 {
@@ -13,19 +13,27 @@ When an ID token or authorization code is exchanged for a set of Keel access and
 }
 ```
 
-The access token is a short-lived token used to access your Keel APIs. It should be confiugred to expire quickly because it provides direct access to your application on Keel as a user. If it's stolen, it can be used to access your application as that user and their identity can be compromised.
+Read more about the token endpoint [here](/authentication/endpoints#authtoken).
 
-The refresh token, however, lives much longer and is used to obtain a new access token without involving the user in another round of authentication. Our default duration for a refresh token is 3 months, which typically means that a user could be "signed in" for 3 months if the client is able to remember this refresh token.
+### What is an Access token?
 
-Each token's lifespan is [configurable via the `keelconfig.yaml` file](/authentication/configuration).
+The access token is a short-lived token used to access your Keel APIs. After authenticating, proceed to use the access token you have received to perform authenticated requests to your Keel APIs. This is done by including the access token (prefixed with `Bearer`) in the `Authorization` header of the request, as shown in the example below.
 
-## Recommended Practices
+```bash
+curl --request POST \
+  --url 'http://localhost:8000/web/json/searchAuthors' \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ...' \
+  --data '{ "where": { "name": { "startsWith": "Bob" } } }'
+```
 
-In your applications, you should always store the refresh token securely and never expose it to the user. If you need to store it in a cookie, make sure it's an HTTP-only cookie that can't be accessed by JavaScript. The access token should ideally live in browser/client memory only and not be stored anywhere. Since the access token is returned to you with an expiry time, you can use that to determine when to request a new access token using the refresh token and silently refresh the access token in the background while your users are using your application. If they close the browser and come back later, then you can silently request a new access token using the refresh token before they begin using the application again.
+The access token should be configured to expire quickly because it provides direct access to your application on Keel as a user. If it's stolen, it can be used to access your application as that user and their identity can be compromised.
 
-## Requesting a New Access Token
+### What is a refresh token?
 
-Access tokens can be refreshed using the standard token endpoint with the `refresh_token` grant.
+The refresh token, however, lives much longer and is used to obtain a new access token without involving the user in another round of authentication.  
+
+Access tokens can be refreshed using the standard [token endpoint](/authentication/endpoints#authtoken) with the `refresh_token` grant.
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
@@ -70,6 +78,16 @@ If the refresh token is still valid, then a new access token will be minted and 
   "refresh_token": "{{keel_id_token}}"
 }
 ```
+
+Our default duration for a refresh token is 3 months, which typically means that a user could be "signed in" for 3 months if the client is able to remember this refresh token.
+
+### Configuring token expiry
+
+Each token's lifespan is [configurable via the `keelconfig.yaml` file](/authentication/configuration).
+
+## Recommended Practices
+
+In your applications, you should always store the refresh token securely and never expose it to the user. If you need to store it in a cookie, make sure it's an HTTP-only cookie that can't be accessed by JavaScript. The access token should ideally live in browser/client memory only and not be stored anywhere. Since the access token is returned to you with an expiry time, you can use that to determine when to request a new access token using the refresh token and silently refresh the access token in the background while your users are using your application. If they close the browser and come back later, then you can silently request a new access token using the refresh token before they begin using the application again.
 
 ## Refresh Token Rotation
 
