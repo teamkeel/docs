@@ -9,7 +9,7 @@ The generated TypeScript client provides you with an end-to-end, type-safe clien
 import { Callout } from "nextra/components";
 
 <Callout>
-Requires version **0.351.0** or higher of the Keel [CLI](/cli).
+Requires version **0.380.0** or higher of the Keel [CLI](/cli).
 </Callout>
 
 ## Generating the client
@@ -112,9 +112,9 @@ These are the core client actions that serve as configuration options for the cl
 
 ### Authenticating 
 
-Authentication is simple with the generated client because you don't need to worry about access tokens and refresh tokens at all.  Making authorized calls to your API happens under the hood. It also automatically refreshes your expiring access tokens.
+Authentication is simple with the generated client because access tokens and refresh tokens are handled implicitly.  Making authorized calls to your API happens under the hood.  The client will also automatically refresh expiring access tokens.
 
-Once authenticated, the client stores the active session in memory, which means that when a new instance of the client is created the session will be lost and authentication will need to take place again.  However, you can easily implement your own token persistence in order to retain authentication over a longer period and between browser sessions.
+Once authenticated, the client stores the active session in memory. This means that when a new instance of the client is created the session will be lost and authentication will need to take place again.  However, you can [implement your own token persistence](#session-persistence) in order to retain authentication over a longer period and between browser sessions.
 
 #### Password authentication
 
@@ -137,11 +137,11 @@ const response = await keel.api.mutations.createBlogPost({ title: title });
 
 #### ID Token authentication
 
-With [ID Token authentication](/authentication/flows/id-token), you would have already configured the 3rd-party authentication provider correctly in your `keelconfig.yaml` and you would have performed the necessary authentication flow with that provider in order to acquire an ID Token.  Once you have this ID Token, you can simple authenticate as follows:
+With [ID Token authentication](/authentication/flows/id-token), you would have already configured the 3rd-party authentication provider correctly in your `keelconfig.yaml` and you would have performed the necessary authentication flow with that provider in order to acquire an ID Token.  Once you have this ID Token, you can authenticate as shown below.
 
 ```ts
 // authenticate the client using an ID token from a 3rd-party provider
-await keel.auth.authenticateWithIDToken(idToken);
+await keel.auth.authenticateWithIdToken(idToken);
 ```
 
 #### Single Sign-On authentication
@@ -162,7 +162,7 @@ However, if the session has expired (i.e. the refresh token has expired), you wi
 ```ts
 const response = await keel.api.mutations.createBlogPost({ title: title });
 
-if (response.error && response.error.type == "unauthorized") {
+if (response.error && response.error.type == "forbidden") {
   request.redirect(302, "/login");
   return;
 } 
@@ -171,6 +171,18 @@ if (response.error && response.error.type == "unauthorized") {
 #### Session persistence
 
 Because the client only stores the session state in memory, you will need to reauthenticate each time the client is reinstantiated.  However, you can implement a custom token store to persist sessions.  This is done by implementing a very simple interface, as shown below.
+
+```ts
+interface TokenStore {
+  // Set a token in the store
+  set(token: string | null): void;
+
+  // Retrieve a token from the store
+  get(): string | null;
+}
+```
+
+For example, shown below is an example of implementing browser localStorage token store.
 
 ```ts
 class LocalStorageStore {
@@ -190,7 +202,7 @@ class LocalStorageStore {
 }
 ```
 
-And then configuring the custom token store with your client.
+The client can then be configured to use this store:
 
 ```ts
 const client = new APIClient({
