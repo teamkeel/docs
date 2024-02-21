@@ -207,7 +207,7 @@ The client can then be configured to use this store:
 ```ts
 const client = new APIClient({
   baseUrl: process.env.API_BASE_URL,
-  refreshToken: new LocalStorageStore()
+  refreshTokenStore: new LocalStorageStore()
 });
 ```
 
@@ -216,8 +216,8 @@ Note that you can also provide a custom store implementation for access tokens, 
 ```ts
 const client = new APIClient({
   baseUrl: process.env.API_BASE_URL,
-  accessToken: new LocalStorageStore(),
-  refreshToken: new HttpOnlyCookieStore()
+  accessTokenStore: new LocalStorageStore(),
+  refreshTokenStore: new HttpOnlyCookieStore()
 });
 ```
 
