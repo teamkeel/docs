@@ -2,7 +2,7 @@
 
 With Keel you can have as many environments as you need and often different environments need different configuration. This is where **environment variables** are useful.
 
-import { Callout } from 'nextra/components'
+import { Callout } from "@core/callout"
 
 <Callout type="warning" emoji="⚠️">
   Do not use environment variables for sensitive values such as API keys. For these kinds of values use [secrets](/secrets).
@@ -31,7 +31,7 @@ Environment variable values are defined in the config file under the environment
 - `staging` - Staging environments
 - `production` - Production environments
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
   There isn't currently support for setting values for specific environments, only for environment types.
 </Callout>
 

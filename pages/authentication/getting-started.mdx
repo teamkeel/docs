@@ -1,4 +1,4 @@
-import { Callout } from "nextra/components";
+import { Callout } from "@core/callout";
 
 # Authentication
 
@@ -31,7 +31,7 @@ Once you've done this, you will be provided with the following:
  - Client ID:  An identifier for your app with the external service. This is how they know your app is communicating with them. This needs to be configured in your `keelconfig.yaml` as shown in the next section.
  - Client Secret: Your app's password on the external service. This should always be kept a secret. This needs to be configured in your host, as discussed soon.
 
-<Callout emoji="ℹ️" type="info">
+<Callout   type="info">
   If you only intend to use ID Token authentication, then you can ignore the client secret. It is only necessary for Single Sign-On. 
 </Callout>
 

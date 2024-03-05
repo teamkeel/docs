@@ -6,9 +6,9 @@ Keel currently supports three types of events at the model level; `create`, `upd
 
 These event types can be configured to execute a _subscriber_. Similar to jobs, subscribers are TypeScript functions which you provide your own implementation for. This means you can write custom code to respond to events that are triggered while your application is running.
 
-import { Callout } from 'nextra/components'
+import { Callout } from "@core/callout"
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
 The execution of a subscriber function (in response to an event) happens asynchronously.  This means that the subscriber function will run _after_ the execution of the action or function which triggered it.
 </Callout>
 
@@ -39,7 +39,7 @@ Here we have subscribed to the `create` and `update` event types on the `Member`
 
 Note that a subscriber function can respond to any number of event types, even those from a different model. Furthermore, an event can be listened to by any number of subscribers.
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
 Events are only fired *after* the completion of the action or function that triggered it. For example, a job might perform many mutations, but the events will only fire after the job has completed.
 </Callout>
 
@@ -131,7 +131,7 @@ Also note that a failure in one subscriber function will not stop other events f
 
 If a subscriber function fails to execute, then the event will return to the queue and will be reprocessed again after 80 seconds. Executing a subscriber function will undergo three attempts, after which the event will be deleted.
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
 Events will fire regardless of whether the action or function that triggered the event succeeds or fails. It all depends on what changes eventually persisted in the database. When a rollback occurs, due to some failure in a `write` custom function, for example, then no events will fire because no changes would have been committed.
 </Callout>
 
@@ -158,7 +158,7 @@ The following table lists the current limits and quotas for events and subscribe
 
 Events could form a crucial part of your application, and so Keel has made it possible for you to test their behaviour by providing support for events and subscribers in [tests](/testing).
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
 Events in tests are synchronous. This means that you can always expect all subscriber functions to have completed executing before your action or function call returns.  This makes testing events easier.
 </Callout>
 

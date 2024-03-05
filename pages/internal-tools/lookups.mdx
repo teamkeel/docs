@@ -1,9 +1,9 @@
-import { Callout } from "nextra/components";
+import { Callout } from "@core/callout";
 
 # Lookup fields
 Some inputs require the user to enter a unique entry. This is usually an `id` field relating to a specific model entry. By creating a `list` action for that model, you can generate a shortcut for the user to lookup that entry on the id input field, so that they don't need to type in the value manually.
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
   The lookup button defaults to using a list action on the relevant model that doesn't have any required inputs. This is so that all possible fields are displayed on default.
   If no list actions without required fields exists in your schema, it will use the first list action it can find on the model.
 </Callout>

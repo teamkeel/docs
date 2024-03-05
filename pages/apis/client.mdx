@@ -6,7 +6,7 @@ The generated TypeScript client provides you with an end-to-end, type-safe clien
  - Support for Password, ID Token and Single Sign-On authentication
  - Automatic refreshing of expiring access token
 
-import { Callout } from "nextra/components";
+import { Callout } from "@core/callout";
 
 <Callout>
 Requires version **0.380.0** or higher of the Keel [CLI](/cli).
@@ -44,7 +44,7 @@ This client uses fetch so will only work in environments where fetch is availabl
 
 First, import `APIClient` from the generated file and create a new instance with the deployed url of your project (or the [localhost](http://localhost) address if running locally)
 
-<Callout emoji="ℹ️" type="info">
+<Callout   type="info">
 This `baseUrl` url should include the API name path but not the protocol (e.g. json/rpc/gql). For a local environment with `keel run`, this will be `http://localhost:8000/api`.
 </Callout>
 
