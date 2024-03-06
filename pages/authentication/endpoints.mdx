@@ -50,6 +50,7 @@ curl --request POST \
 | `code`  | Only required for `authorization_code` grant   |
 | `username`  | Only required for `password` grant   |
 | `password`  | Only required for `password` grant   |
+| `create_if_not_exists` | To create the identity or not during `token_exchange` or `password` flow. Default is `true`. |
 
 We currently support four types of _grants_:
 
@@ -67,7 +68,8 @@ Regardless of the grant request, a successful response will return with a `appli
   "access_token": "{{keel_access_token}}",
   "token_type": "Bearer",
   "expires_in": 86400,
-  "refresh_token": "{{keel_refresh_token}}"
+  "refresh_token": "{{keel_refresh_token}}",
+  "identity_created": true
 }
 ```
 
