@@ -1,0 +1,406 @@
+html,
+body {
+  /* font-size: 15px; */
+}
+
+:root {
+  --sand: #efe7dd;
+  --sand-50: rgba(239, 231, 221, 0.5);
+  --sand-25: rgba(239, 231, 221, 0.25);
+  --sand-dark: #e5d9ca;
+
+  --nextra-primary-hue: 50;
+  --nextra-primary-saturation: 5;
+
+  --background: #faf7f6;
+  --bg-pale: rgba(34, 34, 1, 0.04);
+
+  --border-pale: #efe7dd;
+  --border-tint: rgba(20, 9, 0, 0.06);
+
+  --faint: rgba(20, 9, 0, 0.25);
+  --text-pale: rgba(20, 9, 0, 0.5);
+  --text-content: rgba(20, 9, 0, 0.7);
+  --text-mid: rgba(20, 9, 0, 0.75);
+  --text-dark: rgba(20, 9, 0, 0.8);
+
+  --brand-green: #077460;
+  --brand-green-faded: #07746031;
+
+  --code-bg: rgb(234 227 218 / 50%);
+  --row-highlight: rgb(234 227 218 / 25%);
+}
+
+:is(html[class~="dark"] body) {
+  --background: #201e1d;
+
+  --border-pale: rgba(255, 255, 255, 0.1);
+  --bg-pale: rgba(255, 255, 255, 0.04);
+
+  --border-tint: rgba(255, 255, 255s, 0.06);
+
+  --faint: rgba(255, 255, 255, 0.3);
+  --text-pale: rgba(255, 255, 255, 0.6);
+  --text-content: rgba(255, 255, 255, 0.75);
+  --text-mid: rgba(255, 255, 255, 0.75);
+  --text-dark: rgba(255, 255, 255, 0.95);
+
+  --brand-green: #119f85;
+  --brand-green-faded: #119f8530;
+
+  --code-bg: rgb(234 227 218 / 6%);
+
+  background: var(--background);
+}
+
+nav {
+  background: var(--background);
+}
+
+body {
+  width: 100%;
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+
+  background: var(--background);
+  font-size: 15px;
+}
+
+/* Spacing overrides */
+
+.nx-leading-7 {
+  line-height: 1.6rem;
+}
+
+.nx-mt-6 {
+  margin-top: 1.1rem;
+}
+
+@media (min-width: 768px) {
+  .md\:nx-px-12 {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/*  */
+
+.nx-bg-white {
+  background: var(--background);
+  --tw-shadow: 0 -12px 16px var(--background);
+}
+
+:is(html[class~="dark"] .dark\:nx-bg-dark) {
+  background: var(--background) !important;
+  --tw-shadow: 0 -12px 16px var(--background);
+}
+
+.nx-text-slate-900 {
+  color: var(--text-dark);
+  /* color: rgba(20, 9, 0, 0.84) */
+}
+
+.nextra-content {
+  color: var(--text-content) !important;
+}
+
+.nx-text-gray-500 {
+  color: var(--text-pale) !important;
+}
+
+.nx-text-gray-600 {
+  color: var(--text-content) !important;
+}
+
+.nx-text-gray-700 {
+  color: var(--text-pale);
+}
+
+.nextra-nav-container {
+  border-bottom: 1px solid var(--border-pale);
+}
+
+h1 {
+  @apply font-display text-5xl font-medium;
+}
+
+h2 {
+  font-weight: 700 !important;
+  font-size: 1.7rem !important;
+}
+
+h3 {
+  font-weight: 600 !important;
+  font-size: 1.3rem !important;
+}
+
+h4 {
+  font-weight: 600 !important;
+  font-size: 1.2rem !important;
+}
+
+b,
+strong {
+  font-weight: 700 !important;
+}
+
+code.nx-rounded-md {
+  border-radius: 4px;
+}
+
+.nx-bg-primary-700\/5 {
+  /* background: var(--sand-50); */
+  background: var(--code-bg) !important;
+}
+
+.nx-rounded-xl {
+  border-radius: 6px;
+}
+
+.nx-text-primary-600 {
+  color: var(--brand-green);
+}
+
+.hover\:nx-text-primary-600:hover {
+  color: var(--brand-green);
+}
+
+.nextra-code-block .nx-rounded-t-xl {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.nextra-code-block code {
+  line-height: 1.2rem;
+}
+
+:focus-visible {
+  /* --tw-ring-shadow: none !important; */
+  --tw-ring-offset-color: var(--brand-green) !important;
+  --tw-ring-color: var(--brand-green-faded) !important;
+  /* outline: 1px inset solid var(--brand-green); */
+}
+
+/* a.nx-text-primary-600:hover {
+  color: #03493c;
+} */
+
+.even\:nx-bg-gray-100:nth-child(2n) {
+  background-color: var(--row-highlight);
+}
+
+.nx-text-primary-800 {
+  color: white;
+}
+
+.nx-text-gray-900,
+.nextra-scrollbar > p {
+  color: var(--text-dark);
+}
+
+.nx-bg-primary-100,
+.dark\:nx-text-primary-600 {
+  background: #317c6f !important;
+}
+
+.nx-bg-primary-500\/10,
+.dark:nx-bg-primary-500\/10 {
+  background: var(--bg-pale) !important;
+}
+
+.hover\:nx-bg-gray-100:hover {
+  background: var(--bg-pale) !important;
+  color: var(--text-mid);
+}
+
+.hover\:nx-bg-gray-100:hover,
+.hover\:nx-text-gray-900:hover {
+  color: var(--text-mid);
+}
+
+.nextra-scrollbar a.nx-text-gray-500,
+.nextra-sidebar-container a,
+.nextra-sidebar-container button {
+  color: var(--text-pale);
+}
+
+.nextra-sidebar-container a,
+.nextra-sidebar-container button {
+  font-weight: 500;
+}
+
+.nextra-sidebar-container a svg,
+.nextra-sidebar-container button svg,
+.nextra-breadcrumb svg {
+  color: var(--faint);
+}
+
+.nx-bg-primary-50 {
+  background: var(--bg-pale) !important;
+}
+
+/* .nextra-sidebar-container .nx-overflow-hidden,
+.nextra-toc .nx-overflow-hidden {
+  overflow: visible;
+} */
+
+.nextra-sidebar-container > .nx-overflow-hidden {
+  padding: 0 3px;
+}
+
+.nextra-sidebar-container a.nx-text-primary-800 {
+  color: white;
+}
+
+.nextra-sidebar-container .nx-gap-1 {
+  gap: 0;
+}
+
+.nx-border-primary-500 {
+  color: var(--text-dark);
+  border-color: var(--brand-green);
+}
+
+.hover\:nx-text-black:hover {
+  color: var(--text-dark);
+}
+
+.nextra-callout p,
+.nextra-callout .emoji {
+  line-height: 1.6rem;
+}
+
+.nextra-callout {
+  border: 1px solid var(--border-tint) !important;
+}
+
+.nextra-callout.nx-bg-blue-100 {
+  --tw-bg-opacity: 50%;
+}
+
+.nextra-callout a {
+  color: inherit;
+}
+
+footer {
+  background: none !important;
+}
+
+footer .nx-py-12 {
+  padding: 1rem;
+  font-size: 0.8em;
+  color: var(--text-pale) !important;
+}
+
+/* h2,
+h3 {
+  @apply font-display font-medium;
+} */
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-HeavyItalic.woff2") format("woff2"),
+    url("/fonts/Family-HeavyItalic.woff") format("woff");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Light.woff2") format("woff2"),
+    url("/fonts/Family-Light.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-BlackItalic.woff2") format("woff2"),
+    url("/fonts/Family-BlackItalic.woff") format("woff");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-BoldItalic.woff2") format("woff2"),
+    url("/fonts/Family-BoldItalic.woff") format("woff");
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Heavy.woff2") format("woff2"),
+    url("/fonts/Family-Heavy.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-MediumItalic.woff2") format("woff2"),
+    url("/fonts/Family-MediumItalic.woff") format("woff");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Regular.woff2") format("woff2"),
+    url("/fonts/Family-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-LightItalic.woff2") format("woff2"),
+    url("/fonts/Family-LightItalic.woff") format("woff");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Black.woff2") format("woff2"),
+    url("/fonts/Family-Black.woff") format("woff");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Bold.woff2") format("woff2"),
+    url("/fonts/Family-Bold.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-Medium.woff2") format("woff2"),
+    url("/fonts/Family-Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Family";
+  src: url("/fonts/Family-RegularItalic.woff2") format("woff2"),
+    url("/fonts/Family-RegularItalic.woff") format("woff");
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}

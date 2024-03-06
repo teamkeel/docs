@@ -9,56 +9,165 @@
     "title": "Get Started",
     "type": "separator"
   },
-  "quickstart": "Quickstart",
-  "what-is-keel": "What is Keel?",
-  "local-environment": "Local Development",
+  "quickstart": {
+    "title": "Quickstart",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "what-is-keel": {
+    "title": "What is Keel?",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "local-environment": {
+    "title": "Local Development",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- docs": {
     "title": "Concepts",
     "type": "separator"
   },
-  "models": "Models",
-  "actions": "Actions",
-  "identity": "Identity",
-  "permissions": "Permissions",
-  "functions": "Functions",
-  "jobs": "Jobs",
-  "events": "Events",
+  "models": {
+    "title": "Models",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "actions": {
+    "title": "Actions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "identity": {
+    "title": "Identity",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "permissions": {
+    "title": "Permissions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "functions": {
+    "title": "Functions"
+  },
+  "jobs": {
+    "title": "Jobs",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "events": {
+    "title": "Events",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- features": {
     "title": "Features",
     "type": "separator"
   },
-  "internal-tools": "Internal tools",
-  "authentication": "Authentication",
-  "apis": "APIs",
-  "envvars": "Environment Variables",
-  "secrets": "Secrets",
-  "keelconfig": "keelconfig.yaml",
+  "internal-tools": {
+    "title": "Internal tools"
+  },
+  "authentication": {
+    "title": "Authentication"
+  },
+  "apis": {
+    "title": "APIs"
+  },
+  "envvars": {
+    "title": "Environment Variables",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "secrets": {
+    "title": "Secrets",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "keelconfig": {
+    "title": "keelconfig.yaml",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- tools": {
     "title": "Tools",
     "type": "separator"
   },
-  "cli": "CLI",
+  "cli": {
+    "title": "CLI",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- guides": {
     "title": "Guides",
     "type": "separator"
   },
-  "testing": "Testing",
+  "testing": {
+    "title": "Testing",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- tutorials": {
     "title": "Tutorials",
     "type": "separator"
   },
-  "tutorial": "Basic Tutorial",
-  "advanced-tutorial": "Advanced Tutorial",
-  "internal-tools-tutorial": "Internal Tools",
-  "nextjs-app-router": "Next.js (App Router)",
-  "keel-remix": "Remix",
-  "keel-nuxt": "Nuxt",
-  "keel-vue": "Vue",
+  "tutorial": {
+    "title": "Basic Tutorial",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "advanced-tutorial": {
+    "title": "Advanced Tutorial"
+  },
+  "internal-tools-tutorial": {
+    "title": "Internal Tools"
+  },
+  "nextjs-app-router": {
+    "title": "Next.js (App Router)",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "keel-remix": {
+    "title": "Remix",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "keel-nuxt": {
+    "title": "Nuxt",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "keel-vue": {
+    "title": "Vue",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- misc": {
     "title": "Misc",
     "type": "separator"
   },
-  "release-notes": "Release Notes",
+  "release-notes": {
+    "title": "Release Notes"
+  },
   "website": {
     "title": "Homepage",
     "href": "https://keel.so",

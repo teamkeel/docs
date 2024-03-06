@@ -1,4 +1,4 @@
-import { Callout } from 'nextra/components'
+import { Callout } from "@core/callout"
 
 # Local environment setup
 
@@ -57,8 +57,8 @@ Please also make sure that Docker is running. You can test this by running `dock
 
 Install the CLI globally from [NPM](https://www.npmjs.com/package/keel).
 
-```bash
-$ npm install --global keel
+```sh npm2yarn
+npm install -g keel
 ```
 
 If the CLI has installed correctly, the following command will respond with the current version number.
@@ -70,13 +70,13 @@ v0.380.0
 
 ## VSCode Extension
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
   This extension only works in the desktop version of VSCode and not in the browser.
 </Callout>
 
 The Keel VSCode extension provides inline validation, formatting, and syntax highlighting for Keel schema files. You can find the extension by searching for “Keel” in the Extensions tab in VSCode, or click the button below:
 
-import Install from '../components/VSCodePackageInstall'
+import Install from '@components/VSCodePackageInstall'
 
 <Install />
 

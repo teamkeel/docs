@@ -1,4 +1,4 @@
-import { Callout } from 'nextra/components'
+import { Callout } from "@core/callout"
 
 # Quickstart
 
@@ -19,8 +19,8 @@ Since Keel applications are described in a custom schema language, we have a [VS
 
 To get the most out of Keel, you'll need the [Keel CLI](/cli) that can be installed by running the following command in your terminal:
 
-```sh
-$ npm install --global keel
+```sh npm2yarn
+npm install -g keel
 ```
 
 This CLI will set you up with everything you need to run Keel locally before deploying to production.
@@ -53,7 +53,7 @@ The Keel schema is a custom language that describes your application's backend. 
 
 Let's explore this by creating a simple application that allows users to create and view posts.
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info">
   We've created an AI assistant called [KeelGPT](https://chat.openai.com/g/g-0xwNB1Azt-keelgpt) to help you navigate the Keel schema. It can generate schemas for you, answer questions, and more. It may be helpful as you follow the schema below.
 </Callout>
 
@@ -145,7 +145,7 @@ Now that we have a schema, let's run it locally. To do this, we'll need to start
 keel run
 ```
 
-<Callout type="info" emoji="ℹ️">
+<Callout type="info"  >
   You'll need to have Docker running for this to work. You can confirm this by running `docker ps` in your terminal.
 </Callout>
 

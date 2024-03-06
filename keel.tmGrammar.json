@@ -2,652 +2,155 @@
   "scopeName": "source.keel",
   "patterns": [
     {
-      "include": "#double_comment"
+      "include": "#comment"
     },
     {
-      "include": "#string-literals"
+      "include": "#literal"
     },
     {
-      "include": "#model_block_definition"
+      "include": "#message-definition"
     },
     {
-      "include": "#role_block_definition"
+      "include": "#keyword"
     },
     {
-      "include": "#api_block_definition"
+      "include": "#operator"
     },
     {
-      "include": "#enum_block_definition"
+      "include": "#action-type"
     },
     {
-      "include": "#message_block_definition"
+      "include": "#action-name"
     },
     {
-      "include": "#job_block_definition"
+      "include": "#type-name"
+    },
+    {
+      "include": "#identitifer"
+    },
+    {
+      "include": "#attribute-name"
+    },
+    {
+      "include": "#fields-block"
     }
   ],
   "repository": {
-    "model_block_definition": {
-      "begin": "^\\s*(model)\\s+([A-Za-z][\\w]*)\\s*({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.model.keel"
-        },
-        "2": {
-          "name": "entity.name.type.model.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
+    "comment": {
+      "name": "comment",
+      "match": "//.*"
+    },
+    "keyword": {
+      "name": "keyword.keel",
+      "match": "\\b(model|fields|actions|enum|api|models|job|role|emails|domains|inputs|with|returns)\\s+"
+    },
+    "operator": {
+      "name": "keyword.keel",
+      "match": "(and|or|not|in|!=|==|>=|<=|>|<)\\s+"
+    },
+    "action-type": {
+      "name": "keyword.keel",
+      "match": "\\b(get|create|update|list|delete|read|write)\\s+"
+    },
+    "action-name": {
+      "name": "support.function.action.keel",
+      "match": "(?<=get |create |update |list |delete |read |write )\\s*\\w+"
+    },
+    "type-name": {
+      "name": "entity.name.type.keel",
+      "match": "[A-Z][a-zA-Z0-9\\.]*(\\?|\\[\\])?"
+    },
+    "identitifer": {
+      "name": "variable.field.keel",
+      "match": "[a-z][a-zA-Z0-9\\.]*\\??"
+    },
+    "attribute-name": {
+      "name": "support.function.attribute.name.keel",
+      "match": "@[a-zA-Z]+"
+    },
+    "fields-block": {
+      "name": "block.fields.keel",
+      "comment": "fields block inside a model or inputs in a job",
+      "begin": "(?<=fields |inputs )\\s*{",
       "patterns": [
         {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#fields_block_definition"
-        },
-        {
-          "include": "#operations_block_definition"
-        },
-        {
-          "include": "#attribute_with_arguments"
+          "include": "#field"
         }
       ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
+      "end": "\\s*}"
     },
-    "fields_block_definition": {
-      "begin": "^\\s*(fields)\\s+({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.fields.keel"
-        },
-        "2": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
+    "field": {
+      "comment": "model fields, message fields, and job inputs",
       "patterns": [
         {
-          "include": "#double_comment"
+          "include": "#comment"
         },
         {
-          "include": "#field_definition"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "operations_block_definition": {
-      "begin": "^\\s*(actions)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.operations.keel"
-        },
-        "2": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
+          "include": "#literal"
         },
         {
-          "begin": "\\s?({)",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          },
+          "include": "#identitifer"
+        },
+        {
+          "include": "#type-name"
+        },
+        {
+          "include": "#attribute-name"
+        },
+        {
+          "begin": "\\s+{",
           "patterns": [
             {
-              "include": "#double_comment"
-            },
-            {
-              "include": "#operation_definition"
+              "include": "#field"
             }
           ],
-          "end": "\\s?(})",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
-        }
-      ],
-      "end": "(\\n)"
-    },
-    "api_block_definition": {
-      "begin": "\\s*(api)\\s+([A-Za-z][\\w]*)\\s*({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.api.keel"
-        },
-        "2": {
-          "name": "entity.name.type.api.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#attribute"
-        },
-        {
-          "include": "#api_models_definition"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "api_models_definition": {
-      "begin": "^\\s*(models)\\s+({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.api.models.keel"
-        },
-        "2": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "match": "\\s+([A-Za-z][\\w]*)\\s*\\n",
-          "captures": {
-            "1": {
-              "name": "entity.name.type.model.api.keel"
-            }
-          }
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "role_block_definition": {
-      "begin": "^\\s*(role)\\s+([A-Za-z][\\w]*)\\s+({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.role.keel"
-        },
-        "2": {
-          "name": "entity.name.type.role.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#domains_block_definition"
-        },
-        {
-          "include": "#emails_block_definition"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "domains_block_definition": {
-      "patterns": [
-        {
-          "begin": "\\s+(domains)\\s+({)",
-          "beginCaptures": {
-            "1": {
-              "name": "keyword.domains.keel"
-            },
-            "2": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#string-literals"
-            },
-            {
-              "include": "#double_comment_inline"
-            }
-          ],
-          "end": "\\}",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
+          "end": "\\s*}"
         }
       ]
     },
-    "emails_block_definition": {
+    "message-definition": {
+      "name": "message.keel",
+      "begin": "(message)\\s+([A-Z][a-zA-Z]*)\\s+{",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.keel"
+        },
+        "2": {
+          "name": "entity.name.type.keel"
+        }
+      },
       "patterns": [
         {
-          "begin": "\\s+(emails)\\s+({)",
-          "beginCaptures": {
-            "1": {
-              "name": "keyword.emails.keel"
-            },
-            "2": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#string-literals"
-            },
-            {
-              "include": "#double_comment_inline"
-            }
-          ],
-          "end": "\\}",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
+          "include": "#field"
+        }
+      ],
+      "end": "\\s*}"
+    },
+    "literal": {
+      "name": "literal.keel",
+      "patterns": [
+        {
+          "include": "#string-literal"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#boolean"
         }
       ]
     },
-    "field_definition": {
-      "patterns": [
-        {
-          "begin": "^\\s*(\\w+)\\s+([A-Za-z][\\w]*[?]?)",
-          "beginCaptures": {
-            "1": {
-              "name": "variable.field.keel"
-            },
-            "2": {
-              "name": "support.type.primitive.keel"
-            }
-          },
-          "patterns": [
-            {
-              "begin": "\\s+({)",
-              "beginCaptures": {
-                "1": {
-                  "name": "punctuation.definition.tag.keel"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#attribute_with_arguments"
-                },
-                {
-                  "include": "#attribute"
-                }
-              ],
-              "end": "(})",
-              "endCaptures": {
-                "0": {
-                  "name": "punctuation.definition.tag.keel"
-                }
-              }
-            }
-          ],
-          "end": "(\\n)",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
-        }
-      ]
+    "string-literal": {
+      "name": "string.quoted.double.keel",
+      "match": "\".*?\""
     },
-    "message_block_definition": {
-      "begin": "^\\s*(message)\\s+([A-Za-z][\\w]*)\\s*({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.message.keel"
-        },
-        "2": {
-          "name": "entity.name.type.message.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#field_definition"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
+    "number": {
+      "name": "constant.numeric.keel",
+      "match": "\\d+"
     },
-    "job_block_definition": {
-      "begin": "^\\s*(job)\\s+([A-Za-z][\\w]*)\\s*({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.job.keel"
-        },
-        "2": {
-          "name": "entity.name.type.job.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#job_inputs_block_definition"
-        },
-        {
-          "include": "#attribute_with_arguments"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "job_inputs_block_definition": {
-      "begin": "^\\s*(inputs)\\s+({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.inputs.keel"
-        },
-        "2": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#job_inputs_definition"
-        }
-      ],
-      "end": "\\s*\\}",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "job_inputs_definition": {
-      "patterns": [
-        {
-          "begin": "^\\s*(\\w+)\\s+([A-Za-z][\\w]*[?]?)",
-          "beginCaptures": {
-            "1": {
-              "name": "variable.job_inputs.keel"
-            },
-            "2": {
-              "name": "support.type.primitive.keel"
-            }
-          },
-          "patterns": [
-            {
-              "begin": "\\s+({)",
-              "beginCaptures": {
-                "1": {
-                  "name": "punctuation.definition.tag.keel"
-                }
-              },
-              "patterns": [
-                {
-                  "include": "#attribute_with_arguments"
-                },
-                {
-                  "include": "#attribute"
-                }
-              ],
-              "end": "(})",
-              "endCaptures": {
-                "0": {
-                  "name": "punctuation.definition.tag.keel"
-                }
-              }
-            }
-          ],
-          "end": "(\\n)",
-          "endCaptures": {
-            "0": {
-              "name": "punctuation.definition.tag.keel"
-            }
-          }
-        }
-      ]
-    },
-    "enum_block_definition": {
-      "begin": "(enum)\\s+(\\w+)\\s+({)",
-      "beginCaptures": {
-        "1": {
-          "name": "keyword.enum.keel"
-        },
-        "2": {
-          "name": "entity.name.type.enum.keel"
-        },
-        "3": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "match": "\\s+([A-Za-z][\\w]*)\\s*\\n",
-          "captures": {
-            "1": {
-              "name": "constant.character.enum.keel"
-            }
-          }
-        }
-      ],
-      "end": "(})",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "operation_definition": {
-      "begin": "^\\s*(create|get|list|update|delete|write|read)\\s+(\\w+)",
-      "beginCaptures": {
-        "1": {
-          "name": "constant.character.enum.keel"
-        },
-        "2": {
-          "name": "entity.name.type.function.keel"
-        }
-      },
-      "patterns": [
-        {
-          "begin": "(\\()",
-          "beginCaptures": {
-            "1": {
-              "name": "punctuation.definition.paren.keel"
-            }
-          },
-          "patterns": [
-            {
-              "match": "\\s*([A-Za-z\\.\\?]*)(\\s*,\\s*){0,1}",
-              "captures": {
-                "1": {
-                  "name": "variable.parameter.keel"
-                },
-                "2": {
-                  "name": "punctuation.definition.paren.keel"
-                }
-              }
-            }
-          ],
-          "end": "(\\))(?:\\s*?(with|returns)\\s*(\\()(.*)(\\)))?",
-          "endCaptures": {
-            "1": {
-              "name": "punctuation.definition.paren.keel"
-            },
-            "2": {
-              "name": "keyword.input.keel"
-            },
-            "3": {
-              "name": "punctuation.definition.paren.keel"
-            },
-            "4": {
-              "name": "variable.parameter.keel"
-            },
-            "5": {
-              "name": "punctuation.definition.paren.keel"
-            }
-          }
-        },
-        {
-          "patterns": [
-            {
-              "include": "#curly_block"
-            },
-            {
-              "include": "#attribute"
-            }
-          ]
-        }
-      ],
-      "end": "\\n",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "curly_block": {
-      "begin": "({)",
-      "beginCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      },
-      "patterns": [
-        {
-          "include": "#double_comment"
-        },
-        {
-          "include": "#attribute_with_arguments"
-        },
-        {
-          "include": "#attribute"
-        }
-      ],
-      "end": "(})",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.tag.keel"
-        }
-      }
-    },
-    "attribute_with_arguments": {
-      "begin": "(@@?[\\w\\.]+)(\\()",
-      "beginCaptures": {
-        "1": {
-          "name": "support.function.attribute.name.keel"
-        },
-        "2": {
-          "name": "punctuation.definition.paren.keel"
-        }
-      },
-      "patterns": [
-        {
-          "begin": "\\s?(?:(\\w+)[:])",
-          "beginCaptures": {
-            "1": {
-              "name": "variable.language.keel"
-            }
-          },
-          "patterns": [
-            {
-              "include": "#expression"
-            }
-          ],
-          "end": "\\s"
-        },
-        {
-          "include": "#expression"
-        }
-      ],
-      "end": "\\)",
-      "endCaptures": {
-        "0": {
-          "name": "punctuation.definition.paren.keel"
-        }
-      }
-    },
-    "expression": {
-      "match": "((?:\\w+[.])*\\w+)\\s?([=]?[==]?[>]?[<]?[>=]?[<=]?(?:contains)?(?:in?)?)\\s?((?:\\w+[.])*\\w+)",
-      "captures": {
-        "1": {
-          "name": "variable.parameter.keel"
-        },
-        "2": {
-          "name": "keyword.operator.keel"
-        },
-        "3": {
-          "name": "variable.parameter.keel"
-        }
-      }
-    },
-    "attribute": {
-      "name": "support.function.attribute.keel",
-      "match": "(@[\\w\\.]+)",
-      "captures": {
-        "1": {
-          "name": "support.function.attribute.name.keel"
-        }
-      }
-    },
-    "double_comment": {
-      "begin": "//",
-      "end": "$\\n?",
-      "name": "comment.keel"
-    },
-    "double_comment_inline": {
-      "match": "//[^\\n]*",
-      "name": "comment.inline.keel"
-    },
-    "string-literals": {
-      "begin": "(?:\\s*(\"(.*)\"))",
-      "beginCaptures": {
-        "1": {
-          "name": "string"
-        }
-      },
-      "end": "\\s"
+    "boolean": {
+      "name": "constant.language.boolean.keel",
+      "match": "\\b(true|false)\\b"
     }
   }
 }
