@@ -170,6 +170,10 @@ code.nx-rounded-md {
   border-top-right-radius: 6px;
 }
 
+.nextra-code-block code {
+  line-height: 1.2rem;
+}
+
 :focus-visible {
   /* --tw-ring-shadow: none !important; */
   --tw-ring-offset-color: var(--brand-green) !important;
