@@ -21,7 +21,7 @@ body {
   --text-pale: rgba(20, 9, 0, 0.5);
   --text-content: rgba(20, 9, 0, 0.7);
   --text-mid: rgba(20, 9, 0, 0.75);
-  --text-dark: rgba(20, 9, 0, 0.95);
+  --text-dark: rgba(20, 9, 0, 0.8);
 
   --brand-green: #077460;
   --brand-green-faded: #07746031;
@@ -102,6 +102,10 @@ body {
   color: var(--text-content) !important;
 }
 
+.nx-text-gray-600 {
+  color: var(--text-content) !important;
+}
+
 .nextra-nav-container {
   border-bottom: 1px solid var(--border-pale);
 }
@@ -139,6 +143,10 @@ code.nx-rounded-md {
 }
 
 .nx-text-primary-600 {
+  color: var(--brand-green);
+}
+
+.hover\:nx-text-primary-600:hover {
   color: var(--brand-green);
 }
 
@@ -255,7 +263,7 @@ footer {
 footer .nx-py-12 {
   padding: 1rem;
   font-size: 0.8em;
-  color: var(--text-pale);
+  color: var(--text-pale) !important;
 }
 
 /* h2,
