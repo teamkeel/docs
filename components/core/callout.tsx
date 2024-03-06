@@ -46,7 +46,7 @@ export function Callout({
       )}
     >
       <div
-        className="nx-select-none nx-text-l ltr:nx-pl-3 ltr:nx-pr-2 rtl:nx-pr-3 rtl:nx-pl-2"
+        className="emoji nx-select-none nx-text-l ltr:nx-pl-3 ltr:nx-pr-2 rtl:nx-pr-3 rtl:nx-pl-2"
         style={{
           fontFamily:
             '"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',

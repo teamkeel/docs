@@ -102,8 +102,16 @@ body {
   color: var(--text-content) !important;
 }
 
+.nx-text-gray-500 {
+  color: var(--text-pale) !important;
+}
+
 .nx-text-gray-600 {
   color: var(--text-content) !important;
+}
+
+.nx-text-gray-700 {
+  color: var(--text-pale);
 }
 
 .nextra-nav-container {
@@ -127,6 +135,11 @@ h3 {
 h4 {
   font-weight: 600 !important;
   font-size: 1.2rem !important;
+}
+
+b,
+strong {
+  font-weight: 700 !important;
 }
 
 code.nx-rounded-md {
@@ -194,10 +207,6 @@ code.nx-rounded-md {
   color: var(--text-mid);
 }
 
-.nx-text-gray-700 {
-  color: var(--text-pale);
-}
-
 .hover\:nx-bg-gray-100:hover,
 .hover\:nx-text-gray-900:hover {
   color: var(--text-mid);
@@ -231,6 +240,10 @@ code.nx-rounded-md {
   color: white;
 }
 
+.nextra-sidebar-container .nx-gap-1 {
+  gap: 0;
+}
+
 .nx-border-primary-500 {
   color: var(--text-dark);
   border-color: var(--brand-green);
@@ -240,7 +253,8 @@ code.nx-rounded-md {
   color: var(--text-dark);
 }
 
-.nextra-callout p {
+.nextra-callout p,
+.nextra-callout .emoji {
   line-height: 1.6rem;
 }
 
