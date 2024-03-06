@@ -18,6 +18,7 @@ body {
   --border-pale: #efe7dd;
   --border-tint: rgba(20, 9, 0, 0.06);
 
+  --faint: rgba(20, 9, 0, 0.25);
   --text-pale: rgba(20, 9, 0, 0.5);
   --text-content: rgba(20, 9, 0, 0.7);
   --text-mid: rgba(20, 9, 0, 0.75);
@@ -38,6 +39,7 @@ body {
 
   --border-tint: rgba(255, 255, 255s, 0.06);
 
+  --faint: rgba(255, 255, 255, 0.3);
   --text-pale: rgba(255, 255, 255, 0.6);
   --text-content: rgba(255, 255, 255, 0.75);
   --text-mid: rgba(255, 255, 255, 0.75);
@@ -223,6 +225,12 @@ code.nx-rounded-md {
   font-weight: 500;
 }
 
+.nextra-sidebar-container a svg,
+.nextra-sidebar-container button svg,
+.nextra-breadcrumb svg {
+  color: var(--faint);
+}
+
 .nx-bg-primary-50 {
   background: var(--bg-pale) !important;
 }
@@ -232,7 +240,7 @@ code.nx-rounded-md {
   overflow: visible;
 } */
 
-.nextra-sidebar-container .nx-overflow-hidden {
+.nextra-sidebar-container > .nx-overflow-hidden {
   padding: 0 3px;
 }
 
