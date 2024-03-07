@@ -7,7 +7,10 @@ import { Callout } from "./components/core/callout";
 
 const config: DocsThemeConfig = {
   logo: <Logo height={32} />,
-  project: {},
+  logoLink: "https://keel.so",
+  project: {
+    link: "https://github.com/teamkeel/keel",
+  },
   footer: {
     text: <span>© Planko Ltd {new Date().getFullYear()}</span>,
   },
