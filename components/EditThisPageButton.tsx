@@ -35,7 +35,7 @@ export const EditThisPageButton = () => {
       }}
       style={{ display: "flex", alignItems: "center", gap: 8 }}
     >
-      <GitHubIcon /> Edit this page
+      <GitHubIcon width={18} /> Edit this page
     </button>
   );
 };

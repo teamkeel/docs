@@ -168,9 +168,15 @@
   "release-notes": {
     "title": "Release Notes"
   },
-  "website": {
-    "title": "Homepage",
-    "href": "https://keel.so",
+  "discord": {
+    "title": "Discord",
+    "href": "https://discord.gg/bxvW4QHhBx",
+    "newWindow": true,
+    "type": "page"
+  },
+  "twitter": {
+    "title": "@keelteam",
+    "href": "https://twitter.com/keelteam",
     "newWindow": true,
     "type": "page"
   },

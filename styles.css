@@ -66,6 +66,10 @@ body {
   font-size: 15px;
 }
 
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
 /* Spacing overrides */
 
 .nx-leading-7 {
