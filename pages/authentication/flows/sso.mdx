@@ -15,7 +15,7 @@ These are the general steps:
  4. Handle the redirect after the completed authentication flow (configured at `redirectUrl` in the `keelconfig.yaml`). To handle this, you will need to:
     1. Parse the query string and extract the value of the `code` parameter.
     3. Give the authorization code to our `/auth/token` endpoint to authenticate the provider with Keel. This will return a Keel access token and refresh token. See [here](/authentication/tokens#requesting-a-new-access-token).
- 5. Use the access and refresh tokens to query your Keel API	
+ 5. Use the access and refresh tokens to query your Keel API
 
  Let's break these down in more detail.
 
@@ -37,7 +37,7 @@ Configure the callbackUrl below to the client's allowed redirect URLs. This can 
 ## Setting the Client Secret
 
 The Single Sign-On flow requires a client secret, which is obtained from the auth provider's console, typically when creating the client. This secret must be set as a secret in your environment.
- - For local CLI use, `keel secrets set development MY_SECRET 'my-value'` is used to set a secret
+ - For local CLI use, `keel secrets set MY_SECRET 'my-value'` is used to set a secret
  - For hosted environments, use the environment variables page in the Console
 
 The name of the secret has the format `AUTH_PROVIDER_SECRET_{name}` where `{name}` is the uppercased name of the provider as configured in your keelconfig.yaml file.
