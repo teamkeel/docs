@@ -2,7 +2,7 @@ import { Callout } from "@core/callout";
 
 # Authentication
 
-In order for users to securely interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly integrating with third-party authentication providers, such as Google, Facebook and GitHub.  
+In order for users to securely interact with your application, they will need to be _authenticated_.  Keel provides rich support for seamlessly integrating with third-party authentication providers, such as Google, Facebook and GitHub.
 
 We currently support three authentication flows, two of which for authenticating with third-party providers.
 
@@ -32,7 +32,7 @@ Once you've done this, you will be provided with the following:
  - Client Secret: Your app's password on the external service. This should always be kept a secret. This needs to be configured in your host, as discussed soon.
 
 <Callout   type="info">
-  If you only intend to use ID Token authentication, then you can ignore the client secret. It is only necessary for Single Sign-On. 
+  If you only intend to use ID Token authentication, then you can ignore the client secret. It is only necessary for Single Sign-On.
 </Callout>
 
 Visit the [Providers page](/authentication/providers) for more information.
@@ -53,7 +53,7 @@ If you would like to configure your own custom provider, please read the [Config
 
 ### Setting secrets
 
-If you plan to use the Single Sign-On flow, then you will need to configure the client secret on every host on which your Keel app will run.  
+If you plan to use the Single Sign-On flow, then you will need to configure the client secret on every host on which your Keel app will run.
 
 Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_{provider name}` where `{{provider name}}` is a provider name written in UPPER_SNAKE_CASE. In our case, it will be `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT`.
 
@@ -62,13 +62,13 @@ Secrets for authentication providers follow this pattern: `AUTH_PROVIDER_SECRET_
 If you are running Keel locally, you can set the client secret by setting the environment variable `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` to the client secret you obtained from your provider. Then, you'll need to add it to your local Keel backend. You can do so by running the following command using the [Keel CLI](/cli).
 
 ```
-keel secrets set development AUTH_PROVIDER_SECRET_GOOGLE_CLIENT <your client secret>
+keel secrets set AUTH_PROVIDER_SECRET_GOOGLE_CLIENT <your client secret>
 ```
 
 The `secrets` command has the following signature:
 
 ```
-keel secrets set <env> <key> <value>
+keel secrets set <key> <value>
 ```
 
 So here, we're setting the `AUTH_PROVIDER_SECRET_GOOGLE_CLIENT` to your secrent for the `development` environment. You can also set alternate secrets for other environments, such as `testing`.
