@@ -121,6 +121,12 @@
       "breadcrumb": false
     }
   },
+  "integrating-stripe": {
+    "title": "Integrating Stripe",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- tutorials": {
     "title": "Tutorials",
     "type": "separator"
