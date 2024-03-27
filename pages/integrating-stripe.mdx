@@ -1,0 +1,634 @@
+# How to Add Stripe Payments to Your Keel App
+
+Stripe is a mainstream payment processor that allows businesses to handle online payments. Keel, on the other hand, is an all-in-one backend platform, designed to give you everything you need to build your product.
+
+In this guide, we will build a backend for handling Stripe payments, refunds, and plan changes with Keel; all within 15 minutes!
+
+## Prerequisites
+
+Before getting started, you should have:
+
+- A [Stripe account](https://dashboard.stripe.com/)
+- A [Keel account](https://console.keel.so/)
+- [Node.js](https://nodejs.org/en) installed locally
+- [Keel CLI](https://docs.keel.so/cli) installed locally  
+- [Docker](https://docs.docker.com/desktop/) installed locally
+
+## Setting Up a Todo App with Keel
+
+In this guide, we will use a [Keel todo app example](https://docs.keel.so/tutorial) that will connect to Stripe.
+
+Start by initialising a project in your terminal with:
+
+```sh
+npx keel init
+```
+
+Enter the directory where you want the project to be created.
+```sh
+Directory
+Where should we create your project?: keel-stripe-demo
+```
+Choose the `Starter template`.
+
+```
+Template
+Use the arrow keys to navigate: ↓ ↑ → ←
+How would you like to start your new project?
+  <Starter template>
+  Blank project
+```
+
+Choose the `Simple Todo app`.
+```
+v Starter template
+Use the arrow keys to navigate: ↓ ↑ → ←
+Which template would you like to use?
+  Simple Todo app
+```
+
+Follow the next steps like initialising a Git repo in your project, which is required for deploying to Keel.
+
+## Setting Up Stripe Models with Keel
+
+Keel utilizes a schema-driven approach to application development. Meaning, that all you need to make a fully-fledged backend is to define a [schema](https://docs.keel.so/what-is-keel#schema) comprising of data models, APIs, and permissions.
+
+We will have to edit the `todo/schema.keel` file, which is currently populated with the todo example schema.
+
+```keel filename="schema.keel"
+model Profile {
+    fields {
+        email Text?
+        identity Identity
+        subscriptionStatus SubscriptionStatus?
+        subscriptionActive Boolean @default(false)
+        subscriptionPlan Text?
+        stripeCustomerId Text?
+    }
+}
+```
+
+We'll create an [enum](https://docs.keel.so/models#enums) for subscription statuses used in the `subscriptionStatus` field in the Profile model.
+```keel filename="schema.keel"
+enum SubscriptionStatus {
+    Paid
+    AwaitingPayment
+}
+```
+### Setting Up Stripe Actions
+
+Set up a `handleBilling` [custom function](https://docs.keel.so/functions#custom-functions) that will respond to Stripe's webhook events.
+
+```keel {10-16} filename="schema.keel" 
+model Profile {
+    fields {
+        email Text?
+        identity Identity
+        subscriptionStatus SubscriptionStatus?
+        subscriptionActive Boolean @default(false)
+        subscriptionPlan Text?
+        stripeCustomerId Text?
+    }
+    actions {
+        write handleBilling(Any) returns (
+            WebhookResponse
+        ) {
+            @permission(expression: true)
+        }
+    }
+}
+```
+The [`@permission` attribute](https://docs.keel.so/permissions#permission-attribute) in this function has a `true` [expression](https://docs.keel.so/permissions#expressions), meaning that all requests will be let through, without performing authentication - also known as a **public route**. This is important since we are unable to provide any authentication headers to the Stripe webhook events. 
+
+The function takes [`Any` message](https://docs.keel.so/functions#the-any-message) as input, as Stripe's webhook event data is heavily structured, it would bloat up the code and possibly cause failures in the future.
+
+We will also add the `WebhookResponse` [message](https://docs.keel.so/functions#custom-inputs-and-responses), which will be sent back to Stripe to acknowledge the receipt of the webhook.
+
+```keel filename="schema.keel"
+message WebhookResponse {
+    received Boolean
+}
+```
+Next, we'll create a function for changing plans for a subscription called `changePlan`.
+```keel {16-20} filename="schema.keel" 
+model Profile {
+    fields {
+        email Text?
+        identity Identity
+        subscriptionStatus SubscriptionStatus?
+        subscriptionActive Boolean @default(false)
+        subscriptionPlan Text?
+        stripeCustomerId Text?
+    }
+    actions {
+        write handleBilling(Any) returns (
+            WebhookResponse
+        ) {
+            @permission(expression: true)
+        }
+        write changePlan(stripeCustomerId, subscriptionPlan) returns (
+            Any
+        ) {
+            @permission(roles: [Staff])
+        }
+    }
+}
+```
+In this function, the `@permission` attribute requires authentication from the request sender, as the plan change is something we want to keep away from unauthorized actors. 
+
+Let's create the `Staff` [role](https://docs.keel.so/permissions#expressions). The following schema will give everyone with a `@keel.so` email address the `Staff` role.
+```keel filename="schema.keel"
+role Staff {
+    domains {
+        "keel.so"
+    }
+}
+```
+Next, create a function for issuing refunds. This will be used as an internal tool, which will in the end process the request to Stripe issuing a refund.
+
+```keel {21-25} filename="schema.keel" 
+model Profile {
+    fields {
+        email Text?
+        identity Identity
+        subscriptionStatus SubscriptionStatus?
+        subscriptionActive Boolean @default(false)
+        subscriptionPlan Text?
+        stripeCustomerId Text?
+    }
+    actions {
+        write handleBilling(Any) returns (
+            WebhookResponse
+        ) {
+            @permission(expression: true)
+        }
+        write changePlan(stripeCustomerId, subscriptionPlan) returns (
+            Any
+        ) {
+            @permission(roles: [Staff])
+        }
+        write issueRefund(identity.email) returns (
+            RefundData
+        ) {
+            @permission(roles: [Staff])
+        }
+    }
+}
+```
+The function takes `identity.email` as an input, which has a relationship with the `identity` field, preventing from sending of phantom or non-existent data.
+
+We'll also need to create a message for the `RefundData`, containing the enum representing the Stripe refund statuses.
+```keel filename="schema.keel"
+message RefundData {
+    status RefundStatus
+    timestamp Timestamp? 
+}
+```
+Create the `RefundStatus` enum which will be later used in the code to map to Stripe's refund statuses.
+```keel filename="schema.keel"
+enum RefundStatus {
+    Refunded
+    RefundPending
+    RefundFailed
+    RefundRequiresAction
+    RefundCanceled
+}
+```
+
+And, finally, for the sake of simplicity of creating a profile, we'll create a function for that purpose.
+```keel {26-30} filename="schema.keel" 
+model Profile {
+    fields {
+        email Text?
+        identity Identity
+        subscriptionStatus SubscriptionStatus?
+        subscriptionActive Boolean @default(false)
+        subscriptionPlan Text?
+        stripeCustomerId Text?
+    }
+    actions {
+        write handleBilling(Any) returns (
+            WebhookResponse
+        ) {
+            @permission(expression: true)
+        }
+        write changePlan(stripeCustomerId, subscriptionPlan) returns (
+            Any
+        ) {
+            @permission(roles: [Staff])
+        }
+        write issueRefund(identity.email) returns (
+            RefundData
+        ) {
+            @permission(roles: [Staff])
+        }
+        create createProfile() with (email) {
+            @set(profile.identity = ctx.identity)
+            @set(profile.email = ctx.identity.email)
+            @permission(expression: true)
+        }
+    }
+}
+```
+
+## Setting Up Webhooks in Stripe
+
+Enter the test mode in [Stripe's dashboard](https://dashboard.stripe.com/test/dashboard).
+
+Under **[Developers > Webhooks](https://dashboard.stripe.com/test/webhooks)** press **Add endpoint**. In the **Endpoint URL**, you need to provide the URL to the `handleBilling` action.
+
+import { Callout } from "@core/callout"
+
+<Callout type="info" emoji="👋">
+  Before heading to the Keel Console, you must deploy or run the project with:
+  ```sh 
+  keel run
+  ```
+</Callout>
+
+In the [Keel Console](https://console.keel.so/) go to **API explorer**. Find **Handle billing** under the **Profile** section.
+Copy the POST URL shown on the right side (*e.g. https://staging-keel-demo-12345.keelapps.xyz/web/json/handleBilling*) and paste it into the Stripe's Webhook Endpoint URL.
+
+Under **Select events to listen to** select **Checkout** and **Select all Checkout events**
+
+![Checkout events shown in the Stripe dashboard](https://i.imgur.com/nPCd4i3.png)
+
+Finally, press **Add events**, and after that **Add endpoint**
+
+![Endpoint setup shown in the Stripe dashboard](https://i.imgur.com/2RuCxcU.png)
+
+## Getting a Stripe API Key
+
+Under **Developers > API keys**, on the **Secret key** row press **Reveal test key** and copy it.
+
+In order for Keel to perform requests to the Stripe API, it needs that key stored in a secure environment.
+
+Open the `keelconfig.yaml` file and add the `STRIPE_API_KEY` under `secrets`:
+
+```yaml filename="keelconfig.yaml" {9}
+# Visit https://docs.keel.so/authentication/getting-started for more information about authentication
+auth:
+
+# Visit https://docs.keel.so/envvars for more information about environment variables
+environment:
+
+# Visit https://docs.keel.so/secrets for more information about secrets
+secrets:
+ - name: STRIPE_API_KEY
+```
+
+Open your terminal window and run the following command:
+
+```sh
+keel secrets set STRIPE_API_KEY <API key from the Stripe Dashboard>
+```
+
+You should get the following response:
+
+```
+Secret STRIPE_API_KEY set for environment development
+```
+
+For production deployments, please consider using a [restricted Stripe API key](https://docs.stripe.com/keys#create-restricted-api-secret-key)
+
+## Setting Up Webhooks in Keel
+
+Run `keel generate` in your terminal window, which will generate all the necessary TypeScript files for the actions defined in the schema.
+
+After running the command, your folder structure should look like this:
+```sh
+├── functions
+│   ├── changePlan.ts
+│   ├── handleBilling.ts
+│   ├── issueRefund.ts
+│   └── setCompletion.ts
+├── jobs
+├── keel.mdx
+├── keelClient.ts
+├── keelconfig.yaml
+├── package-lock.json
+├── package.json
+├── schema.keel
+├── subscribers
+└── tsconfig.json
+```
+
+### Handling the Checkout Webhook
+
+Import dependencies and create an enum to map Stripe's webhook event types.
+
+```ts filename="handleBilling.ts"
+import { HandleBilling, SubscriptionStatus, models } from "@teamkeel/sdk";
+
+export enum StripeWebhooks {
+  Completed = "checkout.session.completed",
+  PaymentFailed = "checkout.session.async_payment_failed",
+}
+```
+
+In the `HandleBilling` function, add a switch statement that corresponds to the above enum.
+
+```ts {2-12} filename="handleBilling.ts"
+export default HandleBilling(async (ctx, inputs) => {
+    switch (inputs.type) {
+        case StripeWebhooks.Completed: {
+            break;
+        }
+        case StripeWebhooks.PaymentFailed: {
+            break;
+        }
+    }
+    return {
+        received: true
+    };
+});
+```
+
+In the `StripeWebhooks.Completed` case, update the `Profile` model with the new data received from the webhook.
+
+```ts {4-9} filename="handleBilling.ts"
+export default HandleBilling(async (ctx, inputs) => {
+    switch (inputs.type) {
+        case StripeWebhooks.Completed: {
+            await models.profile.update({ id: inputs.data.object.metadata.id }, {
+                subscriptionActive: true,
+                stripeCustomerId: inputs.data.object.customer,
+                subscriptionPlan: '{{YOUR_SUBSCRIPTION_PLAN}}',
+                subscriptionStatus: SubscriptionStatus.Paid,
+            })
+            break;
+        }
+        case StripeWebhooks.PaymentFailed: {
+            break;
+        }
+    }
+    return {
+        received: true
+    };
+});
+```
+### Handling the Issue Refund Function
+
+Install the Stripe package.
+
+```sh npm2yarn
+npm install stripe
+```
+
+Import dependencies and create a refund status map that maps Stripe's refund status codes to the `RefundStatus` enum defined in the schema.
+
+```ts filename="issueRefund.ts"
+import { IssueRefund, RefundStatus, models } from "@teamkeel/sdk";
+import Stripe from "stripe";
+
+const RefundStatusMap = {
+  pending: RefundStatus.RefundPending,
+  succeeded: RefundStatus.Refunded,
+  failed: RefundStatus.RefundFailed,
+  requires_action: RefundStatus.RefundRequiresAction,
+  canceled: RefundStatus.RefundCanceled
+}
+```
+
+Find the customer's ID with an email query.
+
+```ts {12-15} filename="issueRefund.ts"
+import { IssueRefund, RefundStatus, models } from "@teamkeel/sdk";
+import Stripe from "stripe";
+
+const RefundStatusMap = {
+  pending: RefundStatus.RefundPending,
+  succeeded: RefundStatus.Refunded,
+  failed: RefundStatus.RefundFailed,
+  requires_action: RefundStatus.RefundRequiresAction,
+  canceled: RefundStatus.RefundCanceled
+}
+
+export default IssueRefund(async (ctx, inputs) => {
+  const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+  const customerId = (await models.profile.where({ email: inputs.identityEmail || '' }).findOne()).stripeCustomerId!
+});
+```
+Find last charge for that customer with their ID.
+
+```ts {15-18} filename="issueRefund.ts"
+import { IssueRefund, RefundStatus, models } from "@teamkeel/sdk";
+import Stripe from "stripe";
+
+const RefundStatusMap = {
+  pending: RefundStatus.RefundPending,
+  succeeded: RefundStatus.Refunded,
+  failed: RefundStatus.RefundFailed,
+  requires_action: RefundStatus.RefundRequiresAction,
+  canceled: RefundStatus.RefundCanceled
+}
+
+export default IssueRefund(async (ctx, inputs) => {
+  const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+  const customerId = (await models.profile.where({ email: inputs.identityEmail || '' }).findOne()).stripeCustomerId!
+  const charge = await stripe.charges.list({
+    customer: customerId,
+    limit: 1,
+  })
+});
+```
+
+Initiate a refund.
+
+```ts {19-21} filename="issueRefund.ts"
+import { IssueRefund, RefundStatus, models } from "@teamkeel/sdk";
+import Stripe from "stripe";
+
+const RefundStatusMap = {
+  pending: RefundStatus.RefundPending,
+  succeeded: RefundStatus.Refunded,
+  failed: RefundStatus.RefundFailed,
+  requires_action: RefundStatus.RefundRequiresAction,
+  canceled: RefundStatus.RefundCanceled
+}
+
+export default IssueRefund(async (ctx, inputs) => {
+  const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+  const customerId = (await models.profile.where({ email: inputs.identityEmail || '' }).findOne()).stripeCustomerId!
+  const charge = await stripe.charges.list({
+    customer: customerId,
+    limit: 1,
+  })
+  const refund = await stripe.refunds.create({
+    charge: charge.data[0].id
+  })
+});
+```
+Return the data with the refund status and a timestamp.
+
+```ts {22-25} filename="issueRefund.ts"
+import { IssueRefund, RefundStatus, models } from "@teamkeel/sdk";
+import Stripe from "stripe";
+
+const RefundStatusMap = {
+  pending: RefundStatus.RefundPending,
+  succeeded: RefundStatus.Refunded,
+  failed: RefundStatus.RefundFailed,
+  requires_action: RefundStatus.RefundRequiresAction,
+  canceled: RefundStatus.RefundCanceled
+}
+
+export default IssueRefund(async (ctx, inputs) => {
+  const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+  const customerId = (await models.profile.where({ email: inputs.identityEmail || '' }).findOne()).stripeCustomerId!
+  const charge = await stripe.charges.list({
+    customer: customerId,
+    limit: 1,
+  })
+  const refund = await stripe.refunds.create({
+    charge: charge.data[0].id
+  })
+  return {
+    status: RefundStatusMap[refund.status!],
+    timestamp: new Date()
+  }
+});
+```
+
+### Handling Change Plan Function
+
+Import the dependencies.
+
+```ts filename="changePlan.ts"
+import { ChangePlan } from '@teamkeel/sdk';
+import Stripe from 'stripe';
+```
+Initialise Stripe and find the latest subscription from the customer.
+
+```ts {5-10} filename="changePlan.ts"
+import { ChangePlan } from '@teamkeel/sdk';
+import Stripe from 'stripe';
+
+export default ChangePlan(async (ctx, inputs) => {
+    const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+    const customerId = (await models.profile.where({ email: inputs.email || '' }).findOne()).stripeCustomerId!
+    const subscription = stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1
+    })
+})
+```
+Update the subscription.
+
+```ts {10-18} filename="changePlan.ts"
+import { ChangePlan } from '@teamkeel/sdk';
+import Stripe from 'stripe';
+
+export default ChangePlan(async (ctx, inputs) => {
+    const stripe = new Stripe(ctx.secrets.STRIPE_API_KEY)
+    const customerId = (await models.profile.where({ email: inputs.email || '' }).findOne()).stripeCustomerId!
+    const subscription = stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1
+    })
+    await stripe.subscriptions.update(subscription['id'], {
+        items: [
+            {
+                id: '{{SUB_ITEM_ID}}',
+                price: '{{NEW_PRICE_ID}}',
+            }
+        ]
+    })
+})
+```
+## Checking for Subscription Status
+
+To check whether a user has a subscription active, you can access the `subscriptionActive` property from the relationship with a `Profile` model.
+
+```keel
+@permission(expression: profile.subscriptionActive)
+```
+For example, `owner` is of type `Profile` and has the `subscriptionActive` property, we can add the `@permission` attribute that checks if the `owner` has an active subscription like so:
+
+```keel {16} filename="schema.keel"
+model Project {
+    fields {
+        title Text
+        owner Profile
+        tasks Todo[]
+    }
+
+    actions {
+        get getProject(id)
+        list listProjects() {
+            @where(project.owner.identity == ctx.identity)
+        }
+        delete deleteProject(id)
+        create createProject() with (title) {
+            @permission(expression: ctx.isAuthenticated)
+            @permission(expression: project.owner.subscriptionActive)
+            @set(project.owner.id = ctx.identity.id)
+        }
+        update updateProject(id) with (title)
+    }
+
+    @permission(
+        actions: [get, list, update, delete],
+        expression: project.owner.identity == ctx.identity
+    )
+}
+```
+
+## Creating a Stripe Checkout Session
+
+You can initiate a Stripe Checkout session with a simple cURL request. To begin with, you must provide the following POST data:
+
+- the Stripe API key
+- a [Stripe Price ID](https://docs.stripe.com/api/prices)
+- a Keel user ID (found in the Database, in the `profile` table)
+- a [Stripe Customer ID](https://docs.stripe.com/api/customers)
+
+Run the following cURL, making sure to add your real data.
+
+```sh
+curl https://api.stripe.com/v1/checkout/sessions \
+  -u "{{STRIPE_API_KEY}}:" \
+  --data-urlencode success_url="https://example.com/success" \
+  -d "line_items[0][price]"={{STRIPE_PRICE_ID}} \
+  -d "line_items[0][quantity]"=1 \
+  -d mode=payment \
+  -d "metadata[id]"={{KEEL_USER_ID}} \
+  -d customer={{STRIPE_CUSTOMER_ID}}
+```
+
+You will get a response, and at the end, a URL to the checkout page.
+
+```json
+...
+"ui_mode": "hosted",
+"url": "https://checkout.stripe.com/c/pay/cs_test_a1GoLGkyD20C5J90ziZSZyUoGWqtOIunxuYr8PbRMKjuR4O9tjeG4KPZNj#fidkdWxOYHwnPyd1blpxYHZxWjA0SXNIT0ZEPEJ9TDxMPXIxMF9NbDxzSjZxSHJ0Qk5sSWpndnRHNTxAdTNtN0xUVX01PXNJUW1Ha1NPN09SQmJhS09XNjJ1ckk2SERjZjRuVG1jRkl8Y39VNTVoanNINmtqdicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl"
+```
+Copy the `url`, paste it into your browser, and perform the test payment. 
+
+![Stripe Checkout page](https://i.imgur.com/qQ2wVkD.png)
+
+Now, you can go to the **Database** in the Keel Console, and select the `profile` table. You will see the data populated after the checkout has completed.
+
+![Profile table shown in the Database section of the Keel Console](https://i.imgur.com/QiA8TM2.png)
+
+## Internal Tools for Managing Payments in Keel
+
+Internal tools give you a simple and secure user interface to interact with your data out-of-the-box. A tool is an [action](https://docs.keel.so/actions) that can be accessed and run via the [Keel Console](https://console.keel.so/).
+
+Tools are automatically generated from [APIs](https://docs.keel.so/apis) that Keel creates and exposes from your schema. Keel creates a page for each action and handles the hard UI bits for you, such as navigation, forms, data tables, and filters. When you update your schema, tools will automatically update as well.
+
+Navigate to your [Keel Console](https://console.keel.so/). Under **Operate** select **All tools**.
+
+![Keel Console showing the Internal Tools tab](https://i.imgur.com/Lv1ArJW.png)
+
+Press **Web**. From this panel, you can select the **Issue refund** or **Change plan** action, which will open the given internal tool.
+
+![A GIF showing the Issue Refund tool](https://i.imgur.com/pjL686a.gif)
+ 
+## Conclusion
+
+Congratulations! In this guide, you've learned how to implement Stripe payments with Keel, in a very short timeframe. This guide should serve as a base for further implementation within Stripe's and Keel's ecosystem.
+
+We've covered how to create custom functions, as well as internal tools that make it super easy to perform certain actions, like issuing refunds with a few clicks, reducing unnecessary hustle.
+
+Take a look at some of [real-world examples](https://github.com/teamkeel/examples) of Keel being used with different technologies.
