@@ -83,7 +83,7 @@ export interface MemberCreatedEvent = {
      // The model's data at the time of the event
      data: Member
      // The model's data before the mutation which caused this event
-     previous: Member
+     previousData: Member
   }
 }
 ```
@@ -94,7 +94,7 @@ The `event.target.data` property provides the full model's data to the subscribe
  - `update` - provides the persisted model after it has been updated
  - `delete` - provides the model at the time it was deleted
 
-The `event.target.previous` property provides the full model's data before the mutation which caused the event. This is only available on `update` and `delete` event types.
+The `event.target.previousData` property provides the full model's data before the mutation which caused the event. This is only available on `update` and `delete` event types.
 
 ### Discerning between events
 
