@@ -32,6 +32,7 @@ We also recommend that you name your models using singular terms, such as `Produ
 The built-in Keel types are:
 
 - `Text` - suitable for any text data of any length
+- `Markdown` - text data formatted as Markdown
 - `Number` - a whole number, positive or negative
 - `Boolean` - a true or false value
 - `Timestamp` - a date time accurate to a microsecond
@@ -115,7 +116,7 @@ model Book {
   }
 }
 ```
- 
+
 Uniqueness is enforced at the database level using a unique constraint. The `@unique` attribute can be used on fields whose type is `Text`, `Number`, `Boolean`, `Date`, an enum or a non-repeated relationship.
 
 ### Composite unique
@@ -202,7 +203,7 @@ The models `Product` and `Tag` don't directly reference each other in this schem
 As the join model is just a normal model, it has all the normal built-in model fields. This means you can reference a specific product/tag relationship by its `id` field and know when it was created by using the `createdAt` field.
 
 #### Metadata
-When modelling many-to-many relationships in the real world there is often additional metadata about the relationship that needs to be stored, and the "join" model is the perfect place to put this data. 
+When modelling many-to-many relationships in the real world there is often additional metadata about the relationship that needs to be stored, and the "join" model is the perfect place to put this data.
 
 For example in a data model where projects have many team members and team members can be part of many projects, you may want to store the role a team member has in each project. The following schema shows how you can do this.
 
