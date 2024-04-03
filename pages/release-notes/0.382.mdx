@@ -1,6 +1,6 @@
 import { Callout } from "@core/callout"
 
-# 3rd April, 2024
+# 3 April, 2024
 
 These changes have been released with version `0.382` of the CLI.
 
@@ -17,9 +17,9 @@ model Post {
 }
 ```
 
-## Previous state in event payloads
+## Previous state in subscriber's event payload
 
-Up until now, the full model's payload has been included in the event object's `data` field passed to subscriber functions.  We have added a new field named `previous` which captures the model's data before the mutation occurred that caused the event.  The definition below is an example of what the event payload might look like.
+Up until now, the full model's data has been included in the event object's `data` field passed to subscriber functions.  We have added a new field named `previousData` which captures the model's data before the mutation occurred that caused the event.  The definition below is an example of what the event payload might look like.
 
 ```ts
 export interface MemberCreatedEvent = {
@@ -38,7 +38,7 @@ export interface MemberCreatedEvent = {
      // The model's data at the time of the event
      data: Member
      // The model's data before the mutation which caused this event
-     previous: Member
+     previousData: Member
   }
 }
 ```
