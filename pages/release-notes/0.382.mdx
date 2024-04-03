@@ -1,0 +1,54 @@
+import { Callout } from "@core/callout"
+
+# 3rd April, 2024
+
+These changes have been released with version `0.382` of the CLI.
+
+## New built-in type: Markdown
+
+The generated OpenAPI schema for this new field type will be of `type: "string"` and include `format: "markdown"`. This allows clients to automatically handle fields of this type in a specific way, for example, rendering forms with rich-text editors for a more immersive experience.
+
+```
+model Post {
+    fields {
+        title Text
+        description Markdown?
+    }
+}
+```
+
+## Previous state in event payloads
+
+Up until now, the full model's payload has been included in the event object's `data` field passed to subscriber functions.  We have added a new field named `previous` which captures the model's data before the mutation occurred that caused the event.  The definition below is an example of what the event payload might look like.
+
+```ts
+export interface MemberCreatedEvent = {
+  // The unique name of this event, as a string literal
+  eventName: "member.created"
+  // The timestamp at which the event occured
+  occurredAt: DateTime,
+  // The identity that triggered the event, if any
+  identityId?: string,
+  // The targeted model which was mutated
+  target: {
+     // The id of the mutated model
+     id: string,
+     // The name of the model type
+     type: "Member",
+     // The model's data at the time of the event
+     data: Member
+     // The model's data before the mutation which caused this event
+     previous: Member
+  }
+}
+```
+
+For more information please refer to the [events](/events) documentation.
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.382.0) to the CLI and VS Code extension.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
