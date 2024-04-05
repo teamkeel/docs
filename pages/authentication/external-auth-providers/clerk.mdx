@@ -1,0 +1,653 @@
+# Using Clerk as an External Auth Provider with Keel
+
+Clerk is a complete authentication and user management solution, providing an out of the box suite of APIs, UI components, and administration tools to manage users.
+
+Keel, a similarily feature-packed platform (a swiss army knife), is an all-in-one backend platform, allowing you to build backends rapidly.
+
+In this guide, you will learn how to integrate Clerk as an [external authentication provider](https://docs.keel.so/authentication/getting-started) in Keel, within a few minutes.
+
+## Prerequisites
+
+Before completing this guide, you should have:
+
+- A [Clerk account](https://dashboard.clerk.com/)
+- A [Keel account](https://console.keel.so/)
+- [Node.js](https://nodejs.org/en) installed locally
+- [Keel CLI](https://console.keel.so/) installed locally
+- [Docker](https://docs.docker.com/desktop) installed locally
+
+## Setting Up the Project
+
+For this guide we will setup a simple Next.js [CRUD](keelconfig.yaml
+) application, that will integrate both Clerk and Keel under the hood.
+
+Start by initialising a project in your terminal with:
+
+```sh
+npx create-next-app@latest
+```
+
+Answer the questions prompted as follows:
+
+```sh
+✔ What is your project named? … <keel-clerk-demo>
+✔ Would you like to use TypeScript? … <Yes>
+✔ Would you like to use ESLint? … <Yes>
+✔ Would you like to use Tailwind CSS? … <Yes>
+✔ Would you like to use `src/` directory? … <Yes>
+✔ Would you like to use App Router? (recommended) … <Yes>
+✔ Would you like to customize the default import alias (@/*)? … <No>
+```
+
+Change the directory to the project you created.
+
+```sh
+cd keel-clerk-demo
+```
+
+Your folder structure should now look like this:
+
+```sh
+├── next.config.mjs
+├── next-env.d.ts
+├── node_modules
+├── package.json
+├── package-lock.json
+├── postcss.config.js
+├── public
+├── README.md
+├── src
+├── tailwind.config.ts
+└── tsconfig.json
+```
+
+Now, initialize a Keel project:
+
+```sh
+npx keel init
+```
+
+Enter the directory where you want the project to be created. The project will be nested under the Next.js app.
+
+```sh
+Directory 
+✔ Where should we create your project?: |./keel
+```
+
+Choose `Blank project`.
+
+```sh
+How would you like to start your new project?
+  Starter template
+  <Blank project>
+```
+Follow the next steps like initialising a Git repo in your project, which is required for deploying to Keel.
+
+This will create a new Keel project, inside the Next.js app source directory.
+
+## Configuring Clerk
+
+Navigate to your [Clerk Dashboard](https://dashboard.clerk.com/) and [**Create a new application**](https://dashboard.clerk.com/apps/new).
+
+Enter an `Application name`. For example, `keel-clerk-demo`.
+
+![Clerk's new application creation wizard](https://i.imgur.com/D3GM2w3.png)
+
+Press **Create application**.
+
+Open your terminal window and install the Clerk library.
+
+```sh npm2yarn
+npm install @clerk/nextjs
+```
+
+At your project's root, create a `.env` file. Copy the contents from the environment variables section shown on the image to the `.env` file.
+
+![Clerk's environment variables shown in the dashboard](https://imgur.com/cMOMIBZ)
+
+Your `.env` file should look something like this.
+
+```env filename='.env'
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_123
+CLERK_SECRET_KEY=sk_test_123
+```
+
+Now, under the **Configure** section of the Clerk Dashboard, choose **JWT Templates**. Press **New template**.
+
+![JWT Templates section of the Clerk Dashboard shown](https://i.imgur.com/qt2guRR.png)
+
+Choose a template name, for example `keel`.
+
+In the `Claims` code field, paste the following snippet
+
+![A newly create JWT template shown.](https://i.imgur.com/PjgFk5v.png)
+
+Press **Save changes** in the top-right corner.
+
+## Setting Up a Demo App
+
+### Configuring Keel
+
+We will create a simple model with all CRUD actions, that also utilises Keel's [`@permission` attribute](https://docs.keel.so/permissions#permission-attribute).
+
+Back in your project, open the `keel.schema` file from the `keel` folder
+
+Create a `Thing` model with `name` and `identity` fields.
+
+```keel filename="keel/keel.schema"
+model Thing {
+    fields {
+        name Text
+        identity Identity
+    }
+}
+```
+
+Next, create the `getThing` and `createThing` actions, respectively.
+
+```keel {6-12} filename="keel/keel.schema"
+model Thing {
+    fields {
+        name Text
+        identity Identity
+    }
+    actions {
+        get getThing(id)
+        create createThing() with (name) {
+            @set(thing.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+    }
+}
+```
+
+The `@set` attribute in the `createThing` action will assign the `thing`'s identity to the `ctx` (context) identity. Similarily, the `@permission` attribute will only allow actions if the user is autenticated in the context.
+
+Add the rest of actions.
+
+```keel {13-17} filename="keel/keel.schema"
+model Thing {
+    fields {
+        name Text
+        identity Identity
+    }
+    actions {
+        get getThing(id)
+        create createThing() with (name) {
+            @set(thing.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+    }
+    update updateThing(id) with (name)
+    list myThings() {
+        @where(thing.identity == ctx.identity)
+    }
+    delete deleteThing(id)
+}
+```
+Finally, let's add the general `@permission` attribute. In the `action` selector, we will include all actions previously defined, which will be 'caught' by the authorisation check.
+
+The `expression`'s value, or the value that needs to be met for successful authorisation, is that `thing`'s identity must match the `ctx`'s identity.
+
+```keel filename="keel/keel.schema"
+model Thing {
+    fields {
+        name Text
+        identity Identity
+    }
+    actions {
+        get getThing(id)
+        create createThing() with (name) {
+            @set(thing.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated)
+        }
+    }
+    update updateThing(id) with (name)
+    list myThings() {
+        @where(thing.identity == ctx.identity)
+    }
+    delete deleteThing(id)
+
+    @permission(
+        actions: [list, get, update, delete],
+        expression: thing.identity == ctx.identity
+    )
+}
+```
+
+That's it for the `keel.schema` file. Now, let's edit the `keelconfig.yaml` file.
+
+At the end of the file, add the `providers` object with the following details.
+
+```yaml filename="keel/keelconfig.yaml"
+auth:
+  providers:
+    - type: oidc
+      name: clerk
+      issuerUrl: "https://keel-is-great.clerk.accounts.dev" # Your Clerk url
+      clientId: "keel" # Must match the Clerk JWT aud claim
+```
+
+The `clientId` must match the `aud` claim in the JWT template we set up previously.
+
+The `issuerUrl` is found in the **Domains** section of the [Clerk Dashboard](https://dashboard.clerk.com).
+
+![Domains shown in the Clerk Dashboard](https://i.imgur.com/I9N2gbG.png)
+
+After completing this, you're done with the Keel's backend part. Now, generate the Keel client, which we'll later use in the Next.js app.
+
+```sh
+npx keel client
+```
+
+### Creating a Keel Provider in Next.js
+
+For us to use Keel's API in Next.js, we have to create a contextual provider, which will pass down Keel client to the app.
+
+Create a new file `index.tsx` in `src/app/keel` folder.
+
+Import the dependencies. 
+
+```tsx filename="src/app/keel/index.tsx"
+"use client"
+import { useAuth } from "@clerk/clerk-react";
+import {
+    PropsWithChildren,
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { APIClient } from "../../../keel/keelClient";
+```
+
+Next, create an interface `KeelContextType` that contains the `authenticated` state, as well as the `keel` client.
+
+Afterwards, using `createContext`, we will create a context, allowing us to pass down the `authenticated` state and the `keel` client.
+
+```tsx {13-22} filename="src/app/keel/index.tsx"
+"use client"
+import { useAuth } from "@clerk/clerk-react";
+import {
+    PropsWithChildren,
+    createContext,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import { APIClient } from "../../../keel/keelClient";
+
+interface KeelContextType {
+    authenticated: boolean;
+    keel: APIClient | null;
+}
+
+const KeelContext = createContext<KeelContextType>({
+    authenticated: false,
+    keel: null,
+});
+```
+
+Follow by creating the `KeelProvider` function. 
+
+```tsx filename="src/app/keel/index.tsx"
+export const KeelProvider = (props: PropsWithChildren) => {
+    const { getToken, sessionId } = useAuth();
+    const [authenticated, setAuthenticated] = useState(false);
+
+    const clientRef = useRef(
+        new APIClient({
+            baseUrl: "http://localhost:8000/api",
+        })
+    );
+
+    const keel = clientRef.current;
+}
+```
+The `getToken` and `sessionId` destructured from `useAuth()` - a Clerk method - are used to fetch the JWT template we created earlier.
+
+Then, we use a simple state for the authentication and create a `clientRef` object using `useRef()` that returns the Keel's `APIClient` object.
+
+Next, using `useEffect()` hook, we will perform the [ID token exchange](https://docs.keel.so/authentication/flows/id-token) with Keel.
+
+import { Callout } from "@core/callout"
+
+<Callout type="info">
+The `template` value in the `getToken()` function must match the JWT Template name we previously created in Clerk Dashboard.
+</Callout>
+
+```tsx {12-49} filename="src/app/keel/index.tsx"
+export const KeelProvider = (props: PropsWithChildren) => {
+    const { getToken, sessionId } = useAuth();
+    const [authenticated, setAuthenticated] = useState(false);
+
+    const clientRef = useRef(
+        new APIClient({
+            baseUrl: "http://localhost:8000/api",
+        })
+    );
+
+    const keel = clientRef.current;
+    useEffect(() => {
+        const token = async () => {
+            const t = await getToken({ template: "keel" });
+            console.log(t)
+            if (!t) {
+                keel.auth.accessToken.set('')
+                console.log("keel token cleared");
+                setAuthenticated(false);
+                return;
+            }
+
+            fetch("http://localhost:8000/auth/token", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    grant_type: "token_exchange",
+                    subject_token: t,
+                }),
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (res) {
+                    if (res.access_token) {
+                        keel.auth.accessToken.set(res.access_token);
+                        setAuthenticated(true);
+                        console.log("keel token set");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Token exchange failed", error);
+                });
+        };
+
+        token();
+    }, [getToken, sessionId, keel]);
+}
+```
+
+Lastly, return the Keel context provider as a component.
+
+```tsx {51-55} filename="src/app/keel/index.tsx"
+export const KeelProvider = (props: PropsWithChildren) => {
+    const { getToken, sessionId } = useAuth();
+    const [authenticated, setAuthenticated] = useState(false);
+
+    const clientRef = useRef(
+        new APIClient({
+            baseUrl: "http://localhost:8000/api",
+        })
+    );
+
+    const keel = clientRef.current;
+    useEffect(() => {
+        const token = async () => {
+            const t = await getToken({ template: "keel" });
+            console.log(t)
+            if (!t) {
+                keel.auth.accessToken.set('')
+                console.log("keel token cleared");
+                setAuthenticated(false);
+                return;
+            }
+
+            fetch("http://localhost:8000/auth/token", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                    grant_type: "token_exchange",
+                    subject_token: t,
+                }),
+            })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (res) {
+                    if (res.access_token) {
+                        keel.auth.accessToken.set(res.access_token);
+                        setAuthenticated(true);
+                        console.log("keel token set");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("Token exchange failed", error);
+                });
+        };
+
+        token();
+    }, [getToken, sessionId, keel]);
+
+    return (
+        <KeelContext.Provider value={{ authenticated, keel }}>
+            {props.children}
+        </KeelContext.Provider>
+    );
+}
+```
+
+And finally, for the Keel context provider part, we will create a hook for the Keel context.
+
+```tsx filename="src/app/keel/index.tsx"
+export const useKeel = () => {
+    const keelContext = useContext<KeelContextType>(KeelContext);
+
+    if (!keelContext) {
+        throw new Error("useKeel must be used within a KeelProvider");
+    }
+
+    return keelContext;
+};
+```
+
+Now, let's edit the `layout.tsx` file, to acommodate for the `ClerkProvider` and `KeelProvider`.
+
+```tsx {20-33} filename="src/app/layout.tsx"
+import { ClerkProvider, RedirectToSignIn, SignedIn, SignedOut } from "@clerk/nextjs";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { KeelProvider } from "./keel";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <ClerkProvider>
+      <SignedIn>
+        <KeelProvider>
+          <html>
+            <body>
+              {children}
+            </body>
+          </html>
+        </KeelProvider>
+      </SignedIn>
+      <SignedOut>
+        <RedirectToSignIn />
+      </SignedOut>
+    </ClerkProvider>
+  );
+}
+```
+The `<ClerkProvider />` must wrap the whole app, followed by the neat `<SignedIn />` component that renders the content only when the user is signed in, in which the `<KeelProvider />` resides. The exact structure is necessary, since the `<KeelProvider />` is dependant on the `<ClerkProvider />`.
+
+### Creating CRUD Functionality in the App
+
+Import dependencies.
+
+```tsx filename="src/app/page.tsx"
+"use client"
+import { useAuth } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
+import { Thing } from "../../keel/keelClient";
+import { useKeel } from "./keel";
+```
+
+Create the `<Home />` component. Begin with creating a `useState()` hook for manpiulating `things`. Then, destructure `keel` client and `authenticated` state from the `useKeel()` hook created in a previous step.
+
+With a `useCallback()` hook, and using Keel's API query, we fetch `myThings` and update the state accordingly.
+
+```tsx {7-21} filename="src/app/page.tsx"
+"use client"
+import { useAuth } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
+import { Thing } from "../../keel/keelClient";
+import { useKeel } from "./keel";
+
+export default function Home() {
+  const [things, setThings] = useState<Thing[]>([]);
+  const { keel, authenticated } = useKeel();
+
+  const fetchThings = useCallback(() => {
+    keel?.api.queries.myThings().then((res) => {
+      if (res.error) {
+        console.error(res.error);
+      }
+      if (res.data) {
+        setThings(res.data.results);
+      }
+    });
+  }, [keel]);
+}
+```
+Next, using `useEffect()` hook we want to fetch things on page load, and subsequent page rehydrations. We also add the `handleSubmit` that adds `things` to Keel using the API query.
+
+```tsx {22-34} filename="src/app/page.tsx"
+"use client"
+import { useAuth } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
+import { Thing } from "../../keel/keelClient";
+import { useKeel } from "./keel";
+
+export default function Home() {
+  const [things, setThings] = useState<Thing[]>([]);
+  const { keel, authenticated } = useKeel();
+
+  const fetchThings = useCallback(() => {
+    keel?.api.queries.myThings().then((res) => {
+      if (res.error) {
+        console.error(res.error);
+      }
+      if (res.data) {
+        setThings(res.data.results);
+      }
+    });
+  }, [keel]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchThings();
+  }, [authenticated, fetchThings]);
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    keel?.api.mutations
+      .createThing({
+        name: e.currentTarget.thing.value,
+      })
+      .then(() => fetchThings());
+  };
+}
+```
+Finally, handle the UI with simple HTML elements.
+
+```tsx {36-55} filename="src/app/page.tsx"
+"use client"
+import { useAuth } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
+import { Thing } from "../../keel/keelClient";
+import { useKeel } from "./keel";
+
+export default function Home() {
+  const [things, setThings] = useState<Thing[]>([]);
+  const { keel, authenticated } = useKeel();
+
+  const fetchThings = useCallback(() => {
+    keel?.api.queries.myThings().then((res) => {
+      if (res.error) {
+        console.error(res.error);
+      }
+      if (res.data) {
+        setThings(res.data.results);
+      }
+    });
+  }, [keel]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    fetchThings();
+  }, [authenticated, fetchThings]);
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    keel?.api.mutations
+      .createThing({
+        name: e.currentTarget.thing.value,
+      })
+      .then(() => fetchThings());
+  };
+
+  return (
+    <>
+      <h1>Welcome</h1>
+      <p>Here are your things</p>
+      <ul>
+        {things.map((thing) => (
+          <li key={thing.id}>{thing.name}</li>
+        ))}
+      </ul>
+
+      <hr />
+
+      <form onSubmit={handleSubmit}>
+        <div className="fields">
+          <input name="thing" type="text" />
+          <button type="submit">Add thing</button>
+        </div>
+      </form>
+    </>
+  );
+}
+```
+To ensure Clerk does it job right, we need to create a middleware for Next.js to use. This is straight from Clerk's example and doens't need modifications for this purpose.
+
+```tsx filename="src/middleware.ts"
+import { authMiddleware } from "@clerk/nextjs";
+
+// See https://clerk.com/docs/references/nextjs/auth-middleware
+// for more information about configuring your Middleware
+export default authMiddleware({
+  // Allow signed out users to access the specified routes:
+  // publicRoutes: ['/anyone-can-visit-this-route'],
+});
+
+export const config = {
+  matcher: [
+    // Exclude files with a "." followed by an extension, which are typically static files.
+    // Exclude files in the _next directory, which are Next.js internals.
+    "/((?!.+\\.[\\w]+$|_next).*)",
+    // Re-include any files in the api or trpc folders that might have an extension
+    "/(api|trpc)(.*)",
+  ],
+};
+```
+
+## Testing the App
+
+## Conclusion
