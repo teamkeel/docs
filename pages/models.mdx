@@ -34,6 +34,7 @@ The built-in Keel types are:
 - `Text` - suitable for any text data of any length
 - `Markdown` - text data formatted as Markdown
 - `Number` - a whole number, positive or negative
+- `Decimal` - a decimal number, positive or negative
 - `Boolean` - a true or false value
 - `Timestamp` - a date time accurate to a microsecond
 - `Date` - a date, with no time
@@ -64,7 +65,7 @@ model Person {
 
 ## Default values
 
-You can specify a default value for `Text`, `Number`, `Boolean`, and enum fields, that will be used when a record is created and no value is provided. To provide a default value use the `@default` attribute, passing the value that should be used.
+You can specify a default value for `Text`, `Number`, `Decimal`, `Boolean`, and enum fields, that will be used when a record is created and no value is provided. To provide a default value use the `@default` attribute, passing the value that should be used.
 
 For example, the following schema specifies that if no value is provided for the `status` field when an order is created then the default enum value `Placed` should be used.
 
