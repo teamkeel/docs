@@ -1,10 +1,24 @@
 # Using Clerk as an External Auth Provider with Keel
 
-Clerk is a complete authentication and user management solution, providing an out of the box suite of APIs, UI components, and administration tools to manage users.
+Clerk is a complete authentication and user management solution, providing an out-of-the-box suite of APIs, UI components, and administration tools to manage users.
 
-Keel, a similarily feature-packed platform (a swiss army knife), is an all-in-one backend platform, allowing you to build backends rapidly.
+Keel, a similarly feature-packed platform (a Swiss army knife, to say the least), is an all-in-one backend platform, allowing you to build backends rapidly.
 
 In this guide, you will learn how to integrate Clerk as an [external authentication provider](https://docs.keel.so/authentication/getting-started) in Keel, within a few minutes.
+
+## How ID Token Exchange Works
+
+{/* Raw diagram: https://excalidraw.com/#json=HaQnMavJDR-PouOYV8hQU,-t34iARa26Qf5xDGHreVnQ */}
+![A diagram showing the communication flow between Keel, Clerk and the client](https://i.imgur.com/1ERh66n.png)
+
+For this guide, we will use an [ID token authentication flow](https://docs.keel.so/authentication/flows/id-token). Put simply, with the ID token authentication we're able to authenticate the client with just an arbitrary ID token, provided by an authorisation server - Clerk in this case.
+
+The general steps of the flow are:
+
+1. Logging in with the authorisation provider (Clerk)
+2. Extracting the `id_token` from the successful token endpoint response.
+3. Performing the token exchange with Keel.
+4. Using the [access and refresh tokens](https://docs.keel.so/authentication/flows/id-token) to mutate the Keel API.
 
 ## Prerequisites
 
@@ -18,15 +32,13 @@ Before completing this guide, you should have:
 
 ## Setting Up the Project
 
-For this guide we will setup a simple Next.js [CRUD](keelconfig.yaml
-) application, that will integrate both Clerk and Keel under the hood.
+For this guide we will setup a simple Next.js [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) application, that will integrate both Clerk and Keel under the hood.
 
 Start by initialising a project in your terminal with:
 
 ```sh
 npx create-next-app@latest
 ```
-
 Answer the questions prompted as follows:
 
 ```sh
@@ -38,13 +50,11 @@ Answer the questions prompted as follows:
 ✔ Would you like to use App Router? (recommended) … <Yes>
 ✔ Would you like to customize the default import alias (@/*)? … <No>
 ```
-
 Change the directory to the project you created.
 
 ```sh
 cd keel-clerk-demo
 ```
-
 Your folder structure should now look like this:
 
 ```sh
@@ -61,7 +71,7 @@ Your folder structure should now look like this:
 └── tsconfig.json
 ```
 
-Now, initialize a Keel project:
+Now, initialise a Keel project:
 
 ```sh
 npx keel init
@@ -130,7 +140,7 @@ Press **Save changes** in the top-right corner.
 
 We will create a simple model with all CRUD actions, that also utilises Keel's [`@permission` attribute](https://docs.keel.so/permissions#permission-attribute).
 
-Back in your project, open the `keel.schema` file from the `keel` folder
+Back in your project, open the `keel.schema` file from the `keel` folder.
 
 Create a `Thing` model with `name` and `identity` fields.
 
@@ -349,7 +359,6 @@ const KeelAuthProvider = (props: PropsWithChildren) => {
 export default KeelAuthProvider;
 ```
 
-
 Now, let's edit the `layout.tsx` file, to acommodate for the `ClerkProvider` and `KeelProvider`.
 
 ```tsx {21-38} filename="src/app/layout.tsx"
@@ -394,7 +403,7 @@ export default function RootLayout({
 }
 ```
 <Callout>
-The `<ClerkProvider />` must wrap the whole app, followed by the neat `<SignedIn />` component that renders the content only when the user is signed in, in which the `<KeelProvider />` resides, followed by `<KeelAuthProvider />`. The exact structure is necessary, since the `<KeelAuthProvider />` is dependant on the `<KeelProvider />` and `<ClerkProvider />`.
+The `<ClerkProvider />` must wrap the whole app, followed by the `<SignedIn />` component that renders the content only when the user is signed in, in which the `<KeelProvider />` resides, followed by `<KeelAuthProvider />`. The exact structure is necessary, since the `<KeelAuthProvider />` is dependant on the `<KeelProvider />` and `<ClerkProvider />`.
 </Callout>
 
 In the `.env` file, add the `API_BASE_URL` variable. The endpoint is the base URL + the API name (if you haven't manually set an API name, the default is `api`). This URL can be found in the Keel web console or in the output of `keel run` in your terminal.
@@ -605,4 +614,10 @@ Try adding things with the input.
 ![App's input functionality shown.](https://i.imgur.com/59zwjRW.gif)
 
 Navigating to the Keel Console and taking a look at the `thing` table in the **Database**, we'll see the added things. 
-![Thing table shown in the Keel Console's Database view](https://i.imgur.com/gIb41Ff.png
+![Thing table shown in the Keel Console's Database view](https://i.imgur.com/gIb41Ff.png)
+
+## Conclusion
+
+In this guide, you've learned how to integrate Clerk with Keel, using an ID token exchange flow. This guide should give you an overview of how simple it is to utilise third-party authentication providers with Keel.
+
+Continue your authentication journey in Keel with the [overview of authentication](https://docs.keel.so/authentication/getting-started), or see how Keel handles [Single Sign-On (SSO)](https://docs.keel.so/authentication/flows/id-token) or [password-based](https://docs.keel.so/authentication/flows/password) authentication.
