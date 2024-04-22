@@ -1,0 +1,112 @@
+import { Callout } from "@core/callout"
+
+# 22 April, 2024
+
+These changes have been released with version `0.384` of the CLI.
+
+## Array fields
+
+Keel now supports arrays!  
+
+An array is an ordered list of non-unique values stored in a single field.  For example, a blog post might be tagged under several categories and have reader reviews:
+
+```keel
+model BlogPost {
+  fields {
+    title Text
+    categories Category[]
+    reviews Number[]
+  }
+
+  actions {
+    list listBlogPosts(categories, reviews?)
+  }
+}
+
+enum Category {
+  Art
+  Science
+  Sport
+  Technology
+  Lifestyle
+}
+```
+
+Just like any other field type, arrays can be used in `create` and `update` action inputs for writing data, and in `list` action inputs for querying data.
+
+### Querying arrays with actions
+
+All array types have the following query operators available on the `list` action:
+
+| Query operator | Description |
+| --- | --- |
+| `equals` | Compares an array field against an array literal. Each element must be identical. |
+| `notEquals` | Likewise with `equals`, compares against an array literal. The arrays must be different. |
+| `any` | Checks that at least one array element satisfies the provided query, which, depending on the underlying type, could be `equals`, `notEquals`, `greaterThan`, `lessThan`, etc. |
+| `all` | Checks that all array elements satisfy the provided query. |
+
+For example, the following GraphQL query for `listBlogPosts` will return all blog posts in the `Science` category which have only 4 and 5-star reviews:
+
+```graphql
+query {
+  listBlogPosts(
+    input: {
+      where: {
+        category: { 
+          any: {
+            equals: Category.Science
+          }
+        }
+        reviews: {
+          all: {
+            greaterThanOrEquals: 4
+          }
+        }
+      }
+    }
+  ) {
+    edges {
+      node {
+        title
+        categories
+      }
+    }
+  }
+}
+```
+
+### Using arrays in expressions
+
+Arrays can also be used in expressions.  The following schema demonstrates this with `@where` and `@set`:
+
+```keel
+model BlogPost {
+  fields {
+    title Text
+    categories Text[]
+  }
+
+  actions {
+    create createSciencePost() with (title) {
+      @set(blogPost.categories = ["Science"])
+    }
+    list listSciencePosts() {
+      @where("Science" in blogPost.categories)
+    }
+  }
+}
+```
+
+### Support in the Console
+
+Arrays are supported throughout the Console. The Internal Tools provide a richer experience to create, update and query array fields:
+
+![Arrays in the Console](/release-notes/0-384-arrays-internal-tools.png)
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.384.0) to the CLI and runtime.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
