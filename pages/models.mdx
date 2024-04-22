@@ -249,3 +249,16 @@ model City {
 Note that in this example it is **possible** for a country to have no capital city but it is **not possible** for a city to have no country. This is due to the fact that the foreign key can only be added to one side of the relationship, and in Keel it is added to the side that uses `@unique`. In fact, although a `Country` has a `capitalCity` field in the Keel schema, that field does not exist in the database.
 
 On which side you use `@unique` and which side you use `?` will depend on your data model but we recommend you think about which side **belongs to** to the other, for example it's more reasonable to say a city belongs to a country than the other way around. Another example would be a `User` model and a `Settings` model. You would likely say that settings belong to a user, and so you would put the `@unique` attribute in the `Settings` model.
+
+## Array fields
+
+The built-in Keel types and enums can also be defined as arrays. An array is an ordered list of non-distinct values stored in a single field. For example, a blog post could be assigned to multiple tags.
+
+```keel {4}
+model BlogPost {
+  fields {
+    title Text
+    tags Text[]
+  }
+}
+```
