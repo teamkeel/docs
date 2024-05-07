@@ -1,0 +1,66 @@
+import { Callout } from "@core/callout"
+
+# 07 May, 2024
+
+These changes have been released with version `0.386` of the CLI.
+
+## The `Decimal` type
+
+Keel now supports decimal numbers!  This is useful for cases in which you need to store fractional values.  For example, the currency value of some store item could be defined as `Decimal`.
+
+```keel
+model Product {
+  fields {
+    name Text
+    salePrice Decimal
+    stockCount Number
+  }
+}
+```
+
+## Capturing user info from 3rd party providers
+
+When authenticating with ID Token or Single Sign-On authentication, we now capture additional user info from the 3rd party provider (provided that they are available) and store them in `Identity`. This data will also be updated every time the user authenticates. 
+
+The new fields on `Identity` are `name`, `familyName`, `givenName`, `middleName`, `nickName`, `profile`, `picture`, `website`, `gender`, `zoneInfo` and `locale`.
+
+This provides a lot more context for who the `Identity` represents, which means you don't necessarily need to request this from the user. 
+
+```keel
+model User {
+  fields {
+    username Text
+    name Text
+    email Text
+    identity Identity @unique
+  }
+  
+  actions {
+    create newUser() with (username) {
+      // Associate this new user with the currently authenticated Identity
+      @set(user.identity = ctx.identity)
+
+      // Capture the name and email from the Identity
+      @set(user.name = ctx.identity.name)
+      @set(user.email = ctx.identity.email)
+
+      // The user must be authenticated to perform this action
+      @permission(expression: ctx.isAuthenticated)
+    }
+  }
+}
+```
+
+## Local PostgreSQL upgrade
+
+The CLI has been upgraded to use v16 of PostgreSQL. This does mean that your local data will not be immediately available to your apps running on the updated CLI.
+
+However, the data is not deleted.  If you downgrade your version of Keel, the data will be made available again to your app.  If you would like to migrate this data, then this will need to be done manually by moving the data from the `keel-pg-volume` Docker volume to the `keel-pg-volume-16` volume. Let us know if you need help with this. 
+
+## Fixes and Improvements
+
+We've also released [some other fixes and improvements](https://github.com/teamkeel/keel/releases/tag/v0.386.0) to the CLI and runtime.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
