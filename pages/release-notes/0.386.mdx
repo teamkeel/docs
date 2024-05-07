@@ -20,13 +20,16 @@ model Product {
 
 ## Capturing user info from 3rd party providers
 
-When using ID Token or Single Sign-On authentication, we now capture user info data from the 3rd party provider (if they are available) and store them in `Identity`. This data will also be updated every time the user authenticates. These new fields on `Identity` are `name`, `familyName`, `givenName`, `middleName`, `nickName`, `profile`, `picture`, `website`, `gender`, `zoneInfo` and `locale`.
+When authenticating with ID Token or Single Sign-On authentication, we now capture additional user info from the 3rd party provider (provided that they are available) and store them in `Identity`. This data will also be updated every time the user authenticates. 
 
-This provides a lot more context for who the `Identity` represents which means you now don't necessarily need to request this from the user. We recommend the following pattern:
+The new fields on `Identity` are `name`, `familyName`, `givenName`, `middleName`, `nickName`, `profile`, `picture`, `website`, `gender`, `zoneInfo` and `locale`.
+
+This provides a lot more context for who the `Identity` represents, which means you don't necessarily need to request this from the user. 
 
 ```keel
 model User {
   fields {
+    username Text
     name Text
     email Text
     identity Identity @unique
