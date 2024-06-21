@@ -8,20 +8,28 @@ The `keelconfig.yaml` file is expected at the root of your project and is used t
 
 Let's walk through how you can configure each of these options.
 
+## Configuring staging and production
+
+The configuration in your `keelconfig.yaml` is used locally (when running your application with `keel run`) but will also be applied to your staging and production environments. 
+
+However, you may want to provide a different configuration on your staging and productions environments to what you use locally.  This is achieved using a
+ - `keelconfig.staging.yaml` for staging environments, and a
+ - `keelconfig.production.yaml` for production environments.
+
+If these are provided, the subsequent environment will take on those settings and will ignore the default `keelconfig.yaml` entirely.
+
 ## Environment variables
 
-Environment variables are values that are passed to your application at runtime, dependent on the environment in which it is running. For example, you may have a `EXTERNAL_API_URL` environment variable that points to some external API in your development environment, but points to a different API in your production environment and yet another API in your staging environment.
+Environment variables are values that are passed to your application at runtime. 
 
 This can be configured like so in your `keelconfig.yaml` file:
 
 ```yaml
 environment:
-  staging:
-    - name: EXTERNAL_API_URL
-      value: "https://staging.some-api.com"
-  production:
-    - name: DB_URL
-      value: "https://some-api.com"
+  - name: EXTERNAL_API_URL
+    value: "https://staging.some-api.com"
+  - name: DB_URL
+    value: "https://some-api.com"
 ```
 
 We cover this in more detail under the [Environment Variables](/envvars) section of the docs.

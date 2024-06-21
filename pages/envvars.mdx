@@ -14,26 +14,13 @@ Environment variables are defined in a `keelconfig.yaml` file which should be in
 
 ```yaml filename="keelconfig.yaml"
 environment:
-  staging:
-    - name: MY_ENV_VAR
-      value: "my staging value"
-  production:
-    - name: MY_ENV_VAR
-      value: "my production value"
+  - name: MY_ENV_VAR
+    value: "my staging value"
+  - name: MY_ENV_VAR
+    value: "my production value"
 ```
 
-### Environment Types
-
-Environment variable values are defined in the config file under the environment type. The available types are:
-
-- `development` - Local environments
-- `test` - For test runners
-- `staging` - Staging environments
-- `production` - Production environments
-
-<Callout type="info"  >
-  There isn't currently support for setting values for specific environments, only for environment types.
-</Callout>
+Use `keelconfig.staging.yaml` and `keelconfig.production.yaml` to configure your hosted environments.  You can read more about this [here](/keelconfig).
 
 ### Names
 
