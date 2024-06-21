@@ -1,0 +1,17 @@
+import { Callout } from "@core/callout"
+
+# 21 June, 2024
+
+These changes have been released with version `0.387` of the CLI.
+
+## Staging and production configs
+
+Until now, the `keelconfig.yaml` file was applied to your staging and production environments.  This is still true, however you can now override this by creating environment-specific `keelconfig.staging.yaml` and `keelconfig.production.yaml` files.  
+
+We have also introduced a breaking change to the `keelconfig.yaml` schema by removing environment-type specification in the `environments` section.  You must now rather specify staging and production environment variables in their config files.
+
+See [this page](/keelconfig) for more.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
