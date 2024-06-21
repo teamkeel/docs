@@ -116,7 +116,7 @@ export default VerifyEmail(async (ctx, event) => {
 
     case "member.updated":
       // Verify their email address if it was changed.
-      if (!event.data.emailVerified) {
+      if (!event.target.data.emailVerified) {
         await sendVerifyMail(event.target.email);
       }
       break;
