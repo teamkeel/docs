@@ -4,5 +4,6 @@
   "tokens": "Tokens",
   "configuration": "Configuration",
   "providers": "Providers",
-  "endpoints": "Endpoints"
+  "endpoints": "Endpoints",
+  "external-auth-providers": "External Authentication Providers"
 }
