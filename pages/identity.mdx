@@ -123,3 +123,35 @@ model Post {
   )
 }
 ```
+
+### @unique relationships with identity
+
+When creating a `@unique` relationship between some model and `Identity`, as with many of the examples above, you will then be able to traverse from `Identity` to that model in expressions. See how useful this can be in the example below.
+
+```keel {4,16,22}
+model Customer {
+  fields {
+    name Text
+    identity Identity @unique
+  }
+}
+
+model Order {
+  fields {
+    items OrderItems[]
+    orderedBy Customer
+  }
+
+  actions {
+    create createOrder(items.product.id) {
+      @set(order.orderedBy = ctx.identity.customer)
+    }
+
+    update cancelOrder(id) {
+      @where(order.status != Status.Shipped)
+      @set(order.status = Status.Cancelled)
+      @permission(expression: ctx.identity.customer == order.orderedBy)
+    }
+  }
+}
+```
