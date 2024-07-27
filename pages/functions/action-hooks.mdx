@@ -1,0 +1,374 @@
+
+## Action hooks
+
+Function hooks on actions can be created for the standard action types; `get`, `create`, `update`, `list`, and `delete`. To add hooks to a built-in action, we apply the `@function` attribute. To illustrate how to set up these functions, lets implement a simple `get` function.
+
+```keel filename="schema.keel"
+model Product {
+  actions {
+    get getProduct(id) @function
+  }
+}
+```
+
+If we then run `keel generate` a function file will be created for us which will look something like this.
+
+```tsx filename="functions/getProduct.ts"
+import { GetProduct } from "@teamkeel/sdk";
+
+// To learn more about what you can do with hooks,
+// visit https://docs.keel.so/functions
+const hooks: GetProductHooks = {};
+
+export default GetProduct(hooks);
+```
+
+The `@teamkeel/sdk` package is auto-generated based on your schema and contains wrapper functions for each of your schema-defined functions. These wrapper functions ensure that your code is correctly typed without having to explicitly declare types.
+
+As you can see from this example all function hooks are optional, so even if no hooks are defined a function will still work correctly. We'll talk more about hooks in a bit, but for now they're fundamentally ways to do things around the lifecycle of the main `get` function which Keel still fully manages for you. For example, if we pass `id` in the inputs to the action, the function will query the database to find a product matching that `id` and return it.
+
+### Hooks
+
+Action function hooks allow you to **modify the default behaviour of a function**, for example you might want to add constraints to a query, run custom permission logic on the returned rows, create related data, or perform other side effects.
+
+Each hook is described in detail below but this table shows which hooks are called for which action types.
+
+| Hook          | **get** | **list** | **create** | **update** | **delete** |
+| ------------- | ------- | -------- | ---------- | ---------- | ---------- |
+| `beforeQuery` | ✅      | ✅       | ❌         | ✅         | ✅         |
+| `afterQuery`  | ✅      | ✅       | ❌         | ❌         | ❌         |
+| `beforeWrite` | ❌      | ❌       | ✅         | ✅         | ✅         |
+| `afterWrite`  | ❌      | ❌       | ✅         | ✅         | ✅         |
+
+#### `beforeQuery`
+
+The `beforeQuery` hook allows you to affect which records are being acted on. If this hook is not defined then a default query is executed based on the inputs your action accepts. This hook is passed the default query and may return a modified version of it, a new query, or database record(s).
+
+##### Arguments
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `query` - the default query that will be run
+
+##### Example: extending the default query
+
+By default, a query is generated based on the inputs your action accepts. For example, given the following schema:
+
+```keel
+model Film {
+  fields {
+    title Text
+  }
+  actions {
+    listFilms(title) @function
+  }
+}
+```
+
+And an implementation of `listFilms` that looks like this:
+
+```typescript filename="functions/listFilms.ts"
+import { ListFilms } from "@teamkeel/sdk";
+
+export default ListFilms({
+  beforeQuery(ctx, inputs, query) {
+    return query.where({
+      title: {
+        endsWith: "phantom menace",
+      },
+    });
+  },
+});
+```
+
+The `listFilms` action will now always filter for records whose title ends with "phantom menace". If you then called the `listFilms` action with the following request:
+
+```json
+{
+  "where": {
+    "title": {
+      "startsWith": "star wars"
+    }
+  }
+}
+```
+
+You would now get back films whose title starts with "star wars" **and** ends with "phantom menace". This example shows how you can _extend_ the default query for all actions that this hook is valid for.
+
+##### Example: custom query
+
+If you don't want the default query behaviour at all then you can return a new query object. To illustrate this the following schema defines a `get` function called `latestRelease`:
+
+```keel
+model Film {
+  fields {
+    director Text
+    releaseDate Date
+  }
+  actions {
+    get latestRelease(director) @function
+  }
+}
+```
+
+If this action wasn't marked as a `@function` then you would get a validation error as `director` is not a unique field, but as this is a function we can provide a custom implementation.
+
+```typescript filename="functions/latestRelease.ts"
+import { LatestRelease, models } from "@teamkeel/sdk";
+
+export default LatestRelease({
+  async beforeQuery(ctx, inputs) {
+    // Find the most recent film by the provided director
+    const films = await models.film.findMany({
+      where: {
+        director: {
+          equals: inputs.director,
+        },
+      },
+      limit: 1,
+      orderBy: {
+        releaseDate: 'desc',
+      },
+    });
+
+    // If no films then return null
+    // Note: get actions should return a record or null
+    if (films.length) === 0 {
+      return null;
+    }
+
+    // Return the first result
+    return films[0];
+  },
+});
+```
+
+#### `afterQuery`
+
+The `afterQuery` hook allows you to modify the response, perform custom permission checks, or perform side effects using the data returned from the query.
+
+##### Arguments
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `data` - the data that was retrieved from the database
+
+##### Example: modify the response
+
+The following example shows how `afterQuery` could modify the data returned from the function.
+
+```typescript filename="functions/listPreviewProducts.ts"
+import { ListPreviewProducts } from "@teamkeel/sdk";
+
+export default ListPreviewProducts({
+  async afterQuery(ctx, inputs, products) {
+    return products.map((p) => ({
+      ...p,
+      // truncate the title to 10 characters if not authenticated
+      title: ctx.isAuthenticated ? p.title : `${p.title.slice(0, 10)}...`,
+    }));
+  },
+});
+```
+
+##### Example: custom permissions check
+
+The `afterQuery` hook could also be used to add a custom permissions check, for example:
+
+```typescript filename="functions/listProducts.ts"
+import { ListProducts, permissions } from "@teamkeel/sdk";
+
+export default ListProducts({
+  async afterQuery(ctx, inputs, products) {
+    const hasUnpublishedProducts = products.some((p) => !p.isPublished);
+
+    if (hasUnpublishedProducts && !ctx.isAuthenticated) {
+      // deny the request if any of the products returned are not published
+      // and the request is not authenticated
+      // permissions.deny() will throw an error and stop execution.
+      permissions.deny();
+    }
+
+    // otherwise, just return the products in the response.
+    return products;
+  },
+});
+```
+
+#### `beforeWrite`
+
+The `beforeWrite` hook allows you perform side-effects or permission checks for `create`, `update`, and `delete` function. For `create` and `update` functions this hook can also be used to modify the values that will be written to the database.
+
+##### Arguments
+
+The arguments to `beforeWrite` are slightly different depending on the action type.
+
+**create**
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `values` - the values that will be written to the database
+
+**update**
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `values` - the _new_ values that will be written to the database
+- `record` - the _existing_ record that is going to be updated
+
+**delete**
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `record` - the record that is going to be deleted
+
+##### Example: mutate write values
+
+The following example shows how the `beforeWrite` hook can be used to mutate the values being written to the database. Here a `summary` field is computed based on the title and the first 100 characters of the description.
+
+```typescript filename="functions/createProduct.ts"
+import { CreateProduct } from "@teamkeel/sdk";
+
+export default CreateProduct({
+  async beforeWrite(ctx, inputs, values) {
+    let desc = inputs.description;
+    if (desc.length > 100) {
+      desc = desc.substring(0, 97) + "...";
+    }
+    return {
+      ...values,
+      summary: `${inputs.title} - ${desc}`,
+    };
+  },
+});
+```
+
+##### Example: update based on existing values
+
+When using this hook in an `update` function the fourth argument to the hook is the _existing_ record. The following example shows how you can use that record to update the values that will be used for the update.
+
+```typescript filename="functions/incrementCounter.ts"
+import { IncrementCounter } from "@teamkeel/sdk";
+
+export default IncrementCounter({
+  async beforeWrite(ctx, inputs, values, record) {
+    return {
+      ...values,
+      count: record.count + inputs.value,
+    };
+  },
+});
+```
+
+#### `afterWrite`
+
+The `afterWrite` hook allows you to perform side effects after the record has been written to the database for `create` and `update` and after the record has been deleted for `delete`. Common use cases include creating other models and performing custom permission checks.
+
+For `create` and `update` this hook can return a modified version of the record that was created or updated. As with `afterQuery` this only affects the data returned from the API, not the data in the database.
+
+import { Callout } from "@core/callout";
+
+<Callout type="info"  >
+  Although the `afterWrite` hook can be used to perform side-effects after a
+  write, in many cases it will be better to use an [event](/events). The key
+  difference is that the `afterWrite` hook happens as part of your action and so
+  will affect the response time of your action, whereas an event happens
+  _asynchronously_.
+</Callout>
+
+##### Arguments
+
+- `ctx` - a context object which contains things like the authenticated Identity, environment variables and secrets, and request headers
+- `inputs` - the inputs provided by the caller of your function
+- `data` - the record that that was created/updated/deleted
+
+##### Example: creating additional records
+
+The following example shows how you can create additional records in the database in an `afterWrite` hook.
+
+```typescript filename="functions/createProduct.ts"
+import { CreateProduct, models } from "@teamkeel/sdk";
+
+export default CreateProduct({
+  async afterWrite(ctx, inputs, data) {
+    await models.productReviews.create({
+      productId: data.id,
+      rating: 10,
+      content: "We love it, and that's not just because we made it.",
+    });
+  },
+});
+```
+
+##### Example: posting an update to Slack
+
+In a `delete` function the third argument to the `afterWrite` hook is the record that was deleted. The following example shows how you could post a message to Slack whenever a product is deleted.
+
+```typescript filename="functions/createProduct.ts"
+import { DeleteProduct, models } from "@teamkeel/sdk";
+import { sendSlackMessage } from "../lib/slack";
+
+export default DeleteProduct({
+  async afterWrite(ctx, inputs, data) {
+    await sendSlackMessage(
+      "#products",
+      `${data.title} (${data.id}) has been deleted!`
+    );
+  },
+});
+```
+
+### Named inputs
+
+Given the following schema, we have a `get` function called `latestRelease` that takes a `director` input.
+
+```keel filename="schema.keel"
+model Film {
+  fields {
+    director Text
+    releaseDate Date
+  }
+  actions {
+    get latestRelease(director) @function
+  }
+}
+```
+
+In this case, `director` is a field on the model. Sometimes, we may need to pass inputs to functions that are not fields on the model. For example, we may want to pass a `yearLimit` input to this `get` function to find the latest release *within* a given year for directors who have released multiple films in that year.
+
+To do this, we can add a specific input to this function that the function will receive that is not a field on the model. This is called a *named input*. We can do this like so.
+
+```keel filename="schema.keel" {7}
+model Film {
+  fields {
+    director Text
+    releaseDate Date
+  }
+  actions {
+    get latestRelease(director, yearLimit: Number) @function
+  }
+}
+```
+
+Now, the hooks for this function will receive a property called `yearLimit` on their `inputs` argument that can be used for further filtering.
+
+```typescript filename="functions/latestRelease.ts" {11,12}
+import { ListFilms } from "@teamkeel/sdk";
+
+export default ListFilms({
+  async beforeQuery(ctx, inputs, query) {
+    const allFilms = await query.where({
+      director: {
+        endsWith: "Waititi",
+      },
+    });
+
+    // filter the films by yearLimit
+    const films = allFilms.filter((f) => f.releaseDate.getFullYear() <= inputs.yearLimit);
+
+    return films;
+  },
+});
+```
+
+We use `inputs.yearLimit` to filter the films by the year limit provided by the caller of the function even though `yearLimit` is not necessarily a field on the model. This is the value of named inputs.

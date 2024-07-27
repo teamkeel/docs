@@ -1,0 +1,100 @@
+
+## Custom functions
+
+There may be cases where you want to define a function that returns custom data or needs to receive unknown data as input. For these situations, you can use the `read` and `write` action types with `messages`.
+
+### Custom inputs and responses
+
+To illustrate how custom functions work we will create a batch create function. The built-in Keel action types do not support this, but it can be implemented using the `write` action type and messages.
+
+```keel filename="schema.keel"
+enum Genre {
+  Horror
+  Romance
+}
+
+model Book {
+  fields {
+    title Text
+    genre Genre
+  }
+  actions {
+    write createBooks(CreateBooksInput) returns (CreateBooksResponse)
+  }
+}
+```
+
+Actions that use the `read` or `write` type must take a `message` as input and use the `returns` keyword to define the response message. The following example demonstrates how to define the messages we used in the `createBooks` action.
+
+```keel filename="schema.keel"
+message CreateBooksInput {
+  // messages can be nested
+  books CreateBooksBookFields[]
+}
+
+message CreateBooksBookFields {
+  title Text
+  // messages can contain enums
+  genre Genre
+}
+
+message CreateBooksResponse {
+  // messages can contain models
+  books Book[]
+}
+```
+
+Messages are defined using the `message` keyword and have the same syntax as the `fields` block in a [model](/models) definition. Message fields can be other messages, models, enums, or built-in Keel types.
+
+<Callout>
+  Message names must be **UpperCamelCase** and must be distinct from any model
+  or enum name.
+</Callout>
+
+There is nothing really different about the code for functions that use messages, and they will still be correctly typed. The implementation for `createBooks` might look like this.
+
+```tsx filename="functions/createBooks.ts"
+import { CreateBooks, models } from "@teamkeel/sdk";
+
+export default CreateBooks(async (ctx, input) => {
+  const books = await Promise.all(
+    input.books.map((fields) => {
+      return models.book.create({
+        title: fields.title,
+        genre: fields.genre,
+      });
+    })
+  );
+
+  return {
+    books,
+  };
+});
+```
+
+### The `Any` message
+
+The built-in message `Any` can be used as the input or response of a `read` or `write` function. When you use this message the inputs or return type of your function will be the TypeScript type `any`. The `Any` message is useful if you want to receive unknown or arbitrary data in your function or return dynamic data.
+
+### Permissions
+
+For custom `read` or `write` functions you must implement any permissions logic in your code. This can be done by importing the `permissions` from the `@teamkeel/sdk` package and using the `allow()` and `deny()` methods.
+
+```tsx filename="functions/createBooks.ts"
+import { permissions } from "@teamkeel/sdk";
+
+export default CustomAction(async (ctx, input) => {
+  if (ctx.headers.get("X-custom-auth-header") == ctx.secrets.AUTH_KEY) {
+    permissions.allow();
+  } else {
+    return;
+  }
+
+  // checking row level access
+  if (item.owner != ctx.identity.id) {
+    permissions.deny();
+  }
+});
+```
+
+By default, functions will return permission denied until `allow()` is called so `deny()` only needs to be called if you are explicitly denying access in your code after an `allow()` call.

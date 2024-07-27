@@ -1,4 +1,5 @@
 {
   "sdk": "Functions SDK",
-  "hooks": "Hooks"
+  "action-hooks": "Action Hooks",
+  "auth-hooks": "Auth Hooks"
 }
