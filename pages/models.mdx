@@ -251,6 +251,30 @@ Note that in this example it is **possible** for a country to have no capital ci
 
 On which side you use `@unique` and which side you use `?` will depend on your data model but we recommend you think about which side **belongs to** to the other, for example it's more reasonable to say a city belongs to a country than the other way around. Another example would be a `User` model and a `Settings` model. You would likely say that settings belong to a user, and so you would put the `@unique` attribute in the `Settings` model.
 
+### The @relation attribute
+
+If you need multiple relationships between the same two models, then you will need to explicitly specify to which fields each of the relationships join with. This is done using the `@relation` attribute.
+
+Take the following example. Using `@relation` we can join `Post.writtenBy` to `Author.written` and `Post.reviewedBy` to `Author.reviewed`.
+
+```keel
+model Post {
+  fields {
+    writtenBy Author @relation(written)
+    reviewedBy Author @relation(reviewed)
+  }
+}
+
+model Author {
+  fields {
+    written Post[] 
+    reviewed Post[] 
+  }
+}
+```
+
+Note that `@relation` is only valid on the *has one* side of the relationship.
+
 ## Array fields
 
 The built-in Keel types and enums can also be defined as arrays. An array is an ordered list of non-distinct values stored in a single field. For example, a blog post could be assigned to multiple tags.
