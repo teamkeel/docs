@@ -16,7 +16,9 @@ To enable one or both of these hooks, specify the following in your `keelconfig.
 
 ```yaml
 auth:
-  hooks: [afterIdentityCreated, afterAuthentication]
+  hooks: 
+    - afterIdentityCreated
+    - afterAuthentication
 ```
 
 As with any kind of function, running `keel generate` will conveniently scaffold out the files for you. Note that these files reside at `functions/auth/`.

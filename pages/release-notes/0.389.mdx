@@ -79,13 +79,49 @@ The response from `getOrder` on the JSON API will now include all the embedded d
 }
 ```
 
+## Auth hooks
 
+[Auth hooks](/functions/auth-hooks) are a new kind of function that we have just introduced. They allow you to insert custom logic into the authentication flow.
 
-With the `@embed` attribute, 
+Current we support two type of auth hooks:
+ - `afterIdentityCreated`: executes when a new `Identity` model is created during authentication, and
+ - `afterAuthentication`: executes after authentication completes, whether successful or not.
 
-The Keel extension provides a rich experience when working on your schema in VS Code.  We've now released some significant performance improvements which make for a much snappier response from the extension. 
+Let's demonstrate this with the `Account` schema below. Let's say we want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
 
-The extension will also now use your locally installed Keel CLI to report on any validation errors in the your schema.  This is great because it means that validations reported by the extension and by your installed CLI will be consistent.
+```keel
+model Account {
+    fields {
+        name Text
+        identity Identity @unique
+    }
+}
+```
+
+This will require implementing `afterIdentityCreated`.  First we enable this in the `keelconfig.yaml`:
+
+```yaml
+auth:
+  hooks:
+    - afterIdentityCreated
+```
+
+Then we run `keel generate` to scaffold out the function us. 
+
+And then we complete the function as shown below. 
+
+```typescript
+import { AfterIdentityCreated, models } from '@teamkeel/sdk';
+
+// This synchronous hook will execute after successful authentication and a new identity record created
+export default AfterIdentityCreated(async (ctx) => {
+    const identity = ctx.identity!;
+    await models.account.create({ name: identity.name ?? "", identityId: identity.id });
+});
+```
+
+This will now execute whenever an `Identity` is created!
+
 
 Please make sure to update your CLI by running `npm install -g keel`.
 
