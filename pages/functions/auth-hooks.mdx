@@ -1,0 +1,47 @@
+# Auth hooks
+
+It can useful to provide custom functionality during the authentication flow.  For example, you may want to create a new `Account` model and associate it to the `Identity` which is created when a user signs in for the first time.  Auth hooks are similar to action hooks and custom functions in that the implementation is done in TypeScript functions.
+
+Keel currently provides the following two auth hooks.
+ - `afterIdentityCreated`: executes when a new `Identity` model is created during authentication, and
+ - `afterAuthentication`: executes after authentication completes, whether successful or not.
+
+import { Callout } from "@core/callout";
+
+<Callout type="info">
+  Auth hook functions execute synchronously as part of the authentication flow.
+</Callout>
+
+To enable one or both of these hooks, specify the following in your `keelconfig.yaml` file:
+
+```yaml
+auth:
+  hooks: [afterIdentityCreated, afterAuthentication]
+```
+
+As with any kind of function, running `keel generate` will conveniently scaffold out the files for you. Note that these files reside at `functions/auth/`.
+
+## Example
+
+Let's demonstrate this with the `Account` example mentioned above. We want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
+
+```keel
+model Account {
+    fields {
+        name Text
+        identity Identity @unique
+    }
+}
+```
+
+This will require implementing `afterIdentityCreated` as shown below.
+
+```typescript
+import { AfterIdentityCreated, models } from '@teamkeel/sdk';
+
+// This synchronous hook will execute after successful authentication and a new identity record created
+export default AfterIdentityCreated(async (ctx) => {
+    const identity = ctx.identity!;
+    await models.account.create({ name: identity.name ?? "", identityId: identity.id });
+});
+```
