@@ -1,0 +1,130 @@
+# 29 July, 2024
+
+We have just released two exciting features to Keel.  These have been shipped with version `0.389` of the CLI.
+
+## Embedded models in response data
+
+The [`@embed` attribute](/actions#the-embed-attribute) allows you to include related model data as part of the response for `list` and `get` actions on the JSON API. This can be a really useful way to fetch all the data you need and avoid having to perform multiple requests.
+
+Take the schema below as an example. When fetching `Order` it would make sense to also include all the details about that order (products, number of units, and prices). We can now achieve this with `@embed` as shown below.
+
+```keel {8,9}
+model Order {
+    fields {
+        items OrderItem[]
+    }
+
+    actions {
+        get getOrder(id) {
+            @embed(items)
+            @embed(items.product)
+        }
+    }
+}
+
+model OrderItem {
+    fields {
+        order Order
+        product Product
+        units Number
+        price Decimal
+    }
+}
+
+model Product {
+    fields {
+        name Text
+    }
+}
+```
+
+The response from `getOrder` on the JSON API will now include all the embedded data:
+
+```json
+{
+    "id": "2juubv0JbHrzv8rCG9QB56qTGJs",
+    "items": [
+        {
+           
+            "id": "2juubv3ejcXn0senuEepizX0Oyi",
+            "orderId": "2juubv0JbHrzv8rCG9QB56qTGJs",
+            "product": {
+                "id": "2juuTMDvA5jHEHDcsQ6LrGJAq48",
+                "name": "Cot",
+                "createdAt": "2024-07-29T10:34:49.399894Z",
+                "updatedAt": "2024-07-29T10:34:49.399894Z"
+            },
+            "units": 1,
+            "price": 149.99,
+            "createdAt": "2024-07-29T10:35:56.528001Z",
+            "updatedAt": "2024-07-29T10:35:56.528001Z"
+        },
+        {
+            "id": "2juubv4kfrMMVj9d3ohZmoRXs3I",
+            "orderId": "2juubv0JbHrzv8rCG9QB56qTGJs",
+            "product": {
+                "id": "2juuStluQKb01Qm3chgWjpw7sIb",
+                "name": "Bed",
+                "updatedAt": "2024-07-29T10:34:44.758902Z",
+                "createdAt": "2024-07-29T10:34:44.758902Z",
+            },
+            "units": 3,
+            "price": 329.99,
+            "createdAt": "2024-07-29T10:35:56.528001Z",
+            "updatedAt": "2024-07-29T10:35:56.528001Z"
+        }
+    ],
+    "createdAt": "2024-07-29T10:35:56.528001Z",
+    "updatedAt": "2024-07-29T10:35:56.528001Z"
+}
+```
+
+## Auth hooks
+
+[Auth hooks](/functions/auth-hooks) are a new kind of function that we have just introduced. They allow you to insert custom logic into the authentication flow.
+
+Current we support two type of auth hooks:
+ - `afterIdentityCreated`: executes when a new `Identity` model is created during authentication, and
+ - `afterAuthentication`: executes after authentication completes, whether successful or not.
+
+Let's demonstrate this with the schema below. Let's say we want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
+
+```keel
+model Account {
+    fields {
+        name Text
+        identity Identity @unique
+    }
+}
+```
+
+This will require implementing `afterIdentityCreated`. First we enable this in the `keelconfig.yaml`:
+
+```yaml
+auth:
+  hooks:
+    - afterIdentityCreated
+```
+
+Then we run `keel generate` to scaffold out the TypeScript function for us. 
+
+And then we provide some implemention to the function as shown below. 
+
+```typescript
+import { AfterIdentityCreated, models } from '@teamkeel/sdk';
+
+// This synchronous hook will execute after successful authentication and a new identity record created
+export default AfterIdentityCreated(async (ctx) => {
+    const identity = ctx.identity!;
+    await models.account.create({ name: identity.name ?? "", identityId: identity.id });
+});
+```
+
+This will now execute whenever an `Identity` is created!
+
+
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
