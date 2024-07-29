@@ -6,13 +6,14 @@ We currently support TypeScript for writing functions and your function code sho
 
 Once you have described your function in your schema, you can run `keel generate` via the [CLI](/cli) to scaffold the code for your functions and put files in the right place to get you started. Then, you'd just fill in your application-specific logic in the generated file and you're good to go. 
 
-Keel supports two main types of functions:
+Keel supports three main types of functions:
 
 1. [Action hooks](/functions/action-hooks) that are defined on existing actions like `get`, `create`, `update`, and so on. These functions **modify the default behaviour of a built-in action** by *hooking* in to the lifecycle of the action. For example, you might want to add constraints to a query before it is run, or perform custom permission logic on the returned rows after the data returns from the database.
 
-2. [Custom functions](/functions/custom-functions) that are unrelated to any built-in action. These functions are defined using the `read` or `write` action types and allow you to define custom inputs and responses. These functions are the closest to what you might think of as an [API route in Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) as they are not tied to any built-in action. They are still deeply integrated into your app, however, and you can still use the built-in Keel types and APIs to interact with your database. You'd use this type of function to communicate with 3rd party APIs, do batch operations, or perform other custom logic.
+2. [Auth hooks](/functions/auth-hooks) allow you to provide custom functionality into the authentication flow.
 
-3. [Auth hooks](/functions/auth-hooks)
+3. [Custom functions](/functions/custom-functions) that are unrelated to any built-in action. These functions are defined using the `read` or `write` action types and allow you to define custom inputs and responses. These functions are the closest to what you might think of as an [API route in Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) as they are not tied to any built-in action. They are still deeply integrated into your app, however, and you can still use the built-in Keel types and APIs to interact with your database. You'd use this type of function to communicate with 3rd party APIs, do batch operations, or perform other custom logic.
+
 
 ## Context
 
