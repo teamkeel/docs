@@ -4,7 +4,7 @@ We have just released two exciting features to Keel.  These have been shipped wi
 
 ## Embedded models in response data
 
-The [`@embed` attribute](/actions/#the-embed-attribute) allows you to include related model data as part of the response for `list` and `get` actions on the JSON API. This can be a really useful way to fetch all the data you need and avoid having to perform multiple requests.
+The [`@embed` attribute](/actions#the-embed-attribute) allows you to include related model data as part of the response for `list` and `get` actions on the JSON API. This can be a really useful way to fetch all the data you need and avoid having to perform multiple requests.
 
 Take the schema below as an example. When fetching `Order` it would make sense to also include all the details about that order (products, number of units, and prices). We can now achieve this with `@embed` as shown below.
 
