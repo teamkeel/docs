@@ -1,12 +1,12 @@
 # 29 July, 2024
 
-We have released some excited changes to Keel.  These changes have been released with version `0.389` of the CLI.
+We have just released two exciting features to Keel.  These have been shipped with version `0.389` of the CLI.
 
 ## Embedded models in response data
 
 The [`@embed` attribute](/actions/#the-embed-attribute) allows you to include related model data as part of the response for `list` and `get` actions on the JSON API. This can be a really useful way to fetch all the data you need and avoid having to perform multiple requests.
 
-For example, when fetching `Order` it definitely makes sense to also include all the details about that order (products, number of units, and prices). We can now achieve this with `@embed` as shown below.
+Take the schema below as an example. When fetching `Order` it would make sense to also include all the details about that order (products, number of units, and prices). We can now achieve this with `@embed` as shown below.
 
 ```keel {8,9}
 model Order {
@@ -87,7 +87,7 @@ Current we support two type of auth hooks:
  - `afterIdentityCreated`: executes when a new `Identity` model is created during authentication, and
  - `afterAuthentication`: executes after authentication completes, whether successful or not.
 
-Let's demonstrate this with the `Account` schema below. Let's say we want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
+Let's demonstrate this with the schema below. Let's say we want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
 
 ```keel
 model Account {
@@ -98,7 +98,7 @@ model Account {
 }
 ```
 
-This will require implementing `afterIdentityCreated`.  First we enable this in the `keelconfig.yaml`:
+This will require implementing `afterIdentityCreated`. First we enable this in the `keelconfig.yaml`:
 
 ```yaml
 auth:
@@ -106,9 +106,9 @@ auth:
     - afterIdentityCreated
 ```
 
-Then we run `keel generate` to scaffold out the function us. 
+Then we run `keel generate` to scaffold out the TypeScript function for us. 
 
-And then we complete the function as shown below. 
+And then we provide some implemention to the function as shown below. 
 
 ```typescript
 import { AfterIdentityCreated, models } from '@teamkeel/sdk';
