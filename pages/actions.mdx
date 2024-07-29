@@ -520,7 +520,7 @@ model Post {
 
 In this example, the `Post` model's `getPost` action includes the `author` field, which is a `User` model. The `@embed(author)` attribute indicates that when retrieving a post, we want to include the author as part of the response.
 
-### Nesting Embedded Fields
+### Nesting embedded fields
 
 You can nest embedded fields to include deeper relationships using the dot notation. Given the example above, we could include `@embed(author, reviews.reviewer)` as part of our `getPost` action. The response will now include all the required data, e.g.:
 
