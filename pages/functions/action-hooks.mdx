@@ -266,6 +266,7 @@ The `afterWrite` hook allows you to perform side effects after the record has be
 For `create` and `update` this hook can return a modified version of the record that was created or updated. As with `afterQuery` this only affects the data returned from the API, not the data in the database.
 
 import { Callout } from "@core/callout";
+
 <Callout type="info"  >
   Although the `afterWrite` hook can be used to perform side-effects after a
   write, in many cases it will be better to use an [event](/events). The key
