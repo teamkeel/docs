@@ -455,3 +455,108 @@ model Book {
   }
 }
 ```
+
+## The `@embed` attribute
+
+The `@embed` attribute in Keel allows you to include related fields as part of the response for `list` and `get` actions automatically. This is useful for embedding related data directly within your model responses without the need for additional requests using the JSON API. The `@embed` attributes accepts one or more arguments. These arguments must be fields assigned to the model for which we're defining the action and must be related models.
+
+<Tabs items={['Keel schema', 'API response']}>
+  <Tab>
+```keel
+model User {
+  fields {
+    name Text
+    email Text
+  }
+}
+
+model Review {
+  fields {
+    content Text
+    reviewer User
+    post Post
+  }
+}
+
+model Post {
+  fields {
+    title Text
+    content Text
+    author User
+    reviews Review[]
+  }
+
+  actions {
+    get getPost(id) {
+      @embed(author)
+    }
+    list listPosts() {
+      @embed(author)
+    }
+  }
+}
+```
+  </Tab>
+  <Tab>
+  ```json
+  // POST /api/json/getPost
+{
+  "id": "1",
+  "title": "Post Title",
+  "content": "Post Content",
+  "author": {
+    "id": "123",
+    "name": "Author Name",
+    "email": "author@keel.so",
+    "createdAt": "2024-07-01T00:00:00Z",
+    "updatedAt": "2024-07-01T00:00:00Z"
+  },
+  "createdAt": "2024-07-01T00:00:00Z",
+  "updatedAt": "2024-07-01T00:00:00Z"
+}
+```
+  </Tab>
+</Tabs>
+
+In this example, the `Post` model's `getPost` action includes the `author` field, which is a `User` model. The `@embed(author)` attribute indicates that when retrieving a post, we want to include the author as part of the response.
+
+### Nesting embedded fields
+
+You can nest embedded fields to include deeper relationships using the dot notation. Given the example above, we could include `@embed(author, reviews.reviewer)` as part of our `getPost` action. The response will now include all the required data, e.g.:
+
+```json
+{
+  "author": {
+    "createdAt": "string",
+    "email": "string",
+    "id": "string",
+    "name": "string",
+    "updatedAt": "string"
+  },
+  "content": "string",
+  "createdAt": "string",
+  "id": "string",
+  "reviews": [
+    {
+      "content": "string",
+      "createdAt": "string",
+      "id": "string",
+      "postId": "string",
+      "reviewer": {
+        "createdAt": "string",
+        "email": "string",
+        "id": "string",
+        "name": "string",
+        "updatedAt": "string"
+      },
+      "updatedAt": "string"
+    }
+  ],
+  "title": "string",
+  "updatedAt": "string"
+}
+```
+
+<Callout type="warning" emoji="💬">
+  **Performance considerations**: Embedding fields can impact performance, especially with deep or multiple embeddings. Use this feature judiciously.
+</Callout>
