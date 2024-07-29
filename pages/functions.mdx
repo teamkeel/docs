@@ -1,16 +1,16 @@
 # Functions
 
-Functions allow you to implement actions using code, but they are so much more than just "serverless functions". Your functions are deeply integrated into your app, meaning that inputs are validated, authentication and permissions are handled for you, and you have full access to your database.
+Functions allow you to provide custom logic to your Keel application.  Your functions are deeply integrated into your app, meaning that inputs are validated, authentication and permissions are handled for you, and you have full access to your database.
 
-We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`.
+We currently support TypeScript for writing functions and your function code should be located in the `functions` directory of your project, with each function in its own file named the same as the function in the schema. So if you have a function called `doTheThing` in your schema, the code for this function would be located at `functions/doTheThing.ts`. Auth hook functions are a little different, but more on this later.
 
-Once you have described your function in your schema, you can run `keel generate` via the [CLI](/cli) to scaffold the code for your functions and put files in the right place to get you started. Then, you'd just fill in your application-specific logic in the generated file and you're good to go. 
+Once you have described your function in your schema (or in your `keelconfig.yaml` for auth hooks), you can run `keel generate` via the [CLI](/cli) to scaffold the code for your functions and put files in the right place to get you started. Then, you'd just fill in your application-specific logic in the generated file and you're good to go. 
 
 Keel supports three main types of functions:
 
 1. [Action hooks](/functions/action-hooks) that are defined on existing actions like `get`, `create`, `update`, and so on. These functions **modify the default behaviour of a built-in action** by *hooking* in to the lifecycle of the action. For example, you might want to add constraints to a query before it is run, or perform custom permission logic on the returned rows after the data returns from the database.
 
-2. [Auth hooks](/functions/auth-hooks) allow you to provide custom functionality into the authentication flow.
+2. [Auth hooks](/functions/auth-hooks) allow you to provide custom functionality into the authentication flow. For example, you may want to create a new `Account` model when a user signs in for the first time.
 
 3. [Custom functions](/functions/custom-functions) that are unrelated to any built-in action. These functions are defined using the `read` or `write` action types and allow you to define custom inputs and responses. These functions are the closest to what you might think of as an [API route in Next.js](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) as they are not tied to any built-in action. They are still deeply integrated into your app, however, and you can still use the built-in Keel types and APIs to interact with your database. You'd use this type of function to communicate with 3rd party APIs, do batch operations, or perform other custom logic.
 

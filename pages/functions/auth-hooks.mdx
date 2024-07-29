@@ -1,6 +1,6 @@
 # Auth hooks
 
-It can useful to provide custom functionality during the authentication flow.  For example, you may want to create a new `Account` model and associate it to the `Identity` which is created during registration.  Auth hooks are similar to action hooks and custom functions in that the implementation is done in TypeScript functions.
+It can useful to provide custom functionality during the authentication flow.  For example, you may want to create a new `Account` model and associate it to the `Identity` which is created when a user signs in for the first time.  Auth hooks are similar to action hooks and custom functions in that the implementation is done in TypeScript functions.
 
 Keel currently provides the following two auth hooks.
  - `afterIdentityCreated`: executes when a new `Identity` model is created during authentication, and
@@ -19,11 +19,11 @@ auth:
   hooks: [afterIdentityCreated, afterAuthentication]
 ```
 
-Running `keel generate` will scaffold out the files for you in the `functions/auth/` path.
+As with any kind of function, running `keel generate` will conveniently scaffold out the files for you. Note that these files reside at `functions/auth/`.
 
 ## Example
 
-Let's demonstrate this with the `Account` example mentioned above. We want to automatically create a new `Account` model and associate it to the `Identity` created when the person logs in for the first time.
+Let's demonstrate this with the `Account` example mentioned above. We want to automatically create a new `Account` model and associate it to the `Identity` created when the user signs in for the first time.
 
 ```keel
 model Account {
