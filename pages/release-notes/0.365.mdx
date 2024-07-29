@@ -8,7 +8,7 @@ We are excited to announce the release of Keel `0.365`. This update brings break
 
 ## Breaking Change
 
-We are excited to introduce the **Hooks API**, which is a complete revamp of functions. You will need to restructure your existing functions to use [Hooks](/functions#hooks). With **Hooks** we now write most of the implementation of your function for you, which should mean less code for you to write.
+We are excited to introduce the **action hooks**, which is a complete revamp of functions. You will need to restructure your existing functions to use [Hooks](/functions/action-hooks). With **Hooks** we now write most of the implementation of your function for you, which should mean less code for you to write.
 
 **Hooks** allow you to extend the default behaviour of each action by hooking into several new lifecycle events:
 
@@ -16,11 +16,6 @@ We are excited to introduce the **Hooks API**, which is a complete revamp of fun
 - `afterWrite` : allows you to perform side effects once a record has been created or updated. Useful for creating related data, and performing custom permissions checks.
 - `beforeQuery` : allows you to extend the existing query that we build for you, or alternatively replace the query with a custom query entirely.
 - `afterQuery`: allows you to perform side effects on the data returned from the query, such as performing custom permissions checks on the data, or even modifying the data returned from the query to present it in a certain way.
-
-You will need to upgrade your Keel CLI version to see this change reflect and we have written a [Migration Guide](/functions/hooks/migration-guide) that you can follow to upgrade your existing Keel schemas.
-
-Once you have followed the [**Migration Guide**](/functions/hooks/migration-guide) to update your schemas locally, you can push the commit, and we will rebuild your updated schema and deploy into production.
-
 
 import { Callout } from "@core/callout"
 
@@ -40,8 +35,6 @@ We now have full support for OIDC external provides which changes the behaviour 
 
 ## Bug Fixes
 - Fixed a bug in the Keel schema validation process that is causing the Keel validate and Keel run to throw a nil pointer error.
-
-Read the [Migration Guide for Hooks](/functions/hooks/migration-guide)
 
 For any issues or feedback, please visit the support channel on our community discord or contact us at [help@keel.so](mailto:help@keel.so).
 
