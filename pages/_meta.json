@@ -70,6 +70,12 @@
       "breadcrumb": false
     }
   },
+  "files": {
+    "title": "Files",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- features": {
     "title": "Features",
     "type": "separator"

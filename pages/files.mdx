@@ -1,0 +1,142 @@
+# Files
+
+## Inline Files
+
+Inline Files allow us to work with small files (< 5MB) that are passed inline with the API requests made to a Keel app.
+
+```keel {4}
+model Post {
+  fields {
+    title Text
+    image InlineFile
+  }
+}
+```
+
+### Input
+
+When used as an input, InlineFile fields are being passed as data-urls; The OpenAPI schema generated for an `InlineFile` field will be `string` with format type `data-url`.
+
+The data url passed for inline files should contain a name parameter which will give the filename for the stored file. e.g. `data:image/png;name=cover.png;base64,iVBORw0KGgoAAAANSUhEUg.....`
+
+### Storage
+
+When an `InlineFile` is given to a built-in action (`create`/`update`), the Keel runtime will take the given file and store it in either a database table (`keel_storage`) when running keel locally, or in a S3 storage bucket for hosted environments. Each environment will have a S3 bucket provisioned if the project's schema contains any InlineFiles. This is also applicable for Keel Studio projects.
+
+The table definition for models containing a `InlineFile` field will have a `jsonb` column for each of these file fields. After the file is stored, a json structure will be created which will be saved in the database. This structure is as follows:
+
+```json
+{
+  filename: "string";
+  contentType: "string";
+  size: 123;
+  key: "string";
+  public: false;
+}
+```
+import { Callout } from "@core/callout";
+
+<Callout type="info" emoji="🔐">
+  By default, all files are stored as private files and direct access is not permitted. When retrieving a model with a file, a presigned `url` is generated which allows the file to be accessed for a short period of time.
+</Callout>
+
+### Response
+
+When an API response contains an InlineFile (e.g. as a `get`, `list`, or the response for a `update`/`create` action), the format in which these fields are returned is as follows:
+
+```
+"image": {
+  "key": "2k724tpxBenRVdYI8iwao1hYUtt",
+  "filename": "000 copy.png",
+  "contentType": "image/png",
+  "size": 153225,
+  "url": "https://env-abcdefghijklmnopqrstuvwxyz.s3.eu-west-2.amazonaws.com....",
+  "public": false
+},
+```
+
+### Custom Functions & Jobs
+
+`InlineFile`s can be used in custom functions. The Keel SDK provides a `InlineFile` class which can be used to handle these input types.
+
+When defining a input message with an `InlineFile` field, the file should be provided as part of the API request as previously stated, in the form of a data-url. The SDK will then parse the input and instantiate an `InlineFile` for it. When using the ModelAPI's `create()` or `update()` function, inputs are traversed and any files will be uploaded before the data is inserted in the DB. 
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['Keel schema', 'Custom Function Implementation', 'API Request & Response' ]}>
+  <Tab>
+```keel
+message ImageInput {
+  title Text
+  image InlineFile
+}
+
+model Post {
+  fields {
+    title Text
+    image InlineFile
+  }
+  actions {
+    write createFromImage(ImageInput) returns (Any)
+  }
+}
+```
+  </Tab>
+    <Tab>
+```ts
+export default CreateFromImage(async (ctx, inputs) => {
+  try {
+    const post = await models.post.create({
+      image: inputs.image,
+      description: inputs.title,
+    })
+  
+    return post
+  } catch (error) {
+    console.log(error)
+    throw error;
+  }
+});
+```
+  </Tab>
+  <Tab>
+```json
+  // POST /api/json/createFromImage
+  {
+    "title": "A string blog post title",
+    "image": "`data:image/png;name=cover.png;base64,iVBORw0KGgoAAAANSUhEUg....."
+  }
+
+  // Response
+  {
+    "id": "2kbvM6UwdA8GogE0rZpSd7DmnM9",
+    "image": {
+      "contentType": "image/png",
+      "filename": "cover.png",
+      "key": "2kbvM90SbG1R4FH3pV7eYYh7QwI",
+      "size": 2024
+    },
+    "title": "A string blog post title",
+    "createdAt": "2024-08-13T16:03:59.377Z",
+    "updatedAt": "2024-08-13T16:03:59.377Z"
+  }
+```
+  </Tab>
+</Tabs>
+
+When using the ModelAPI to retrieve models, any InlineFile fields will be retrieved as instances of `InlineFile`. This class provides a `read()` method which can be used to read the contents of the file. When an `InlineFile` is used as an input, the read function will retrieve the contents from the given dataURL, or if the file has been persisted then the read will fetch the stored filed from the respective store (either S3 or the database) and retrieve the contents as a `Buffer`.
+
+```ts
+export default ReadFile(async (ctx, inputs) => {
+    const post = await models.post.findOne({ id: inputs.id })
+    const contents = await post?.image?.read();
+
+    return {
+        contents: contents?.toString('base64'),
+    }
+});
+```
+
+<Callout type="info" emoji="🗄️">
+  Files can be persisted manually by using the InlineFile's `store()` function. This function also accepts an `expires` parameter. This is a optional `Date` on which the S3 file will expire.
+</Callout>
