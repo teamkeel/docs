@@ -51,7 +51,7 @@ This `baseUrl` url should include the API name path but not the protocol (e.g. j
 ```ts
 import { APIClient } from "../keelClient";
 
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 ```
@@ -65,12 +65,12 @@ The generated client is segmented into three parts; `api`, `auth`, and `client`.
 This includes all the actions that you have specified in your Keel schema. For example, if you have an action that lists all users, here is how you can use the generated client to execute this action on the client-side:
 
 ```ts
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 
 // use generated client to execute the action on the client-side
-const allUsers = await client.api.queries.listUsers()
+const allUsers = await keel.api.queries.listUsers()
 
 // log response from API to console
 console.log(response.data?.results)
@@ -79,7 +79,7 @@ console.log(response.data?.results)
 You can also use `.api.mutations` if you have actions that mutate data. For example, if you have an action that deletes a user, you can use it like so:
 
 ```ts
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL, // http://localhost:8000/api
 });
 
@@ -121,7 +121,7 @@ Once authenticated, the client stores the active session in memory. This means t
 First, let's demonstrate how to authenticate the client with an [email and password](/authentication/flows/id-token).
 
 ```ts
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL,
 });
 
@@ -205,7 +205,7 @@ class LocalStorageStore {
 The client can then be configured to use this store:
 
 ```ts
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL,
   refreshTokenStore: new LocalStorageStore()
 });
@@ -214,7 +214,7 @@ const client = new APIClient({
 Note that you can also provide a custom store implementation for access tokens, however it's important to remember that access tokens are typically short-lived and only need to be persisted if you're unable to reuse them between requests.
 
 ```ts
-const client = new APIClient({
+const keel = new APIClient({
   baseUrl: process.env.API_BASE_URL,
   accessTokenStore: new LocalStorageStore(),
   refreshTokenStore: new HttpOnlyCookieStore()
@@ -246,7 +246,7 @@ type ErrorObj = {
 You can then check the presence of the error object to handle any errors
 
 ```tsx
-const myAction = await client.myAction({
+const myAction = await keel.myAction({
   input: "foo"
 });
 
