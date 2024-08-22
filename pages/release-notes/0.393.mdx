@@ -44,7 +44,7 @@ const res = await keel.client.authenticateWithPassword({
 
 ### Returning errors
 
-We have decideds to change our approach to errors on the generated client and _not throw them_. This means that most of the `auth` functions can now return errors.
+We have decideds to change our approach to errors on the authentication functions and _not throw them_. This means that most of the `auth` functions can now return errors, which is aligned to how actions are handled on the generated client.
 
 ```typescript
 const res = await keel.client.authenticateWithPassword(...);
