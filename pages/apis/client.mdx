@@ -156,14 +156,26 @@ With [Single Sign-On authentication](/authentication/flows/sso), you would have 
 
 ```ts
 // authenticate the client using an authorization code from Single Sign-On
-await keel.auth.authenticateWithSingleSignOn({ code: authCode });
+const response = await keel.auth.authenticateWithSingleSignOn({ code: authCode });
 ```
 
 #### Sign in and sign up
 
 Both the `authenticateWithPassword()` and `authenticateWithIdToken()` functions also accept the optional argument 'createIfNotExists'.  Setting this to `false` will not create a new identity if it doesn't exist - i.e. a sign in flow. 
 
-The response from a successful `authenticateWithPassword()`, `authenticateWithIdToken()`, or `authenticateWithSingleSignOn()` includes the field  `identityCreated`.  This will be `true` when the identity was created as a result of authentication - i.e. the identity has signed up.
+The response from a successful `authenticateWithPassword()`, `authenticateWithIdToken()`, or `authenticateWithSingleSignOn()` includes the field  `identityCreated`.  This will be `true` when the identity was created as a result of authentication - i.e. the identity has signed up. See example below.
+
+```ts
+const response = await keel.auth.authenticateWithSingleSignOn({ code: authCode });
+
+if (response.error) { 
+  // an error occurred
+}
+
+if (response.data.identityCreated) {
+  // a new identity was created
+}
+```
 
 #### Token refresh and expiry
 
