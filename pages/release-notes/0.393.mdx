@@ -30,7 +30,7 @@ if (res.data.identityCreated) {
 
 ### Object inputs
 
-We have changed the shape of the arguments to `authenticateWithPassword()`, `authenticateWithIdToken()` and `authenticateWithSingleSignOn`. Previously, they had accepted multiple arguments (for example, `authenticateWithPassword(email, password)`), however they will now take accept the arguments as fields of an object. 
+We have changed the shape of the arguments to `authenticateWithPassword()`, `authenticateWithIdToken()` and `authenticateWithSingleSignOn`. Previously, they had accepted multiple arguments (e.g., `(email, password)`), however they will now take accept the arguments as fields of an object (e.g., `({ email: email, password: pass })`).
 
 For example, calling `authenticateWithPassword()` might look something like this:
 
