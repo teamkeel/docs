@@ -126,13 +126,19 @@ const keel = new APIClient({
 });
 
 // authenticate the client with email and password
-await keel.auth.authenticateWithPassword(email, pass);
+const response = await keel.auth.authenticateWithPassword({ email: email, password: pass });
+if (response.error) {
+  // an error occurred
+}
 
-// check that the client is authenticated
-const isAuthenticated = await keel.auth.isAuthenticated();
+// check that the client is still authenticated
+const isAuthenticatedResponse = await keel.auth.isAuthenticated();
+if (response.data) {
+  // the client is still authenticated
+}
 
 // perform an authenticated request to your Keel API
-const response = await keel.api.mutations.createBlogPost({ title: title });
+const createPost = await keel.api.mutations.createBlogPost({ title: title });
 ```
 
 #### ID Token authentication
@@ -141,7 +147,7 @@ With [ID Token authentication](/authentication/flows/id-token), you would have a
 
 ```ts
 // authenticate the client using an ID token from a 3rd-party provider
-await keel.auth.authenticateWithIdToken(idToken);
+const response = await keel.auth.authenticateWithIdToken({ idToken: idToken });
 ```
 
 #### Single Sign-On authentication
@@ -150,7 +156,25 @@ With [Single Sign-On authentication](/authentication/flows/sso), you would have 
 
 ```ts
 // authenticate the client using an authorization code from Single Sign-On
-await keel.auth.authenticateWithSingleSignOn(authCode);
+const response = await keel.auth.authenticateWithSingleSignOn({ code: authCode });
+```
+
+#### Sign in and sign up
+
+Both the `authenticateWithPassword()` and `authenticateWithIdToken()` functions also accept the optional argument 'createIfNotExists'.  Setting this to `false` will not create a new identity if it doesn't exist - i.e. a sign in flow. 
+
+The response from a successful `authenticateWithPassword()`, `authenticateWithIdToken()`, or `authenticateWithSingleSignOn()` includes the field  `identityCreated`.  This will be `true` when the identity was created as a result of authentication - i.e. the identity has signed up. See example below.
+
+```ts
+const response = await keel.auth.authenticateWithSingleSignOn({ code: authCode });
+
+if (response.error) { 
+  // an error occurred
+}
+
+if (response.data.identityCreated) {
+  // a new identity was created
+}
 ```
 
 #### Token refresh and expiry
@@ -223,7 +247,7 @@ const keel = new APIClient({
 
 ### Error handling
 
-The response of an action is a promise that resolves to an object that either contains the data or an error object
+The response of an action is a `Promise` that resolves to an object that either contains the `data` or an `error` object.
 
 ```tsx
 type Data<T> = {
@@ -243,7 +267,7 @@ type ErrorObj = {
 };
 ```
 
-You can then check the presence of the error object to handle any errors
+You can then check the presence of the `error` object to handle any errors
 
 ```tsx
 const myAction = await keel.myAction({

@@ -1,0 +1,67 @@
+# 21 August, 2024
+
+## Generated client __upgraded__
+
+As you might already know, running `keel client` generates a [complete TypeScript SDK](https://docs.keel.so/apis/client) for you to authenticate with and query your Keel application.
+
+In this release we have made some important changes to the authentication functions in the generated client.
+
+import { Callout } from "@core/callout"
+
+<Callout type="warning" emoji="⚠️">
+Note that this release introduced some breaking changes to the generated client.
+</Callout>
+
+### `createIfNotExists` and `identityCreated`
+
+The `authenticateWithPassword()` and `authenticateWithIdToken()` now accept the optional argument `createIfNotExists`. By setting this to `false` the authentication flow will only "log in" - i.e. it will only authenticate if the identity already exists and will not create the identity otherwise. This is really useful when you need to differentiate between "log in" and "sign up" flows.
+
+All three authenticatee functions now return the field `identityCreated`, which indicates whether an new identity was created during the auth flow.
+
+```typescript
+const res = await keel.client.authenticateWithPassword(...);
+
+if (res.data.identityCreated) {
+    // The identity was created - i.e. sign up
+} else {
+    // The identity was created - i.e. log in
+}
+```
+
+### Object inputs
+
+We have changed the shape of the arguments to `authenticateWithPassword()`, `authenticateWithIdToken()` and `authenticateWithSingleSignOn`. Previously, they had accepted multiple arguments (e.g., `(email, password)`), however they will now take accept the arguments as fields of an object (e.g., `({ email: email, password: pass })`).
+
+For example, calling `authenticateWithPassword()` might look something like this:
+
+```typescript
+const res = await keel.client.authenticateWithPassword({ 
+    email: "me@user.com",
+    password: "p@55w0rd",
+    createIfNotExists: false
+});
+```
+
+### Returning errors
+
+We have decided to change our approach to errors on the authentication functions and _not throw them_. This means that most of the `auth` functions can now return errors, which is aligned to how actions are handled on the generated client.
+
+```typescript
+const res = await keel.client.authenticateWithPassword(...);
+
+if (res.error) {
+    switch res.error.type {
+        case "unauthorized":
+            // Failed to authenticate
+        default:
+            // Some other error occurred
+    }
+}
+```
+
+
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
