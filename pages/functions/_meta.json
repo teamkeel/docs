@@ -1,6 +1,6 @@
 {
   "action-hooks": "Action hooks",
-  "auth-hooks": "Auth hooks",
   "custom-functions": "Custom functions",
+  "auth-hooks": "Auth hooks",
   "sdk": "Functions SDK"
 }

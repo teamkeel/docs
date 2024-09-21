@@ -1,0 +1,453 @@
+# Schema reference
+
+The Keel schema is a DSL used to define data models, actions, permissions, and other components that are transformed into APIs and project infrastructure. It allows you to specify the structure and behavior of your application's data and operations in a concise and readable manner.
+
+## overview
+
+A Keel schema (one or many `.keel` files) is composed of declarations:
+
+- [**Models**](#models)
+- [**Enums**](#enums)
+- [**Roles**](#roles)
+- [**Messages**](#messages)
+- [**Jobs**](#jobs)
+- [**APIs**](#apis)
+
+Each declaration begins with a keyword (`model`, `enum`, `message`, `role`, `api`, `job`) followed by a name and a block defining its contents.
+
+```keel
+keyword EntityName {
+	// ..
+}
+```
+
+Comments in Keel DSL use the `//` syntax for single-line comments.
+
+## Models
+
+Models represent data structures in your application. They can have fields, actions, and permissions.
+
+```keel
+model ModelName {
+    // Sections: fields, actions
+}
+```
+
+### Fields
+
+Fields define the data properties of a model.
+
+```keel
+fields {
+    fieldName FieldType [modifiers] [attributes]
+}
+```
+
+- **`fieldName`**: The name of the field.
+- **`FieldType`**: The data type of the field.
+- **Modifiers**:
+  - `[]`: Indicates the field is an array (repeated).
+  - `?`: Indicates the field is optional.
+- **Attributes**: Additional metadata for the field, defined using attributes.
+
+#### Field types
+
+Built-in scalar types:
+
+| Field Type | Description |
+|------------|-------------|
+| `ID` | A unique identifier (KSUID) |
+| `Text` | A string |
+| `Number` | An integer |
+| `Decimal` | A decimal number |
+| `Date` | A date without time (ISO 8601 format) |
+| `Timestamp` | A UTC timestamp |
+| `Boolean` | A boolean value (`true` or `false`) |
+| `Secret` | An encrypted secret |
+| `Password` | A hashed password |
+| `Markdown` | Rich text in Markdown format |
+| `Vector` | A vector type |
+| `File` | A file input, supplied as a data URL |
+
+You can also use other models or enums as field types.
+
+**Example**
+
+```keel
+fields {
+    name Text
+    rating Number?
+    tags Text[]
+    books Book[]
+}
+```
+
+### Actions
+
+Actions define operations that can be performed on the model.
+
+#### Standard actions
+
+Standard actions are actions where Keel handles the implementations. The functionality can be extended using [hooks](/functions/action-hooks).
+
+```keel
+actions {
+    actionType actionName(readFields) [with (writeFields)] [attributes]
+}
+```
+| Parameter       | Description                                                                           |
+|-----------------|----------------------------------------------------------------------------------------|
+| `actionType`    | The type of action: `get`, `create`, `update`, `delete`, or `list`                     |
+| `actionName`    | Globally unique name of the action (e.g., `createPost`, `updateUser`)                  |
+| `readFields`    | Comma-separated list of model fields or custom parameter used for selecting the entry                      |
+| `writeFields`   | Comma-separated list of model fields or custom parameter to write                         |
+| `attributes`    | Additional controls for the behavior of the action                                     |
+
+**Supported attributes**
+
+| Attribute    | get | list | create | update | delete |
+|--------------|-----|------|--------|--------|--------|
+| `@embed`     | ✓   | ✓    |        |        |        |
+| `@permission`| ✓   | ✓    | ✓      | ✓      | ✓      |
+| `@function`  | ✓   | ✓    | ✓      | ✓      | ✓      |
+| `@where`     | ✓   | ✓    | ✓      | ✓      | ✓      |
+| `@orderBy`   |     | ✓    |        |        |        |
+| `@sortable`  |     | ✓    |        |        |        |
+| `@set`       |     |      | ✓      | ✓      |        |
+
+**Custom parameter**  
+For write actions, you can specify custom fields that are not part of the model with the syntax `fieldName: FieldType`. These fields must then be used as part of a `@set` or `@where`:
+
+```keel
+actions {
+    update updatePost(id) with (customInput: Text) {
+		@set(title = customInput)
+	}
+}
+```
+
+
+#### Custom actions
+
+Custom actions are actions where you define the implementation. Either as a `read` function that returns data or a `write` function that modifies data.
+
+```keel
+actions {
+    actionType actionName(readFields) returns (returnTypes) [attributes]
+}
+```
+
+| Parameter       | Description                                                                           |
+|-----------------|----------------------------------------------------------------------------------------|
+| `actionType`    | The type of action: `read`, `write`                                                      |
+| `actionName`    | Globally unique name of the action (e.g., `createPost`, `updateUser`)                  |
+| `readFields`    | Comma-separated list of model fields or [message](#messages) to use as inputs                   |
+| `returnTypes`   | [Message](#messages) to use as output.                                                            |
+| `attributes`    | Additional controls for the behavior of the action                                     |
+
+**Supported attributes**
+
+| Attribute    | read | write |
+|--------------|------|-------|
+| `@permission`| ✓    | ✓     |
+
+**N.B.** `@permission` expressions can't use row-based data for custom actions. For row based permission checked, handle the logic within the function.
+
+
+**Example**
+
+```keel
+actions {
+    create createAuthor(name) @function
+    get getAuthor(id) 
+    list listAuthors() {
+        @sortable(firstName, surname)
+        @orderBy(firstName: asc, surname: desc)
+    }
+    read getExternalAuthor(extId: Text) returns (GetAuthorResponse) 
+	write processAuthor (id) returns (GetAuthorResponse)
+}
+
+message GetAuthorResponse {
+	name Text
+}
+message GetAuthorResponse {
+	authorId ID
+}
+```
+
+### Attributes
+
+Attributes provide metadata and additional behavior to models, fields, and actions. Attributes are denoted using the `@` symbol, followed by the attribute name and optional arguments.
+
+```keel
+@attributeName(arguments)
+```
+
+#### Common attributes
+
+| Attribute    | Description                                       |
+|--------------|---------------------------------------------------|
+| `@unique`    | Ensures the field's value is unique.              |
+| `@permission`| Defines access control for actions.               |
+| `@function`  | Marks an action as a function.                    |
+| `@orderBy`   | Specifies default ordering for lists.             |
+| `@sortable`  | Specifies fields that can be used for sorting.    |
+| `@on`        | Defines triggers for actions.                     |
+| `@embed`     | Specifies related models to include.              |
+| `@schedule`  | Schedules a job to run at specific intervals.     |
+| `@relation`  | Defines relationships between models.             |
+| `@default`   | Sets a default value for a field.                 |
+| `@validate`  | Adds validation rules to fields.                  |
+| `@where`     | Adds conditions to actions.                       |
+| `@set`       | Sets values during an action.                     |
+
+**Example**
+
+```keel
+fields {
+    isbn Text {
+        @unique
+    }
+}
+
+@permission(
+    role: Admin,
+    actions: [create]
+)
+```
+
+## Enums
+
+Enums define a set of named constant values.
+
+```keel
+enum EnumName {
+    Value1
+    Value2
+    // ...
+}
+```
+
+**Example**
+
+```keel
+enum Planets {
+    Mercury
+    Venus
+    Earth
+    Mars
+}
+```
+
+## Messages
+
+Messages define custom input and output types for actions. They are especially useful when defining custom functions. 
+
+```keel
+message MessageName {
+    fieldName FieldType [modifiers]
+    // ...
+}
+```
+
+Messages can be nested to define more complex structures.
+
+```keel
+message MessageName {
+    fieldName FieldType
+	messageField OtherMessage
+    // ..
+}
+message OtherMessage {
+    fieldName FieldType
+    // ...
+}
+```
+
+**Example**
+
+```keel
+message MyInput {
+    id ID
+}
+
+message MyOutput {
+    name Text?
+}
+
+message Book {
+    name Text
+}
+message AuthorAndBooks {
+    name Text
+	books Book[]
+}
+```
+
+## Roles
+
+Roles define access permissions based on domains or specific emails.
+
+```keel
+role RoleName {
+    domains {
+        "example.com"
+        "anotherdomain.com"
+    }
+    emails {
+        "user@example.com"
+        "admin@example.com"
+    }
+}
+```
+
+**Example**
+
+```keel
+role Admin {
+    domains {
+        "keel.xyz"
+        "keel.zyx"
+    }
+    emails {
+        "adam@keel.xyz"
+        "adam@keel.zyx"
+    }
+}
+```
+
+## APIs
+
+APIs define how models and their actions are exposed.
+
+```keel
+api ApiName {
+    models {
+        ModelName {
+            actions {
+                actionName
+                // ...
+            }
+        }
+        // ...
+    }
+}
+```
+
+**Example**
+
+```keel
+api Web {
+    models {
+        Author
+        Book
+    }
+}
+
+api Admin {
+    models {
+        Author {
+            actions {
+                deleteAuthor
+                deleteAll
+            }
+        }
+    }
+}
+```
+
+## Jobs
+
+Jobs define background tasks that can either be scheduled or triggered manually via the console (or both).
+
+```keel
+job JobName {
+    inputs {
+        inputName InputType [modifiers]
+        // ...
+    }
+    @schedule("cron_expression") 
+	@permission(expression: <condition>) 
+    [attributes]
+}
+```
+
+**Example**
+
+```keel
+job MyJob {
+    inputs {
+        veryImportantValue Text
+        someFlag Boolean?
+    }
+    @permission(roles: [Developer])
+    @schedule("0 0 * * *") // Runs daily at midnight
+}
+```
+
+## Expressions
+
+Expressions are used within attributes and other constructs to define conditions, default values, etc.
+
+Expressions support logical and comparison operations:
+
+- **Operators**: `==`, `!=`, `>`, `<`, `>=`, `<=`, `in`, `not in`, `and`, `or`, `=`, `+=`, `-=`
+- **Values**: Literals (`true`, `false`, `null`, numbers, strings), identifiers, arrays.
+- **Parentheses**: Used for grouping, e.g., `(a == b) and (c > d)`
+
+**Example**
+
+```keel
+@permission(
+    expression: isAdmin == true and department == "Engineering",
+    actions: [update, delete]
+)
+
+@default(status = "pending")
+
+@on([create], sendWelcomeEmail)
+```
+
+## Permissions
+
+Permissions in Keel DSL are used to control access to models and actions based on roles and conditions. They are defined using the `@permission` attribute and the `role` declaration.
+
+```keel
+@permission(
+    roles: [RoleName],
+    actions: [actionType1, actionType2, ...],
+    expression: <condition>
+)
+```
+
+- **`roles`**: A list of roles which have access.
+- **`actions`**: A list of action types that the permission applies to.
+- **`expression`**: An optional logical condition that must be met for the permission to be granted. See [expressions](#expressions) for more details.
+
+#### Role based permissions
+
+```keel
+@permission(
+    roles: [Admin],
+    actions: [create, update, delete]
+)
+```
+
+In this example, users with the `Admin` role are allowed to perform `create`, `update`, and `delete` actions.
+
+#### Row based permissions
+
+You can use the `expression` parameter to define conditional permissions based on model fields or other variables.
+Row based data is available under the namespace of the model. e.g. `employee` in the example below.
+
+```keel
+@permission(
+    expression: employee.isActive == true and employee.department == "HR",
+    actions: [update]
+)
+```
+
+In this case, the permission is granted if the `isActive` field is `true` and the `department` is `"HR"`.
+
+For more information see [permissions](/permissions).

@@ -76,6 +76,22 @@
       "breadcrumb": false
     }
   },
+  "-- Reference": {
+    "title": "Reference",
+    "type": "separator"
+  },
+  "schema-reference": {
+    "title": "Schema",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
+  "functions-reference": {
+    "title": "Functions",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- features": {
     "title": "Features",
     "type": "separator"
