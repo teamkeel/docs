@@ -598,46 +598,6 @@ role Admin {
 }
 ```
 
-## APIs
-
-APIs define how models and their actions are exposed.
-
-```keel
-api ApiName {
-    models {
-        ModelName {
-            actions {
-                actionName
-                // ...
-            }
-        }
-        // ...
-    }
-}
-```
-
-**Example**
-
-```keel
-api Web {
-    models {
-        Author
-        Book
-    }
-}
-
-api Admin {
-    models {
-        Author {
-            actions {
-                deleteAuthor
-                deleteAll
-            }
-        }
-    }
-}
-```
-
 ## Jobs
 
 Jobs define background tasks that can either be scheduled or triggered manually via the console (or both).
@@ -668,6 +628,53 @@ job ManualImport {
         dryRun Boolean?
     }
     @permission(roles: [Developer])
+}
+```
+
+## APIs
+
+APIs define how models and their actions are exposed. By default there is an api called `API` which contains all the models.
+Additional APIs can be defined or the default API can be redefined and manually controlled.
+
+```keel
+api ApiName {
+    models {
+        ModelName {
+			// Optionally filter the actions
+            actions {
+                actionName
+                // ...
+            }
+        }
+        // ...
+    }
+}
+```
+
+**Example**
+
+```keel
+api Web {
+    models {
+        Customer
+		Order
+		Product {
+			actions {
+				getProduct
+				listProducts
+			}
+		}
+    }
+}
+
+api Admin {
+    models {
+        Customer
+		Order
+		Product
+		InventoryItem
+		StockLocations
+    }
 }
 ```
 
