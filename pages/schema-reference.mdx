@@ -86,7 +86,7 @@ Actions define operations that can be performed on the model.
 
 #### Standard actions
 
-Standard actions are actions where Keel handles the implementations. The functionality can be extended using [hooks](/functions/action-hooks).
+[Standard actions](/actions) are actions where Keel handles the implementations. The functionality can be extended using [hooks](/functions/action-hooks).
 
 ```keel
 actions {
@@ -119,8 +119,8 @@ For write actions, you can specify custom fields that are not part of the model 
 ```keel
 actions {
     update updatePost(id) with (customInput: Text) {
-		@set(title = customInput)
-	}
+        @set(title = customInput)
+    }
 }
 ```
 
@@ -140,7 +140,7 @@ actions {
 | `actionType`    | The type of action: `read`, `write`                                                      |
 | `actionName`    | Globally unique name of the action (e.g., `createPost`, `updateUser`)                  |
 | `readFields`    | Comma-separated list of model fields or [message](#messages) to use as inputs                   |
-| `returnTypes`   | [Message](#messages) to use as output.                                                            |
+| `returnTypes`   | [Message](#messages) to use as output                                                             |
 | `attributes`    | Additional controls for the behavior of the action                                     |
 
 **Supported attributes**
@@ -163,14 +163,14 @@ actions {
         @orderBy(firstName: asc, surname: desc)
     }
     read getExternalAuthor(extId: Text) returns (GetAuthorResponse) 
-	write processAuthor (id) returns (GetAuthorResponse)
+	write processAuthor(id) returns (GetAuthorResponse)
 }
 
 message GetAuthorResponse {
-	name Text
+    name Text
 }
 message GetAuthorResponse {
-	authorId ID
+    authorId ID
 }
 ```
 
@@ -245,7 +245,7 @@ For more information see [permissions](/permissions).
 
 ### `@unique`
 
-Ensures that the field's value is unique across all records in the model. This attribute is applied to fields within a model or on the modal for compound unique constraints.
+Ensures that the field's value is [unique](/models#unique-fields) across all records in the model. This attribute is applied to fields within a model or on the modal for compound unique constraints.
 
 **Usage:**
 
@@ -309,7 +309,7 @@ actions {
 
 ### `@orderBy`
 
-Specifies default ordering for `list` actions. You can define multiple fields and specify the sort direction (`asc` for ascending or `desc` for descending).
+The [`@orderBy` attribute](/actions#using-orderby) specifies default ordering for `list` actions. You can define multiple fields and specify the sort direction (`asc` for ascending or `desc` for descending).
 
 **Usage:**
 
@@ -323,7 +323,7 @@ actions {
 
 ### `@sortable`
 
-Specifies fields that can be used for sorting in `list` actions. Clients can sort results by these fields when making queries.
+The [`@sortable` attribute](/actions#using-sortable) specifies fields that can be used for sorting in `list` actions. Clients can sort results by these fields when making queries.
 
 **Usage:**
 
@@ -337,7 +337,7 @@ actions {
 
 ### `@on`
 
-Defines event subscribers for models based on the action type. 
+Defines [event subscribers](/events) for models based on the action type. 
 
 **Syntax:**
 
@@ -358,7 +358,7 @@ model User {
 
 ### `@embed`
 
-Specifies related models to include in the JSON and RPC api responses for `get` or `list` actions. This is useful for fetching associated data in a single query.
+[Embedding](/actions#the-embed-attribute) specifies related models to include in the JSON and RPC api responses for `get` or `list` actions. This is useful for fetching associated data in a single query.
 Can be used multiple times to embed multiple fields and can also embed multiple levels deep.
 
 **Usage:**
@@ -486,7 +486,7 @@ actions {
 
 ### `@schedule`
 
-Schedules a job to run at specific intervals. The argument is a cron expression or natural language description that defines the schedule. 
+Schedules a [job](/jobs) to run at specific intervals. The argument is a cron expression or natural language description that defines the schedule. 
 More information on the scheduling expressions can be found [here](/jobs#defining-a-schedule).
 
 **Usage:**
@@ -513,7 +513,7 @@ enum EnumName {
 **Example**
 
 ```keel
-enum Planets {
+enum Planet {
     Mercury
     Venus
     Earth
@@ -598,49 +598,9 @@ role Admin {
 }
 ```
 
-## APIs
-
-APIs define how models and their actions are exposed.
-
-```keel
-api ApiName {
-    models {
-        ModelName {
-            actions {
-                actionName
-                // ...
-            }
-        }
-        // ...
-    }
-}
-```
-
-**Example**
-
-```keel
-api Web {
-    models {
-        Author
-        Book
-    }
-}
-
-api Admin {
-    models {
-        Author {
-            actions {
-                deleteAuthor
-                deleteAll
-            }
-        }
-    }
-}
-```
-
 ## Jobs
 
-Jobs define background tasks that can either be scheduled or triggered manually via the console (or both).
+[Jobs](/jobs) define background tasks that can either be scheduled or triggered manually via the console (or both).
 More information on jobs can be found [here](/jobs).
 
 ```keel
@@ -668,6 +628,53 @@ job ManualImport {
         dryRun Boolean?
     }
     @permission(roles: [Developer])
+}
+```
+
+## APIs
+
+APIs define how models and their actions are exposed. By default there is an api called `API` which contains all the models.
+Additional APIs can be defined or the default API can be redefined and manually controlled.
+
+```keel
+api ApiName {
+    models {
+        ModelName {
+			// Optionally filter the actions
+            actions {
+                actionName
+                // ...
+            }
+        }
+        // ...
+    }
+}
+```
+
+**Example**
+
+```keel
+api Web {
+    models {
+        Customer
+		Order
+		Product {
+			actions {
+				getProduct
+				listProducts
+			}
+		}
+    }
+}
+
+api Admin {
+    models {
+        Customer
+		Order
+		Product
+		InventoryItem
+		StockLocations
+    }
 }
 ```
 
