@@ -2,8 +2,6 @@
 
 The Keel schema is a DSL used to define data models, actions, permissions, and other components that are transformed into APIs and project infrastructure. It allows you to specify the structure and behavior of your application's data and operations in a concise and readable manner.
 
-## overview
-
 A Keel schema (one or many `.keel` files) is composed of declarations:
 
 - [**Models**](#models)
@@ -643,29 +641,33 @@ api Admin {
 ## Jobs
 
 Jobs define background tasks that can either be scheduled or triggered manually via the console (or both).
+More information on jobs can be found [here](/jobs).
 
 ```keel
 job JobName {
+	// Inputs can only be used with manual jobs
     inputs {
         inputName InputType [modifiers]
         // ...
     }
-    @schedule("cron_expression") 
+    @schedule(<cron_expression>) 
 	@permission(expression: <condition>) 
-    [attributes]
 }
 ```
 
 **Example**
 
 ```keel
-job MyJob {
+job DailyReport {
+     @schedule("every monday at 9am")
+}
+
+job ManualImport {
     inputs {
-        veryImportantValue Text
-        someFlag Boolean?
+        json Text
+        dryRun Boolean?
     }
     @permission(roles: [Developer])
-    @schedule("0 0 * * *") // Runs daily at midnight
 }
 ```
 
@@ -678,16 +680,3 @@ Expressions support logical and comparison operations:
 - **Operators**: `==`, `!=`, `>`, `<`, `>=`, `<=`, `in`, `not in`, `and`, `or`, `=`, `+=`, `-=`
 - **Values**: Literals (`true`, `false`, `null`, numbers, strings), identifiers, arrays.
 - **Parentheses**: Used for grouping, e.g., `(a == b) and (c > d)`
-
-**Example**
-
-```keel
-@permission(
-    expression: isAdmin == true and department == "Engineering",
-    actions: [update, delete]
-)
-
-@default(status = "pending")
-
-@on([create], sendWelcomeEmail)
-```
