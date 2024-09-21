@@ -176,46 +176,329 @@ message GetAuthorResponse {
 }
 ```
 
-### Attributes
+## Attributes
 
-Attributes provide metadata and additional behavior to models, fields, and actions. Attributes are denoted using the `@` symbol, followed by the attribute name and optional arguments.
+Attributes provide metadata and additional behavior to models, fields, and actions. They are denoted using the `@` symbol, followed by the attribute name and optional arguments.
 
 ```keel
 @attributeName(arguments)
 ```
 
-#### Common attributes
+Attributes can be applied to fields, actions, or models.
 
-| Attribute    | Description                                       |
-|--------------|---------------------------------------------------|
-| `@unique`    | Ensures the field's value is unique.              |
-| `@permission`| Defines access control for actions.               |
-| `@function`  | Marks an action as a function.                    |
-| `@orderBy`   | Specifies default ordering for lists.             |
-| `@sortable`  | Specifies fields that can be used for sorting.    |
-| `@on`        | Defines triggers for actions.                     |
-| `@embed`     | Specifies related models to include.              |
-| `@schedule`  | Schedules a job to run at specific intervals.     |
-| `@relation`  | Defines relationships between models.             |
-| `@default`   | Sets a default value for a field.                 |
-| `@validate`  | Adds validation rules to fields.                  |
-| `@where`     | Adds conditions to actions.                       |
-| `@set`       | Sets values during an action.                     |
+| Attribute    | Fields | Actions | Models | Jobs |
+|--------------|--------|---------|--------|------|
+| @permission  |        | ✓       | ✓      | ✓    |
+| @unique      | ✓      |         | ✓      |      |
+| @relation    | ✓      |         |        |      |
+| @default     | ✓      |         |        |      |
+| @function    |        | ✓       |        |      |
+| @orderBy     |        | ✓       |        |      |
+| @sortable    |        | ✓       |        |      |
+| @embed       |        | ✓       |        |      |
+| @where       |        | ✓       |        |      |
+| @set         |        | ✓       |        |      |
+| @on          |        |         | ✓      |      |
+| @schedule    |        |         |        | ✓    |
 
-**Example**
+### `@permission`
+
+Defines access control for actions or models. It specifies which roles have access and can include expressions for conditional permissions.
+
+**Syntax:**
+
+```keel
+@permission(
+    roles: [Role1, Role2, ...],
+    actions: [actionType1, actionType2, ...],
+    expression: <condition>
+)
+```
+
+- **`roles`**: A list of roles granted access.
+- **`actions`**: A list of action types the permission applies to (`get`, `list`, `create`, `update`, `delete`).
+- **`expression`**: An optional logical condition that must be met for the permission to be granted.
+
+Multiple `@permission` attributes can be applied to the same action or model and will be evaluated as a logical `or`.
+
+If a permission is defined on an individual action, it will replace any permissions defined for that action type on the model.
+
+**Usage:**
+
+```keel
+@permission(
+    roles: [Admin],
+    actions: [create, update, delete]
+)
+```
+
+**Row-based permissions:**
+
+```keel
+@permission(
+    expression: employee.isActive == true and employee.department == "HR",
+    actions: [update]
+)
+```
+
+*Note:* In row-based permissions, you can reference model fields and compare them to static values or context variables.
+
+For more information see [permissions](/permissions).
+
+### `@unique`
+
+Ensures that the field's value is unique across all records in the model. This attribute is applied to fields within a model or on the modal for compound unique constraints.
+
+**Usage:**
 
 ```keel
 fields {
-    isbn Text {
-        @unique
+	username Text {
+		@unique
+	}
+}
+```
+
+```keel
+modal User {
+    fields {
+        username Text 
+		email Text 
+    }
+
+	@unique([username, email])
+}
+```
+
+**Permissions specificity**
+
+```keel
+model Post {
+  fields {
+	name Text
+    author Author
+	owner Identity
+  }
+
+  actions {
+	update updatePost(id) with (name)
+	update updatePostAuthor(id) with (author) {
+		// This will override the model level permission
+		@permission(expression: post.owner == ctx.identity)
+	} 
+  }
+ 
+  @permission(
+    expression: post.author.identity == ctx.identity,
+    actions: [update]
+  )
+}
+```
+
+
+
+### `@function`
+
+Marks a standard action as a function, this exposes [action hooks](/functions/action-hooks) where you can extend the functionality. 
+
+**Usage:**
+
+```keel
+actions {
+    create createAuthor(name) @function
+}
+```
+
+### `@orderBy`
+
+Specifies default ordering for `list` actions. You can define multiple fields and specify the sort direction (`asc` for ascending or `desc` for descending).
+
+**Usage:**
+
+```keel
+actions {
+    list listItems() {
+        @orderBy(price: asc, createdAt: desc)
     }
 }
-
-@permission(
-    role: Admin,
-    actions: [create]
-)
 ```
+
+### `@sortable`
+
+Specifies fields that can be used for sorting in `list` actions. Clients can sort results by these fields when making queries.
+
+**Usage:**
+
+```keel
+actions {
+    list listProducts() {
+        @sortable(name, price, rating)
+    }
+}
+```
+
+### `@on`
+
+Defines event subscribers for models based on the action type. 
+
+**Syntax:**
+
+```keel
+@on([actionType], functionName)
+```
+Run `keel generate` to scaffold the subscriber function.
+
+
+**Usage:**
+
+```keel
+model User {
+	@on([create], sendWelcomeEmail)
+	@on([create, update, delete], syncUsersWithExternalSystem)
+}
+```
+
+### `@embed`
+
+Specifies related models to include in the JSON and RPC api responses for `get` or `list` actions. This is useful for fetching associated data in a single query.
+Can be used multiple times to embed multiple fields and can also embed multiple levels deep.
+
+**Usage:**
+
+```keel
+actions {
+    get getOrder(id) {
+        @embed(customer)
+		@embed(items)
+    }
+
+    list listOrders() {
+        @embed(customer)
+		@embed(customer.addresses)
+    }
+}
+```
+
+
+
+### `@relation`
+
+If you need multiple relationships between the same two models, then you will need to explicitly specify to which fields each of the relationships join with. 
+This is done using the `@relation` attribute.
+
+**Usage:**
+
+```keel
+model Post {
+  fields {
+    writtenBy Author @relation(written)
+    reviewedBy Author @relation(reviewed)
+  }
+}
+ 
+model Author {
+  fields {
+    written Post[] 
+    reviewed Post[] 
+  }
+}
+```
+
+Note that `@relation` is only valid on the has one side of the relationship.
+
+
+### `@default`
+
+Sets a default value for a field when a new record is created.
+Using `@default` without arguments will default to empty value of the field type.
+
+| Data Type | Empty Value |
+|-----------|-------------|
+| Text      | "" (empty string) |
+| Number    | 0 |
+| Decimal    | 0 |
+| Boolean   | false |
+| Timestamp  | Current timestamp |
+| Date  | Current date |
+| ID        | Auto-generated KSUID |
+
+
+**Usage:**
+
+```keel
+fields {
+    isActive Boolean @default(true)
+    createdAt DateTime @default
+}
+```
+
+### `@where`
+
+Adds conditions to actions to filter data based on specified criteria. Applicable to `get`, `list`, `update`, and `delete` actions.
+
+**Usage:**
+
+```keel
+actions {
+    list listActiveUsers() {
+        @where(user.isActive == true)
+    }
+
+    update deactivateUser(id) {
+        @where(user.isActive == true) // Will 404 if user is not active
+        @set(user.isActive = false)
+    }
+}
+```
+
+### `@set`
+
+Assigns values to fields during `create` or `update` actions. You can set fields to static values, input variables, or expressions.
+
+**Usage:**
+
+```keel
+actions {
+    create createPost(title) {
+        @set(post.status = "draft")
+        @set(post.createdAt = ctx.now)
+        @set(post.author = ctx.identity)
+    }
+
+    update publishPost(id) {
+        @set(post.status = "published")
+        @set(post.publishedAt = ctx.now)
+    }
+}
+```
+
+*Note:* You can also use `@set` with custom input fields not defined in the model.
+
+**Example with custom input:**
+
+```keel
+actions {
+    create createEvent() with (startTime: Timestamp, duration: Number) {
+        @set(event.startTime = startTime)
+        @set(event.endTime = startTime + duration * durationUnit)
+    }
+}
+```
+
+
+### `@schedule`
+
+Schedules a job to run at specific intervals. The argument is a cron expression or natural language description that defines the schedule. 
+More information on the scheduling expressions can be found [here](/jobs#defining-a-schedule).
+
+**Usage:**
+
+```keel
+job EmailNewCustomerReport {
+  @schedule("every monday at 9am")
+}
+```
+
 
 ## Enums
 
@@ -408,46 +691,3 @@ Expressions support logical and comparison operations:
 
 @on([create], sendWelcomeEmail)
 ```
-
-## Permissions
-
-Permissions in Keel DSL are used to control access to models and actions based on roles and conditions. They are defined using the `@permission` attribute and the `role` declaration.
-
-```keel
-@permission(
-    roles: [RoleName],
-    actions: [actionType1, actionType2, ...],
-    expression: <condition>
-)
-```
-
-- **`roles`**: A list of roles which have access.
-- **`actions`**: A list of action types that the permission applies to.
-- **`expression`**: An optional logical condition that must be met for the permission to be granted. See [expressions](#expressions) for more details.
-
-#### Role based permissions
-
-```keel
-@permission(
-    roles: [Admin],
-    actions: [create, update, delete]
-)
-```
-
-In this example, users with the `Admin` role are allowed to perform `create`, `update`, and `delete` actions.
-
-#### Row based permissions
-
-You can use the `expression` parameter to define conditional permissions based on model fields or other variables.
-Row based data is available under the namespace of the model. e.g. `employee` in the example below.
-
-```keel
-@permission(
-    expression: employee.isActive == true and employee.department == "HR",
-    actions: [update]
-)
-```
-
-In this case, the permission is granted if the `isActive` field is `true` and the `department` is `"HR"`.
-
-For more information see [permissions](/permissions).
