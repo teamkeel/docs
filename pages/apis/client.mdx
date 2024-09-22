@@ -245,6 +245,53 @@ const keel = new APIClient({
 });
 ```
 
+#### Server-side usage
+
+By default, the generated client persists sessions in memory. This is **not suitable** for server-side applications and framework with SSR such as Next.js or Remix.
+
+For these applications, it's critical that the client is created per request and cookie storage is used to persist the tokens.
+
+For example, with Next.js, you can create a client with cookie storage as shown below.
+
+```ts
+import { deleteCookie, getCookie, setCookie } from 'cookies-next';
+
+export const keelClient = async (context?: OptionsType) => {
+  return new APIClient({
+    baseUrl: process.env.NEXT_PUBLIC_KEEL_BASE_URL,
+    accessTokenStore: {
+      get: () => {
+        return getCookie(ACCESS_TOKEN_KEY, context) || null;
+      },
+      set: async (token) => {
+        token
+          ? setCookie(ACCESS_TOKEN_KEY, token, context)
+          : deleteCookie(ACCESS_TOKEN_KEY, context);
+      },
+    },
+    refreshTokenStore: {
+      get: () => {
+        return getCookie(REFRESH_TOKEN_KEY, context) || null;
+      },
+      set: async (token) => {
+        token
+          ? setCookie(REFRESH_TOKEN_KEY, token, context)
+          : deleteCookie(REFRESH_TOKEN_KEY, context);
+      },
+    },
+  });
+};
+```
+
+And then use this client in your `getServerSideProps` function, passing the request context.
+
+```ts
+export const getServerSideProps = (async (context) => {
+  const keel = await keelClient(context);
+  // Use the client...
+});
+```
+
 ### Error handling
 
 The response of an action is a `Promise` that resolves to an object that either contains the `data` or an `error` object.
