@@ -194,7 +194,9 @@ if (response.error && response.error.type == "forbidden") {
 
 #### Session persistence
 
-Because the client only stores the session state in memory, you will need to reauthenticate each time the client is reinstantiated.  However, you can implement a custom token store to persist sessions.  This is done by implementing a very simple interface, as shown below.
+By default the client will keep both the access and refresh tokens in memory, which although is ok for browser usage is **not appropriate for server-side usage** for example with frameworks like Next.js or Remix. Also it means that if the page is refreshed the user will need to reauthenticate.
+
+To make it possible to persist auth tokens correctly in different environments or frameworks the client allows you to set custom token stores for both the access and refresh tokens. The interface for a token store is:
 
 ```ts
 interface TokenStore {
@@ -206,91 +208,274 @@ interface TokenStore {
 }
 ```
 
-For example, shown below is an example of implementing browser localStorage token store.
+Here are some examples of how you can implement a token store.
 
-```ts
-class LocalStorageStore {
-  #key = "keel-refresh-token";
+import {Tabs, Tab} from "nextra-theme-docs";
 
-  get = () => {
-    return localStorage.get(#key);
-  };
+<Tabs items={['Browser', 'Next (Pages Router)', "Next (App Router)", "Remix"]}>
+  <Tab>
+In the browser we can use the Local Storage API to persist the tokens. The client can also be created just once globally and used all throughout your app.
+```ts filename="keel/index.ts"
+import { APIClient, TokenStore } from "./keelClient.ts"; // the generated client
 
-  set = (token: string | null): void => {
+class LocalStorageStore implements TokenStore {
+  #key: string;
+
+  constructor(key: string) {
+    this.#key = key;
+  }
+
+  get() {
+    return localStorage.get(this.#key);
+  }
+
+  set(token: string | null): void {
     if (token) {
-      localStorage.set(#key, token);
+      localStorage.set(this.#key, token);
     } else {
-      localStorage.removeItem(#key);
+      localStorage.removeItem(this.#key);
     }
-  };
+  }
+}
+
+const client = new APIClient({
+  // or if using Next.js something like process.env.NEXT_PUBLIC_BASE_URL
+  baseUrl: meta.import.env.VITE_KEEL_BASE_URL,
+
+  // token stores
+  accessTokenStore: new LocalStorageStore("keel-access-token"),
+  refreshTokenStore: new LocalStorageStore("keel-refresh-token"),
+});
+```
+
+```tsx filename="components/MyComponent.tsx"
+import { client } from "~/keel/index";
+
+export function MyComponent() {
+  // use the client
+}
+```
+  </Tab>
+  <Tab>
+  In Next.js when using the Pages router we can use the `cookies-next` package to manage reading and writing cookies.
+```ts filename="keel/index.ts"
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
+import type { GetServerSidePropsContext } from "next";
+import { APIClient, TokenStore } from "./keelClient"; // the generated client
+
+class CookieTokenStore implements TokenStore {
+  #key: string;
+  #ctx: GetServerSidePropsContext;
+  #token: string | null;
+
+  constructor(key: string, ctx: GetServerSidePropsContext) {
+    this.#key = key;
+    this.#ctx = ctx;
+    this.#token =
+      getCookie(this.#key, {
+        req: this.#ctx.req,
+        res: this.#ctx.res,
+        path: "/",
+        httpOnly: true,
+      }) || null;
+  }
+
+  get() {
+    return this.#token;
+  }
+
+  set(token: string | null): void {
+    this.#token = token;
+    if (token) {
+      setCookie(this.#key, token, {
+        req: this.#ctx.req,
+        res: this.#ctx.res,
+        path: "/",
+        httpOnly: true,
+      });
+    } else {
+      deleteCookie(this.#key, {
+        req: this.#ctx.req,
+        res: this.#ctx.res,
+        path: "/",
+        httpOnly: true,
+      });
+    }
+  }
+}
+
+export function getClient(ctx: GetServerSidePropsContext) {
+  return new APIClient({
+    // note this is server side code so not using NEXT_PUBLIC_ prefix
+    baseUrl: process.env.KEEL_BASE_URL,
+
+    accessTokenStore: new CookieTokenStore("keel-access-token", ctx),
+    refreshTokenStore: new CookieTokenStore("keel-refresh-token", ctx),
+  });
 }
 ```
 
-The client can then be configured to use this store:
+Then inside a route you can create a client in the `getServerSideProps` function.
+```tsx filename="pages/myPage.tsx"
+import { getClient } from "~/keel";
 
-```ts
-const keel = new APIClient({
-  baseUrl: process.env.API_BASE_URL,
-  refreshTokenStore: new LocalStorageStore()
-});
-```
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const keel = await getClient(context);
 
-Note that you can also provide a custom store implementation for access tokens, however it's important to remember that access tokens are typically short-lived and only need to be persisted if you're unable to reuse them between requests.
-
-```ts
-const keel = new APIClient({
-  baseUrl: process.env.API_BASE_URL,
-  accessTokenStore: new LocalStorageStore(),
-  refreshTokenStore: new HttpOnlyCookieStore()
-});
-```
-
-#### Server-side usage
-
-By default, the generated client persists sessions in memory. This is **not suitable** for server-side applications and framework with SSR such as Next.js or Remix.
-
-For these applications, it's critical that the client is created per request and cookie storage is used to persist the tokens.
-
-For example, with Next.js, you can create a client with cookie storage as shown below.
-
-```ts
-import { deleteCookie, getCookie, setCookie } from 'cookies-next';
-
-export const keelClient = async (context?: OptionsType) => {
-  return new APIClient({
-    baseUrl: process.env.NEXT_PUBLIC_KEEL_BASE_URL,
-    accessTokenStore: {
-      get: () => {
-        return getCookie(ACCESS_TOKEN_KEY, context) || null;
-      },
-      set: async (token) => {
-        token
-          ? setCookie(ACCESS_TOKEN_KEY, token, context)
-          : deleteCookie(ACCESS_TOKEN_KEY, context);
-      },
-    },
-    refreshTokenStore: {
-      get: () => {
-        return getCookie(REFRESH_TOKEN_KEY, context) || null;
-      },
-      set: async (token) => {
-        token
-          ? setCookie(REFRESH_TOKEN_KEY, token, context)
-          : deleteCookie(REFRESH_TOKEN_KEY, context);
-      },
-    },
-  });
+  // Use the client...
 };
 ```
+  </Tab>
+  <Tab>
+If using the Next.js App Router we can use the `next/headers` package to manage setting cookies, but there is an important caveat with this use-case in that we **can't set cookies from a Server Component**, only from [Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations). This means when creating the client we need to specify whether to allow token refreshing. Disabling token refreshing is as simple as just using the in-memory store for the `refreshTokenStore` option.
 
-And then use this client in your `getServerSideProps` function, passing the request context.
+This isn't a perfect solution as it means access tokens are only refreshed as part of the response of a Server Action or Route Handler. In the future we'll update these docs to show how this can be improved by using a middleware.
 
-```ts
-export const getServerSideProps = (async (context) => {
-  const keel = await keelClient(context);
-  // Use the client...
-});
+```ts filename="keel/index.ts"
+import { cookies } from "next/headers";
+import { APIClient, InMemoryStore, TokenStore } from "./keelClient"; // the generated client
+
+class CookieTokenStore implements TokenStore {
+  #key: string;
+  #token: string | null;
+
+  constructor(key: string) {
+    this.#key = key;
+    const value = cookies().get(this.#key);
+    this.#token = value ? value.value : null;
+  }
+
+  get() {
+    return this.#token;
+  }
+
+  set(token: string | null): void {
+    this.#token = token;
+    if (token) {
+      cookies().set(this.#key, token, {
+        path: "/",
+        httpOnly: true,
+      });
+    } else {
+      cookies().delete(this.#key);
+    }
+  }
+}
+
+export function getClient(options?: {
+  noTokenRefresh: boolean;
+}) {
+  return new APIClient({
+    // note this is server side code so not using NEXT_PUBLIC_ prefix
+    baseUrl: process.env.KEEL_BASE_URL,
+
+    accessTokenStore: new CookieTokenStore("keel-access-token"),
+
+    // Trying to set a cookie in Server Components will result in an error so we need 
+    // to create a client that won't try to do this if options.noTokenRefresh is true.
+    refreshTokenStore:
+      options && options.noTokenRefresh
+        ? new CookieTokenStore("keel-refresh-token")
+        : new InMemoryStore(),
+  });
+}
 ```
+
+Now we can now create clients in either Server Components or Server Actions.
+```tsx filename="app/page.tsx"
+import { getClient } from "~/keel";
+
+export async function myAction() {
+  'use server';
+
+  const client = getClient();
+  // do stuff with client
+}
+
+export default async function Page() {
+  const client = getClient({noTokenRefresh: true});
+  
+  // do stuff with client
+
+  return (
+    <form action={myAction}></form>
+  )
+}
+```
+  </Tab>
+  <Tab>
+
+  Setting cookies in Remix is done by setting headers in the response of loader and action functions. This actually means we can use the built-in in-memory store (providing initial values from cookies) and then at the end of a loader/action function we serialize the tokens back into cookies. In this case using the in-memory store is ok on the server as we're still creating a client for every request.
+
+```tsx filename="app/keel/index.ts"
+import { createCookie } from "@remix-run/node";
+import { APIClient, InMemoryStore } from "./keelClient";
+
+export const authToken = createCookie("keel-access-token", {
+  httpOnly: true,
+  path: "/",
+});
+
+export const refreshToken = createCookie("keel-refresh-token", {
+  httpOnly: true,
+  path: "/",
+});
+
+export async function getClient(request: Request) {
+  const cookieHeader = request.headers.get("Cookie");
+
+  const accessTokenStore = new InMemoryStore();
+  accessTokenStore.set(await authToken.parse(cookieHeader));
+
+  const refreshTokenStore = new InMemoryStore();
+  refreshTokenStore.set(await refreshToken.parse(cookieHeader));
+
+  return new APIClient({
+    baseUrl: process.env.KEEL_API_URL!,
+    accessTokenStore,
+    refreshTokenStore,
+  });
+}
+
+export async function serializeCookies(
+  client: APIClient
+): Promise<[string, string][]> {
+  return [
+    ["Set-Cookie", await authToken.serialize(client.auth.accessToken.get())],
+    [
+      "Set-Cookie",
+      await refreshToken.serialize(client.auth.refreshToken.get()),
+    ],
+  ];
+}
+```
+
+You can now use `getCient` inside a loader or action function to create a client. Just remember to always set cookies as tokens may have been refreshed.
+```ts filename="app/routes/_index.tsx"
+import { json, LoaderFunctionArgs, redirect } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { getClient, serializeCookies } from "~/keel";
+
+export async function loader({request}: LoaderFunctionArgs) {
+  const client = getClient(request);
+
+  // do stuff with client
+
+  return json(dataForComponent, {
+    // It's important you do this in every loader/action as otherwise token refreshing
+    // won't work
+    headers: await serializeCookies(client),
+  })
+}
+
+export function Index() {
+  const data = useLoaderData<typeof loader>;
+
+  // do stuff with data
+}
+```
+  </Tab>
+</Tabs>
 
 ### Error handling
 
