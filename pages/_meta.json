@@ -70,6 +70,16 @@
       "breadcrumb": false
     }
   },
+  "-- Reference": {
+    "title": "Reference",
+    "type": "separator"
+  },
+  "schema-reference": {
+    "title": "Schema",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- features": {
     "title": "Features",
     "type": "separator"
