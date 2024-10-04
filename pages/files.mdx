@@ -1,6 +1,6 @@
 # Files
 
-Being able to work with files is essential for many business use cases. The Keel `File` field type provides an easy and managed way to create, store and read files in your Keel application. As with any field type, it can be used in models, actions, functions, jobs and even in subscriber functions. 
+The Keel `File` model field type provides an easy and managed way to create, store and read files in your Keel application. As with any field type, it can be used in models, actions, functions, jobs, subscriber functions and with the generated client.
 
 Take the schema below for example.  Here we have defined a `Product` model which has two properties; its `title` and an `image` file field which would, presumably, store an image of the product.
 
@@ -32,7 +32,7 @@ When used as an input, files must be passed as [data URLs](https://developer.moz
 // POST /api/json/createProduct
 {
   "title: "Running shoes"
-  "csv": "`data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg....."
+  "csv": "data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg....."
 }
 ```
 
@@ -63,7 +63,7 @@ The `key` field is a unique identifier used by Keel to store and locate file dat
 
 ## Functions
 
-Keel provides a `File` TypeScript class in the functions runtime and full Model API support for reading and writing files, which means that they can be used in `read` and `write` custom functions, action hooks, jobs and even subscriber functions. 
+Keel provides a `File` TypeScript class in the functions runtime and full [Model API](/functions/sdk/modelApi) support for reading and writing files, which means that they can be used in `read` and `write` [custom functions](/functions/custom-functions), [action hooks]((/functions/sdk/action-hooks), [jobs](/jobs) and [subscriber functions](/events). 
 
 The `File` class allows you to read files in functions. For example, this may be useful for importing bulk data from a CSV file. See the code sample below.
 
@@ -108,7 +108,7 @@ export default ImportBulk(async (ctx, inputs) => {
 ```json
   // POST /api/json/importBulk
   {
-    "csv": "`data:image/png;name=accounts.csv;base64,iVBORw0KGgoAAAANSUhEUg....."
+    "csv": "data:text/csv;name=accounts.csv;base64,iVBORw0KGgoAAAANSUhEUg....."
   }
 
   // Response
@@ -186,6 +186,8 @@ export default ExportBulk(async (ctx, inputs) => {
 
 Files can also be manually stored before writing them to your database using `file.store()`. This can be useful if you want to multiple models to reference a single stored file (instead of writing the file multiple times).
 
+## Generated Client
+
 ## Storage
 
 `File` fields are stored as a `jsonb` column type in the database as shown in the example below.
@@ -204,3 +206,4 @@ In the hosted environments, Keel securely stores files in a dedicated AWS S3 buc
 <Callout type="info">
   The Keel CLI does not leverage AWS for storing files, and instead will store files in the database table `keel_storage`. Please note that this table does not exist in hosted environments.
 </Callout>
+
