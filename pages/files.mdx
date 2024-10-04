@@ -1,0 +1,207 @@
+# Files
+
+The Keel `File` model field type provides an easy and managed way to create, store and read files in your Keel application. As with any field type, it can be used in models, actions, functions, jobs, subscriber functions and with the generated client.
+
+Take the schema below for example.  Here we have defined a `Product` model which has two properties; its `title` and an `image` file field which would, presumably, store an image of the product.
+
+```keel {4}
+model Product {
+    fields {
+        title Text
+        image File
+    }
+
+    actions {
+        get getProduct(id)   
+        create createProduct() with (title, image)
+    }
+}
+```
+
+import { Callout } from "@core/callout";
+
+<Callout type="info">
+  At present, files cannot exceed 4MB in size, however there is no constraint on files type.
+</Callout>
+
+## API inputs
+
+When used as an input, files must be passed as [data URLs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). This data URL must also include a `name` parameter which stipulates the file name for the file. e.g. `data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg.....`
+
+```json
+// POST /api/json/createProduct
+{
+  "title: "Running shoes",
+  "csv": "data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg....."
+}
+```
+
+## Response
+
+When an API response of an action or function includes the `File` type (i.e. it might form part of the model being returned or defined in the custom function message), the format in which it is returned is as follows:
+
+```json
+{
+  "title": "Running shoes",
+  "image": {
+    "key": "2k724tpxBenRVdYI8iwao1hYUtt",
+    "filename": "product.png",
+    "contentType": "image/png",
+    "size": 153225,
+    "url": "https://env-abcdefghijklmnopqrstuvwxyz.s3.eu-west-2.amazonaws.com/...."
+  }
+}
+```
+
+The `url` field provides a short-term presigned URL for the file which expires after 60 minutes. This URL is regenerated each time a file response is returned.
+
+<Callout type="info">
+  When developing your applications locally with the Keel CLI, the `url` response field will not contain a URL but rather a Data URL.
+</Callout>
+
+The `key` field is a unique identifier used by Keel to store and locate file data internally and can be ignored for most use cases.
+
+## Functions
+
+Keel provides a `File` TypeScript class in the functions runtime and full [Model API](/functions/sdk/modelApi) support for reading and writing files, which means that they can be used in `read` and `write` [custom functions](/functions/custom-functions), [action hooks](/functions/action-hooks), [jobs](/jobs) and [subscriber functions](/events). 
+
+The `File` class allows you to read files in functions. For example, this may be useful for importing bulk data from a CSV file. See the code sample below.
+
+import { Tab, Tabs } from "nextra-theme-docs";
+
+<Tabs items={['Keel schema', 'writeBulk.ts', 'API Request & Response' ]}>
+  <Tab>
+```keel
+model User {
+    fields {
+        name Text
+    }
+
+    actions {
+        write importBulk(csv: File) returns (Any)
+    }
+}
+```
+  </Tab>
+    <Tab>
+```ts
+import { ImportBulk, models } from '@teamkeel/sdk';
+
+export default ImportBulk(async (ctx, inputs) => {
+    // Read the contents of the file
+    const buffer = await inputs.csv.read();
+    const contents = buffer.toString('utf8');
+
+    // Split the comma-seperated values
+    const names = contents.split(",");
+
+    // Create accounts for each name
+    for (const name in names) {
+        await models.user.create({ name: name });
+    }
+
+    return names.length + " accounts successfully created";
+});
+```
+  </Tab>
+  <Tab>
+```json
+  // POST /api/json/importBulk
+  {
+    "csv": "data:text/csv;name=accounts.csv;base64,iVBORw0KGgoAAAANSUhEUg....."
+  }
+
+  // Response
+  10 accounts successfully created
+```
+  </Tab>
+</Tabs>
+
+It is also possible to construct a new file from scratch within your function, to either be stored or just returned from the API.  The example below does both.
+
+<Tabs items={['Keel schema', 'exportBulk.ts', 'API Response' ]}>
+  <Tab>
+```keel
+model User {
+    fields {
+        name Text
+    }
+
+    actions {
+        write exportBulk(Any) returns (ExportedUsersMessage)
+    }
+}
+
+message ExportedUsersMessage {
+    csv File
+}
+
+```
+  </Tab>
+    <Tab>
+```ts
+import { ExportBulk, InlineFile, models } from '@teamkeel/sdk';
+
+export default ExportBulk(async (ctx, inputs) => {
+    // Instantiate a new file
+    const file = new InlineFile({
+        contentType: "text/csv",
+        filename: "export.csv"
+    });
+
+    // Create a comma-separated string of user names
+    const users = await models.account.findMany();
+    let names: string[] = [];
+    for (const user of users) {
+        names.push(user.name);
+    }
+    const contents = names.join(",");
+
+    // Write the string to the file
+    file.write(Buffer.from(contents));
+
+    // Save the file to the exports table
+    await models.export.create({ csv: file });
+
+    // Return the file from the API
+    return { csv: file };
+});
+```
+  </Tab>
+  <Tab>
+```json
+  // Response
+  {
+    "csv": {
+        "key": "2mxx1HlBxKwMyfeGm8YH8QW3Jxs",
+        "filename": "export.csv",
+        "contentType": "text/csv",
+        "size": 31,
+        "url": "https://env-abcdefghijklmnopqrstuvwxyz.s3.eu-west-2.amazonaws.com/...."
+    }
+  }
+```
+  </Tab>
+</Tabs>
+
+Files can also be manually stored before writing them to your database using `file.store()`. This can be useful if you want to multiple models to reference a single stored file (instead of writing the file multiple times).
+
+## Storage
+
+`File` fields are stored as a `jsonb` column type in the database as shown in the example below.
+
+```json
+{
+    filename: "product.png",
+    contentType: "image/png",
+    size: 153225,
+    key: "2k724tpxBenRVdYI8iwao1hYUtt"
+}
+```
+
+In the hosted environments, Keel securely stores files in a dedicated AWS S3 bucket provisioned just for your environment. Access to this bucket can only be achieved using the Keel platform.
+
+<Callout type="info">
+  The Keel CLI does not leverage AWS for storing files, and instead will store files in the database table `keel_storage`. Please note that this table does not exist in hosted environments.
+</Callout>
+

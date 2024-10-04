@@ -1,0 +1,29 @@
+# 4 October, 2024
+
+## Files
+
+Today we are shipping [files](/files) support as a first-class feature in Keel. As with any field type, it can be used in models, actions, functions, jobs, subscriber functions and in the generated client.
+
+For example, you can now define a `File` field in your schema, and Keel will handle all the complexities around storing, retrieving and keeping your data secure.
+
+```keel {4}
+model Product {
+    fields {
+        title Text
+        image File
+    }
+
+    actions {
+        get getProduct(id)   
+        create createProduct() with (title, image)
+    }
+}
+```
+
+There are a lot of juicy bits to this release, so please head over to the [files](/files) page to read more.
+
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
