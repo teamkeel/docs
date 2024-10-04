@@ -1,8 +1,8 @@
 # Files
 
-Being able to work with files are essential for many businesses. The Keel `File` field type provides an easy and managed way to work with files in your Keel application. As with any field type, it can be used in models, actions, functions, jobs and even in subscriber functions. 
+Being able to work with files is essential for many business use cases. The Keel `File` field type provides an easy and managed way to create, store and read files in your Keel application. As with any field type, it can be used in models, actions, functions, jobs and even in subscriber functions. 
 
-Take the schema below for example.  Here we have defined a `Product` model which have two properties; its title and an file which would, presumably, store a photograph of the product.
+Take the schema below for example.  Here we have defined a `Product` model which has two properties; its `title` and an `image` file field which would, presumably, store an image of the product.
 
 ```keel {4}
 model Product {
@@ -21,40 +21,49 @@ model Product {
 import { Callout } from "@core/callout";
 
 <Callout type="info">
-  At present, files cannot exceed 4MB in size, however there is no constraint on files types and
+  At present, files cannot exceed 4MB in size, however there is no constraint on files type.
 </Callout>
 
-### API inputs
+## API inputs
 
-When used as an input, files are being passed as [data URLs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data); the OpenAPI schema generated for an `File` field will be `string` with format type `data-url`.
+When used as an input, files must be passed as [data URLs](https://developer.mozilla.org/en-US/docs/Web/URI/Schemes/data). This data URL must also include a `name` parameter which stipulates the file name for the file. e.g. `data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg.....`
 
-This data URL must also include a `name` parameter which stipulates the filename for the file. e.g. `data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg.....`
-
-### Response
-
-When an API response of an action or function includes the `File` type (i.e. it might form part of the model being returned or defined in the custom function message), the format in which these fields are returned is as follows:
-
-```
-"image": {
-  "key": "2k724tpxBenRVdYI8iwao1hYUtt",
-  "filename": "product.png",
-  "contentType": "image/png",
-  "size": 153225,
-  "url": "https://env-abcdefghijklmnopqrstuvwxyz.s3.eu-west-2.amazonaws.com/...."
-},
+```json
+// POST /api/json/createProduct
+{
+  "title: "Running shoes"
+  "csv": "`data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg....."
+}
 ```
 
-The `url` field provides a shoter-term presigned URL to the file, which will expire after 24 hours. This URL is regenerated each time a file response is returned.
+## Response
+
+When an API response of an action or function includes the `File` type (i.e. it might form part of the model being returned or defined in the custom function message), the format in which it is returned is as follows:
+
+```json
+{
+  "title": "Running shoes"
+  "image": {
+    "key": "2k724tpxBenRVdYI8iwao1hYUtt",
+    "filename": "product.png",
+    "contentType": "image/png",
+    "size": 153225,
+    "url": "https://env-abcdefghijklmnopqrstuvwxyz.s3.eu-west-2.amazonaws.com/...."
+  }
+}
+```
+
+The `url` field provides a short-term presigned URL for the file, which expires after 60 minutes. This URL is regenerated each time a file response is returned.
 
 <Callout type="info">
   The `key` field is the unique identity used by Keel to store and locate the file data and can mostly be ignored.
 </Callout>
 
-### Functions
+## Functions
 
 Keel provides a `File` TypeScript class in the functions runtime and full Model API support for reading and writing files, which means that they can be used in `read` and `write` custom functions, action hooks, jobs and even subscriber functions. 
 
-The `File` class allows you to read files in functions. For example, this may be useful for importing bulk from a CSV file. See the code sample below.
+The `File` class allows you to read files in functions. For example, this may be useful for importing bulk data from a CSV file. See the code sample below.
 
 import { Tab, Tabs } from "nextra-theme-docs";
 
@@ -67,21 +76,21 @@ model User {
     }
 
     actions {
-        write writeBulk(csv: File) returns (Any)
+        write importBulk(csv: File) returns (Any)
     }
 }
 ```
   </Tab>
     <Tab>
 ```ts
-import { WriteBulk, models } from '@teamkeel/sdk';
+import { ImportBulk, models } from '@teamkeel/sdk';
 
-export default WriteBulk(async (ctx, inputs) => {
+export default ImportBulk(async (ctx, inputs) => {
     // Read the contents of the file
     const buffer = await inputs.csv.read();
     const contents = buffer.toString('utf8');
 
-    // Split the comma seperated values
+    // Split the comma-seperated values
     const names = contents.split(",");
 
     // Create accounts for each name
@@ -95,7 +104,7 @@ export default WriteBulk(async (ctx, inputs) => {
   </Tab>
   <Tab>
 ```json
-  // POST /api/json/writeBulk
+  // POST /api/json/importBulk
   {
     "csv": "`data:image/png;name=accounts.csv;base64,iVBORw0KGgoAAAANSUhEUg....."
   }
@@ -106,24 +115,19 @@ export default WriteBulk(async (ctx, inputs) => {
   </Tab>
 </Tabs>
 
-It is also possible to construct a new file from scratch within your function, to either be stored or just returned from the API. 
+It is also possible to construct a new file from scratch within your function, to either be stored or just returned from the API.  The example below does both.
 
 <Tabs items={['Keel schema', 'exportBulk.ts', 'API Response' ]}>
   <Tab>
 ```keel
-message ImageInput {
-  title Text
-  image InlineFile
-}
+model User {
+    fields {
+        name Text
+    }
 
-model Post {
-  fields {
-    title Text
-    image InlineFile
-  }
-  actions {
-    read createFromImage(ImageInput) returns (Any)
-  }
+    actions {
+        write exportBulk(csv: File) returns (Any)
+    }
 }
 ```
   </Tab>
@@ -147,7 +151,7 @@ export default ExportBulk(async (ctx, inputs) => {
     const contents = names.join(",");
 
     // Write the string to the file
-    file.write(Buffer.from(contents))
+    file.write(Buffer.from(contents));
 
     // Save the file to the exports table
     await models.export.create({ csv: file });
@@ -175,7 +179,7 @@ export default ExportBulk(async (ctx, inputs) => {
 
 Files can also be manually stored before writing them to your database using `file.store()`. This can be useful if you want to multiple models to reference a single stored file (instead of writing the file multiple times).
 
-### How are files stored?
+## Storage
 
 When a `File` is an input to a built-in action (`create`/`update`), the Keel runtime will take the given file and store it in either a database table (`keel_storage`) when running keel locally, or securely in an AWS S3 storage bucket for hosted environments. Each one of your environments will have its own dedicated S3 bucket provisioned. This is also applicable for Keel Studio projects.
 
