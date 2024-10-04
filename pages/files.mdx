@@ -31,7 +31,7 @@ When used as an input, files must be passed as [data URLs](https://developer.moz
 ```json
 // POST /api/json/createProduct
 {
-  "title: "Running shoes"
+  "title: "Running shoes",
   "csv": "data:image/png;name=product.png;base64,iVBORw0KGgoAAAANSUhEUg....."
 }
 ```
@@ -42,7 +42,7 @@ When an API response of an action or function includes the `File` type (i.e. it 
 
 ```json
 {
-  "title": "Running shoes"
+  "title": "Running shoes",
   "image": {
     "key": "2k724tpxBenRVdYI8iwao1hYUtt",
     "filename": "product.png",
@@ -53,7 +53,7 @@ When an API response of an action or function includes the `File` type (i.e. it 
 }
 ```
 
-The `url` field provides a short-term presigned URL for the file, which expires after 60 minutes. This URL is regenerated each time a file response is returned.
+The `url` field provides a short-term presigned URL for the file which expires after 60 minutes. This URL is regenerated each time a file response is returned.
 
 <Callout type="info">
   When developing your applications locally with the Keel CLI, the `url` response field will not contain a URL but rather a Data URL.
@@ -63,7 +63,7 @@ The `key` field is a unique identifier used by Keel to store and locate file dat
 
 ## Functions
 
-Keel provides a `File` TypeScript class in the functions runtime and full [Model API](/functions/sdk/modelApi) support for reading and writing files, which means that they can be used in `read` and `write` [custom functions](/functions/custom-functions), [action hooks]((/functions/sdk/action-hooks), [jobs](/jobs) and [subscriber functions](/events). 
+Keel provides a `File` TypeScript class in the functions runtime and full [Model API](/functions/sdk/modelApi) support for reading and writing files, which means that they can be used in `read` and `write` [custom functions](/functions/custom-functions), [action hooks](/functions/sdk/action-hooks), [jobs](/jobs) and [subscriber functions](/events). 
 
 The `File` class allows you to read files in functions. For example, this may be useful for importing bulk data from a CSV file. See the code sample below.
 
@@ -186,18 +186,16 @@ export default ExportBulk(async (ctx, inputs) => {
 
 Files can also be manually stored before writing them to your database using `file.store()`. This can be useful if you want to multiple models to reference a single stored file (instead of writing the file multiple times).
 
-## Generated Client
-
 ## Storage
 
 `File` fields are stored as a `jsonb` column type in the database as shown in the example below.
 
 ```json
 {
-    filename: "product.png";
-    contentType: "image/png";
-    size: 153225;
-    key: "2k724tpxBenRVdYI8iwao1hYUtt";
+    filename: "product.png",
+    contentType: "image/png",
+    size: 153225,
+    key: "2k724tpxBenRVdYI8iwao1hYUtt"
 }
 ```
 
