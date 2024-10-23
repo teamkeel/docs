@@ -174,7 +174,7 @@ export default MyFunction(async (ctx, inputs) => {
 
 ## Transaction support 
 
-Mutation function hooks and the write custom function are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no changes will persist to your database.
+Mutation function hooks and the `write` custom function are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no changes will persist to your database.
 
 All other function types have transactions disabled. Refer to the table below.
 
@@ -192,7 +192,7 @@ All other function types have transactions disabled. Refer to the table below.
 
 ### Enabling or disabling transactions
 
-This is a great default but there are times where you might want to explicitly enable or disable transactions for your function. 
+This is a great default but there are times where you might want to explicitly enable or disable transactions for your function. This can be achieved by setting the `autoTransaction` property in your function configuration.
 
 For example, below we demonstrate enabling transactions for a job.
 

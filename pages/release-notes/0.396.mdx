@@ -10,7 +10,7 @@ Running the `keel validate` CLI command will now, in addition to checking your K
 
 Mutation [function hooks](/functions/action-hooks) (on `create` or `update` actions) and the [`write` custom function](/functions/custom-functions) are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database. All [other functions](/functions#transaction-support) have transactions disabled by default.
 
-This is a great default but there are times where you might want to explicitly enable or disable transactions for your functions. We now support this by exposing function configs.
+This is a great default but there are times where you might want to explicitly enable or disable transactions for your functions. We now support this by exposing a function config from which you can set `autoTransaction` accordingly. 
 
 For example, below we demonstrate enabling transactions for a job.
 
