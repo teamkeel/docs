@@ -172,3 +172,36 @@ export default MyFunction(async (ctx, inputs) => {
 });
 ```
 
+## Transactions
+
+We have, by default, enabled transaction support around your code defined in write functions, mutation hooks, jobs and in event subscribers. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database.
+
+### Disabling transactions
+
+This is a great default but there are times where you do want to write to the database and also return an error. If you wish to disable using transactions, set the function config as shown below.
+
+```ts
+MyFunction.config = {
+  autoTransaction: false,
+};
+
+export default MyFunction(async (ctx, inputs) => {
+  // ...
+});
+```
+
+Simirlarly for function hooks, it will look as follows.
+
+```ts
+const hooks: MyFunctionHooks = {
+  beforeWrite: async (ctx, inputs, values, record) => {
+   // ...
+  },
+};
+
+MyFunction.config = {
+  autoTransaction: false,
+};
+
+export default MyFunction(hooks);
+```
