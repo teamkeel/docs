@@ -6,23 +6,25 @@ Running the `keel validate` CLI command will now, in addition to checking your K
 
 ![keelconfig.yaml validation errors in the CLI](/release-notes/0-396-keel-validation-config-errs.png)
 
-## Disabling transactions in mutation functions
+## Enabling and disabling transactions in functions
 
-Mutation [function hooks](/functions/action-hooks) (on `create` or `update` actions) and the [`write` custom function](/functions/custom-functions) are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database.
+Mutation [function hooks](/functions/action-hooks) (on `create` or `update` actions) and the [`write` custom function](/functions/custom-functions) are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database. All [other functions](/functions#transaction-support) have transactions disabled by default.
 
-However, there are times where you do want to write to the database *and* also return an error. If you wish to disable using transactions, you can now set the function config as shown below.
+This is a great default but there are times where you might want to explicitly enable or disable transactions for your functions. We now support this by exposing function configs.
+
+For example, below we demonstrate enabling transactions for a job.
 
 ```ts
-MyFunction.config = {
-  autoTransaction: false,
+MyJob.config = {
+  autoTransaction: true,
 };
 
-export default MyFunction(async (ctx, inputs) => {
+export default MyJob(async (ctx, inputs) => {
   // ...
 });
 ```
 
-Simirlarly for function hooks, it will look as follows.
+Simirlarly, we can disable transactions for some write hook.
 
 ```ts
 const hooks: MyFunctionHooks = {
