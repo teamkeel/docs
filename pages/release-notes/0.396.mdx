@@ -1,12 +1,12 @@
 # 23 October, 2024
 
-## `keel validate` your configs
+## Validate your config file with the CLI
 
 Running the `keel validate` CLI command will now, in addition to checking your Keel schema, also validate your `keelconfig.yaml` configuration file, as demonstrated in the example below.
 
 ![keelconfig.yaml validation errors in the CLI](/release-notes/0-396-keel-validation-config-errs.png)
 
-## Transactions in mutation functions, jobs and event subscribers
+## Transactions in mutation functions
 
 We have, by default, enabled transaction support around your code defined in write functions, mutation hooks, jobs and in event subscribers. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database.
 
