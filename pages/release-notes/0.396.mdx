@@ -2,13 +2,13 @@
 
 ## `keel validate` your configs
 
-Running the `keel validate` CLI command will now also validate your keelconfig.yaml file, as demonstrated in the example below.
+Running the `keel validate` CLI command will now, in addition to checking your Keel schema, also validate your `keelconfig.yaml` configuration file, as demonstrated in the example below.
 
 ![keelconfig.yaml validation errors in the CLI](/release-notes/0-396-keel-validation-config-errs.png)
 
 ## Transactions in mutation functions, jobs and event subscribers
 
-We have now, by default, enabled transaction support around your code defined in write functions, jobs and in event subscribers. This means that if an error occurs in your code the entire transaction will get rolled back and no mutations will persist to your database.
+We have, by default, enabled transaction support around your code defined in write functions, mutation hooks, jobs and in event subscribers. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database.
 
 ### Disabling transactions
 
@@ -24,7 +24,7 @@ export default MyFunction(async (ctx, inputs) => {
 });
 ```
 
-Simirlarly for function hooks, it will look like this:
+Simirlarly for function hooks, it will look as follows.
 
 ```ts
 const hooks: MyFunctionHooks = {
