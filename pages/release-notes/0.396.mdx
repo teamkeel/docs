@@ -1,0 +1,53 @@
+# 30 October, 2024
+
+## Validate your config file with the CLI
+
+Running the `keel validate` CLI command will now, in addition to checking your Keel schema, also validate your `keelconfig.yaml` configuration file, as demonstrated in the example below.
+
+![keelconfig.yaml validation errors in the CLI](/release-notes/0-396-keel-validation-config-errs.png)
+
+## Enabling and disabling transactions in functions
+
+Mutation [function hooks](/functions/action-hooks) (on `create` or `update` actions) and the [`write` custom function](/functions/custom-functions) are, by default, wrapped in transactions. This means that if an error occurs in your code the transaction will get rolled back and no mutations will persist to your database. All [other functions](/functions#transaction-support) have transactions disabled by default.
+
+This is a great default but there are times where you might want to explicitly enable or disable transactions for your functions. We now support this by exposing a function config from which you can set `autoTransaction` accordingly. 
+
+For example, below we demonstrate enabling transactions for a job.
+
+```ts
+MyJob.config = {
+  autoTransaction: true,
+};
+
+export default MyJob(async (ctx, inputs) => {
+  // ...
+});
+```
+
+Simirlarly, we can disable transactions for some write hook.
+
+```ts
+const hooks: MyFunctionHooks = {
+  beforeWrite: async (ctx, inputs, values, record) => {
+   // ...
+  },
+};
+
+MyFunction.config = {
+  autoTransaction: false,
+};
+
+export default MyFunction(hooks);
+```
+
+import { Callout } from "@core/callout"
+
+<Callout type="warning">
+While they are disabled for now, please note that we do intend to enable transactions by default on event subscribers in the future.
+</Callout>
+
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
