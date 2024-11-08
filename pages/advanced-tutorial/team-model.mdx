@@ -29,6 +29,6 @@ model Team {
 
 The model consists of fields `name` with a type of `Text` which holds the name of the team, `description` which is optional but holds the team’s description, the `members` and `document` fields holds the TeamMembership and documents models respectively.  We have also defined CRUD operations for the model `get`, `list`, `delete` and `update`.  We won’t be creating a team with this Model, instead we’ll be doing that in the `TeamMembership` model.
 
-We have also set the `list` action to be carried out by a user with an existing Identity in the identity array hence the `@where{}` condition. The `@where{}` condition helps us filter through the permission rules filter the results of the action and make sure we’ve only pulling what belongs to the specified user.
+We have also set the `list` action to be carried out by a user with an existing Identity in the identity array hence the `@where{}` condition. The `@where{}` condition helps us filter through the results of the action and make sure we’re only pulling teams where the user is also a member.
 
 Finally, for permissions, we defined all the actions in our model in an array with the `actions` and `expression` arguments respectively. We then use the `in` operator to check if the authenticated identity is in the array of identities with access to the model.

@@ -15,10 +15,10 @@ model Document {
 
     actions {
         get getDocument(id, user.id) {
-            @permission(expression: ctx.identity == profileImage.user.identity)
+            @permission(expression: ctx.identity == document.user.identity)
         }
         list listDocuments(user.id?, team.id?) {
-            @where(document.owner == ctx.identity or ctx.identity in document.team.members.user.identity)
+            @where(document.user.identity == ctx.identity or ctx.identity in document.team.members.user.identity)
         }
         delete deleteDocument(id, user.id?, team.id?) {
             @permission(expression: document.user.identity == ctx.identity)

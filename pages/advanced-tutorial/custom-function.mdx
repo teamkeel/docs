@@ -1,8 +1,8 @@
 # Custom Functions
 
-In Keel, you can create a [custom function](https://docs.keel.so/functions#custom-functions) and pass it as a `read` or `write` operation. In our case, we will be using the `write` operation since we are writing to the backend and creating a record in the database.
+In Keel, you can create a [custom function](https://docs.keel.so/functions/custom-functions) and pass it as a `read` or `write` operation. In our case, we will be using the `write` operation since we are writing to the backend and creating a record in the database.
 
-The reason for doing this is that we want to upload our image to [Cloudinary](https://cloudinary.com), save the path to the Keel database and render the Image via the path on the frontend. This way we can harness Cloudinary lightning quick image uploads and not worry about managing media files ourselves.
+The reason for doing this is that we want to upload our image to [Cloudinary](https://cloudinary.com), save the path to the Keel database and render the Image via the path on the frontend. This way we can harness Cloudinary's lightning quick image uploads and not worry about managing media files ourselves.
 
 Since we have to use a function for this we have to generate this function by running the following command in the folder where your Keel Schema is placed:
 
@@ -15,7 +15,7 @@ This command will automatically create a new folder for you with your function d
 ```ts
 import { models, permissions, UploadImageToCloudinary } from '@teamkeel/sdk';
 
-export default UploadImageToCloudinary(async (ctx, input) => {
+export default UploadImageToCloudinary(async (ctx, inputs) => {
 
 });
 ```
@@ -26,7 +26,7 @@ Now let’s create the `uploadImageToCloudinary` function by pasting in the foll
 import { models, permissions, UploadImageToCloudinary } from '@teamkeel/sdk';
 import { v2 as cloudinary } from 'cloudinary';
 
-export default UploadImageToCloudinary(async (ctx, input) => {
+export default UploadImageToCloudinary(async (ctx, inputs) => {
 
   cloudinary.config({
     cloud_name: ctx.secrets.CLOUD_NAME,
@@ -35,7 +35,7 @@ export default UploadImageToCloudinary(async (ctx, input) => {
   });
 
   try {
-    const uploadResponse = await cloudinary.uploader.upload(input.base64Image, {
+    const uploadResponse = await cloudinary.uploader.upload(inputs.base64Image, {
       upload_preset: ctx.secrets.UPLOAD_PRESET,
     });
 
@@ -50,13 +50,13 @@ export default UploadImageToCloudinary(async (ctx, input) => {
 
     // safely fetch the user
     const user = await models.user.findOne({
-      id: input.userId,
+      id: inputs.userId,
     });
 
     // if a teamId is provided instead, pull the team image too
-    if (input.teamId) {
+    if (inputs.teamId) {
     const team = await models.team.findOne({
-      id: input.teamId
+      id: inputs.teamId
   })
 }
 
@@ -68,8 +68,8 @@ export default UploadImageToCloudinary(async (ctx, input) => {
     // Save this imagePath to Keel database
     const imageRecord = await models.profileImage.create({
       path: imagePath,
-      userId: input.userId,
-      teamId: input.teamId || null
+      userId: inputs.userId,
+      teamId: inputs.teamId || null
     });
 
     return {
@@ -109,6 +109,7 @@ Just after our ProfileImage model, we have the `uploadImageInput` and `uploadIma
 message UploadImageInput {
     base64Image Text
     userId ID
+    teamId ID
 }
 
 message UploadImageResponse {
