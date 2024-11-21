@@ -1,0 +1,163 @@
+# 22 November, 2024
+
+## Relative time periods filters
+
+When specifying fields that can be used for filtering the results of a `list` action we can now filter dates and timestamps with relative time periods, such as `today`, `last 7 days`.
+
+For example, given the following schema:
+
+```keel
+model Post {
+    fields {
+        title Text
+        body Text
+        date Date?
+    }
+
+    actions {
+        list listPosts(createdAt?, date?)
+    }
+}
+```
+
+Alongside the previously existing where filters for `date` and `createdAt`, this release introduces 3 new filtering options: `beforeRelative`, `afterRelative` and `equalsRelative`. These fields accept a string expression in the following format: 
+
+```
+    attribute   value  complete          period
+       v          v       v                 v
+{this/next/last} {x}? {complete}? {minute/hour/day/week/month/year}
+```
+
+For example: `next 3 days`, `last month`, `last 2 complete years`
+
+The components of the expression are: 
+* Attribute: `this`/`next`/`last`
+* Value: a positive integer. When using the attribute `this`, the `value` must be omitted. When using `next` or `last`, if omitted it will default to `1`.
+* Complete: `complete` - specifies if the period we're filtering by will be a completed period: e.g. `last month` will take in account the previous calendar month. If omitted, the period will take in a rolling month (in the case of `last month`).
+* Period: `minute`/`hour`/`day`/`week`/`month`/`year` - plural or singular versions are both accepted.
+
+Alongside the expressions following the rule above, there are also a few valid shorthands:
+
+* `now`
+* `today` - equivalent to `this day`
+* `tomorrow` - equivalent to `next complete day`
+* `yesterday` - equivalent to `last complete day`
+
+### `equalsRelative`
+
+Example request payload:
+```json
+{
+    "where":
+    {
+        "date": {
+            "equalsRelative": "this year"
+        }
+    }
+}
+```
+
+The results returned will be all items with a `date` after or equal to `2024-01-01` and before `2025-01-01` (assuming the request is made on 22/11/2024).
+
+
+### `afterRelative`
+
+Example request payload:
+```json
+{
+    "where":
+    {
+        "date": {
+            "afterRelative": "today"
+        }
+    }
+}
+```
+
+The results returned will be all items with a `date` after or equal to `2024-11-23` (assuming the request is made on 22/11/2024).
+
+### `beforeRelative`
+
+Example request payload:
+```json
+{
+    "where":
+    {
+        "date": {
+            "beforeRelative": "last 2 complete days"
+        }
+    }
+}
+```
+
+The results returned will be all items with a `date` before `2024-11-20` (assuming the request is made on 22/11/2024).
+
+import { Callout } from "@core/callout"
+
+<Callout type="info">
+Note that these filter fields can be combined to perform more complex data segmentation; e.g.
+```json
+{
+    // retrieve all items with date >= 2024-01-01 and date < 2024-11-22 
+    // (assuming the request is made on 2024-11-22)
+    "where":
+    {
+        "date": {
+            "beforeRelative": "today",
+            "afterRelative": "last year"
+        }
+    }
+}
+```
+</Callout>
+
+### ModelAPI & custom functions support
+
+These new filters are also available to be used within hooks, and custom functions, e.g.:
+
+```ts
+const hooks: ListPosts = {
+    beforeQuery(ctx, inputs, query) {
+    return query.where({
+      date: {
+        beforeRelative: "this week",
+      },
+    });
+  },
+};
+```
+
+The TS type used for these filters is `RelativeDateString` and should provide expression validation. 
+
+## `Time-Zone` header
+
+The API requests will now accept a `Time-Zone` header. The value must be a [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) string. The timezone will be used to accurately calculate the relative date periods when filtering using `beforeRelative`, `afterRelative`, `equalsRelative`.
+
+```sh
+curl --location 'https://my-keel-app.keelapps.xyz/api/json/listPosts' \
+--header 'Time-Zone: Europe/London' \
+--header 'Content-Type: application/json' \
+--data '{
+    "where":
+    {
+        "date": {
+            "equalsRelative": "today"
+        }
+    }
+}'
+```
+
+## Other improvements & bugfixes
+
+This new release comes with a few smaller improvements and bugfixes:
+
+* Updated go version to 1.23
+* Better schema validation for atribute arguments
+* `@embed` attribute is now correctly included in code completions
+
+---
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
