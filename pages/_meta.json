@@ -86,12 +86,6 @@
       "breadcrumb": false
     }
   },
-  "functions-reference": {
-    "title": "Functions",
-    "theme": {
-      "breadcrumb": false
-    }
-  },
   "-- features": {
     "title": "Features",
     "type": "separator"
