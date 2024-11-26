@@ -58,9 +58,9 @@ There is nothing really different about the code for functions that use messages
 ```tsx filename="functions/createBooks.ts"
 import { CreateBooks, models } from "@teamkeel/sdk";
 
-export default CreateBooks(async (ctx, input) => {
+export default CreateBooks(async (ctx, inputs) => {
   const books = await Promise.all(
-    input.books.map((fields) => {
+    inputs.books.map((fields) => {
       return models.book.create({
         title: fields.title,
         genre: fields.genre,
@@ -85,7 +85,7 @@ For custom `read` or `write` functions you must implement any permissions logic 
 ```tsx filename="functions/createBooks.ts"
 import { permissions } from "@teamkeel/sdk";
 
-export default CustomAction(async (ctx, input) => {
+export default CustomAction(async (ctx, inputs) => {
   if (ctx.headers.get("X-custom-auth-header") == ctx.secrets.AUTH_KEY) {
     permissions.allow();
   } else {

@@ -70,7 +70,7 @@ In the `createUser()` action, we have specified that a name and email  needs to 
 The `get me()` action will help us return the user’s identity in context just incase we need to pull the correct user details on the client-side.
 
 <Callout type="info" emoji="💡">
-  The name of an action does not functional significance, what matters is the action type you use. You can name your actions whatever you want.
+  The name of an action does not denote any functional significance, what matters is the action type you use. You can name your actions whatever you want.
 </Callout>
 
 The `delete deleteUser()` action will delete a user account
@@ -79,7 +79,7 @@ The `update updateUser()` actions will update a user name or email.
 
 Next, we need to set permissions for all the other actions in the model. We can do that by using [@permisson](https://docs.keel.so/permissions#permission-attribute) attribute to define this in the keel schema.
 
-```keel {25-28}
+```keel {26-29}
 model User {
 
   fields {

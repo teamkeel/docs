@@ -119,7 +119,7 @@ Once the repository is updated, Keel will use the schema to build and deploy you
 To use your Keel APIs in your Next.js app, Keel can generate you a fully type-safe API client based on your schema using the [Keel CLI](/cli) to generate a client.
 
 ```bash
-keel client .
+keel client
 ```
 
 With that, you should see a `keelClient.ts` file in the root of your project.
@@ -151,7 +151,7 @@ export const createClient = () => {
 Finally, let's create a `.env` file in the project root and add the Keel API root. Note that the URL should end with just `/api`. 
 
 ```bash
-# Using Keel on your local
+# Using Keel locally
 KEEL_API_URL=http://localhost:8000/api 
 ```
 
