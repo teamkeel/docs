@@ -301,3 +301,346 @@ The important thing here is the **“for each”** part of the last two steps. B
 ## Functions
 
 Permission rules apply to both built-in actions and functions, and you can add permission rules to specific functions too. The only exception to this is for `read` and `write` functions - schema defined permission rules do not apply to these functions and so you must implement any permissions logic in your code. See the docs on [custom functions](/functions#permissions) for more info.
+
+
+### Examples
+
+#### Model with permission attributes
+
+```keel
+model Employee {
+    fields {
+        name Text
+        department Text
+        isActive Boolean
+    }
+
+    @permission(
+        roles: [Manager],
+        actions: [create, update, delete]
+    )
+    @permission(
+        expression: employee.department == "HR",
+        actions: [read]
+    )
+}
+```
+
+In this example:
+
+- Users with the `Manager` role can create, update, and delete employees.
+- Any user in the "HR" department can read employee data.
+
+#### Action with permission attribute
+
+```keel
+model Document {
+    fields {
+        title Text
+        content Text
+        owner Identity
+    }
+
+    actions {
+        update updateDocument(id, content) {
+            @permission(
+                expression: ctx.identity == document.owner,
+            )
+        }
+    }
+}
+```
+
+Here, the `updateDocument` action can only be performed by the user who owns the document.
+
+#### Permissions with complex expressions
+
+```keel
+@permission(
+    expression: (post.user.role == "Admin" or post.user.role == "Editor") and post.isPublished == false,
+    actions: [update, delete]
+)
+```
+
+This permission allows users with the `Admin` or `Editor` role to update or delete items that are not yet published.
+
+## Examples
+
+### Model with fields, actions, and permissions
+
+```keel
+model Post {
+    fields {
+        title Text
+        content Markdown
+        author Identity
+    }
+
+    actions {
+        create createPost(title, content) {
+            @function
+        }
+        update updatePost(id, title, content) {
+            @function
+            @permission(
+                expression: ctx.identity == post.author,
+                actions: [update]
+            )
+        }
+        delete deletePost(id) {
+            @function
+            @permission(
+                roles: [Admin],
+                actions: [delete]
+            )
+        }
+    }
+
+    @permission(
+        actions: [read],
+        roles: [Viewer]
+    )
+}
+```
+
+### Role definitions
+
+```keel
+role Admin {
+    emails {
+        "admin@keel.xyz"
+    }
+}
+
+role Editor {
+    domains {
+        "keel.xyz"
+    }
+}
+
+role Viewer {
+    domains {
+        "public.keel.xyz"
+    }
+}
+```
+
+### Model with role-based permissions
+
+```keel
+model Procedure {
+    fields {
+        name Text @unique
+    }
+
+    actions {
+        get getProc(name)
+        create doProcedure() with (name) {
+            @permission(roles: [Surgeon])
+        }
+    }
+}
+
+role Surgeon {
+    domains {
+        "barts.org"
+    }
+
+    emails {
+        "sam.brainsurgeon@gmail.com"
+        "sally.heartsurgeon@gmail.com"
+    }
+}
+```
+
+In this example:
+
+- The `Procedure` model defines a `doProcedure` action that is restricted to users with the `Surgeon` role.
+- The `Surgeon` role is assigned to specific domains and emails.
+
+### Model with complex permission expressions
+
+```keel
+model Post {
+    fields {
+        title Text?
+        views Number?
+        identity Identity?
+    }
+
+    actions {
+        create create() with (title, views)
+        create createUsingRole() with (title) {
+            @permission(roles: [Poster])
+        }
+        get get(id)
+        update update(id) with (title)
+        delete delete(id)
+    }
+
+    @permission(
+        expression: post.title == "hello",
+        actions: [create, get, update]
+    )
+
+    @permission(
+        expression: post.views == 5,
+        actions: [get]
+    )
+
+    @permission(
+        expression: true,
+        actions: [delete]
+    )
+}
+
+role Poster {
+    domains {
+        "times.co.uk"
+    }
+
+    emails {
+        "chiefEditor@dailygazette.com"
+        "sportsWriter@athleticnews.net"
+        "techReporter@futuretech.io"
+        "foodCritic@culinaryreview.org"
+        "travelBlogger@wanderlust.com"
+    }
+}
+```
+
+In this example:
+
+- The `Post` model has multiple `@permission` attributes with expressions based on field values.
+- The `createUsingRole` action is accessible only to users with the `Poster` role.
+- The `Poster` role is defined with specific domains and emails.
+
+### Action with database field comparison in permissions
+
+```keel
+model Task {
+    fields {
+        title Text
+        project Project
+    }
+
+    actions {
+        get getTask(id)
+    }
+
+    @permission(
+        actions: [get],
+        expression: (
+            ctx.identity in task.project.users.user.identity and
+            "Admin" in task.project.users.role
+        )
+    )
+}
+
+model Project {
+    fields {
+        name Text
+        users ProjectUser[]
+    }
+}
+
+model ProjectUser {
+    fields {
+        user User
+        project Project
+        role Text
+    }
+}
+
+model User {
+    fields {
+        name Text
+        identity Identity
+        projects ProjectUser[]
+    }
+}
+```
+
+In this example:
+
+- The `Task` model's `getTask` action is restricted by a complex `@permission` expression.
+- The permission checks if the current user's identity is part of the task's project's users and whether they have the "Admin" role.
+
+### Using enums in permissions
+
+```keel
+enum PostType {
+    Technical
+    Lifestyle
+    Food
+}
+
+model Post {
+    fields {
+        title Text
+        type PostType
+    }
+
+    actions {
+        get getPost(id) {
+            @permission(expression: post.type == PostType.Technical)
+        }
+    }
+}
+```
+
+In this example:
+
+- The `Post` model uses an enum `PostType`.
+- The `getPost` action is permitted only when the post's type is `Technical`.
+
+### Permission with identity comparison
+
+```keel
+model Post {
+    fields {
+        title Text
+        identity Identity
+    }
+
+    actions {
+        get getPost(id) {
+            @permission(expression: post.identity == ctx.identity)
+        }
+    }
+}
+```
+
+In this example:
+
+- Access to the `getPost` action is granted only if the post's `identity` matches the current user's identity (`ctx.identity`).
+
+### Jobs with permissions
+
+```keel
+job ManualJob {
+    inputs {
+        id ID
+    }
+    @permission(roles: [Admin])
+}
+
+job ManualJobTrueExpression {
+    inputs {
+        id ID
+    }
+    @permission(expression: true)
+}
+
+role Admin {
+    domains {
+        "keel.so"
+    }
+}
+```
+
+In this example:
+
+- The `ManualJob` job can only be executed by users with the `Admin` role.
+- The `ManualJobTrueExpression` job is allowed for all users due to the `expression: true` permission. Jobs are only accessible via the console (unlike actions which are accessed via API) so the `true` expressions represents all users with project access.
+

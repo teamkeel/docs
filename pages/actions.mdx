@@ -14,12 +14,6 @@ model Product {
 
 To find out how to use your Actions from your API see the [API docs](/apis).
 
-import { Callout } from "@core/callout";
-
-<Callout type="info" emoji="🙌">
-  In the future Actions will also be used to auto-generate internal tools for you and your team in the Keel console.
-</Callout>
-
 ## Action Types
 
 Every Action has a type which indicates what it does. The action types `get`, `list`, `create`, `update`, and `delete` can be used for built-in actions and functions. There are also two more generic action types - `read` and `write` which can only be used for functions and are discussed in more detail in the [Functions](/functions) documentation. The table below describes the behaviour of each action type.
@@ -410,6 +404,7 @@ model Contestant {
 When you want the client to have control on the sorting order. You can use the `@sortable` attribute in `list` built-in actions to select which fields are available to sort by. The sort order can then be controlled by passing `orderBy` in the request.
 
 import { Tab, Tabs } from "nextra-theme-docs";
+import { Callout } from "@core/callout"
 
 <Tabs items={['Keel schema', 'API request']}>
   <Tab>
