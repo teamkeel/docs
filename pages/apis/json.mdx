@@ -4,8 +4,6 @@ The JSON API is a path-based JSON API, described by an [OpenAPI](https://www.ope
 
 You can download the OpenAPI 3.1 spec for your JSON API from the **API explorer** page in the Keel console by clicking on the "API definitions" button in the top-right of the page.
 
-![Downloading an OpenAPI spec from the Keel console](/api-explorer-openapi-spec.png)
-
 ## Types
 
 The built-in Keel types are mapped to JSON types in the following way:
@@ -25,6 +23,7 @@ The built-in Keel types are mapped to JSON types in the following way:
 Enums defined in your Keel schema are represented as strings in both inputs and responses
 
 import { Tab, Tabs } from 'nextra-theme-docs'
+import { Callout } from "@core/callout"
 
 <Tabs items={['Keel schema', 'JSON example']}>
   <Tab>
@@ -370,6 +369,7 @@ All Keel types have a corresponding query type that allow filtering in ways that
 ```
   </Tab>
   <Tab>
+**Absolute**
 ```json
 {
   "equals": "2023-06-11",
@@ -379,16 +379,83 @@ All Keel types have a corresponding query type that allow filtering in ways that
   "onOrAfter": "2023-06-11",
 }
 ```
+**Relative**
+```json
+{
+  "equalsRelative": "this year",
+  "beforeRelative": "today",
+  "afterRelative": "last 2 complete days"
+}
+```
+
+Relative date fields accept a string expression in the following format:
+
+```
+    attribute   value  complete          period
+       v          v       v                 v
+{this/next/last} {x}? {complete}? {minute/hour/day/week/month/year}
+```
+
+The components of the expression are: 
+| Component | Usage |
+| --- | --- |
+| Attribute | `this`/`next`/`last` |
+| Value | a positive integer. When using the attribute `this`, the `value` must be omitted. When using `next` or `last`, if omitted it will default to `1`. |
+| Complete | `complete` - specifies if the period we're filtering by will be a completed period: e.g. `last month` will take in account the previous calendar month. If omitted, the period will take in a rolling month (in the case of `last month`). |
+| Period | `minute`/`hour`/`day`/`week`/`month`/`year` - plural or singular versions are both accepted. |
+
+Alongside the expressions following the rule above, there are also a few valid shorthands:
+
+* `now`
+* `today` - equivalent to `this day`
+* `tomorrow` - equivalent to `next complete day`
+* `yesterday` - equivalent to `last complete day`
+
+
+<Callout type="info">
+Relative dates are timezone dependent and default to UTC. Use the `Time-Zone` header to specify the user's timezone. If using the generated client, it will use the user's timezone if available.
+</Callout>
+
+A `Time-Zone` header can be provided to specify the user's timezone. The value must be a [IANA time zone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) string. 
+
+For example
+
+```sh
+curl --location 'https://my-keel-app.keelapps.xyz/api/json/listPosts' \
+--header 'Time-Zone: Europe/London' \
+--header 'Content-Type: application/json' \
+--data '{
+    "where":
+    {
+        "date": {
+            "equalsRelative": "today"
+        }
+    }
+}'
+```
+
   </Tab>
   <Tab>
+**Absolute**
 ```json
 {
   "before": "2023-06-11T00:00:00.000Z",
   "after": "2023-06-11T00:00:00.000Z",
 }
 ```
+**Relative**
+```json
+{
+  "equalsRelative": "this year",
+  "beforeRelative": "today",
+  "afterRelative": "last 2 complete days"
+}
+```
+See Date filters for more information
   </Tab>
 </Tabs>
+
+---
 
 ### Pagination
 
