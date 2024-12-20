@@ -1,0 +1,245 @@
+# Self-hosting
+
+You can self-host your Keel app in your own AWS account by using the `keel deploy` CLI.
+
+## AWS Setup
+
+You'll need an AWS account for which you have permissions to create resources and you'll need to be authenticated with that account using the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html). You can check that you are authenticated by using the `get-caller-identity` command on the AWS CLI.
+
+```bash
+$ aws sts get-caller-identity
+```
+
+## Basic Usage
+
+To deploy your app you must have a `deploy` section in your `keelconfig.yaml` or env specific `keelconfig.<env>.yaml` file. The minimal configuration required is a `projectName` and a `region`. For more configuration options see [Configuration](#configuration).
+
+```yaml
+deploy:
+  # lower-case letter and hyphens only
+  projectName: my-project
+  # any valid AWS region
+  region: eu-west-2
+```
+
+Once you have this set you can run `keel deploy up --env <env>` to deploy your app. The `--env` flag is required and the value must contain only letters, numbers, and hyphens. Environments are totally isolated and you can deploy as many as you want. This command will:
+
+* Validate your schema and config
+* Build your functions
+* Create or update any required resources in AWS
+* Update your database schema if there have been any changes
+
+An initial deployment will take around five minutes and subsequent deploys should be around two minutes. Once the deploy is successful you will see the URL for your Keel app.
+
+To destroy an environment and all AWS resources associated with it you can use `keel deploy remove --env <env>`.
+
+## CLI
+
+All commands live under `keel deploy` and require an `--env` flag which indicates which _environment_ to use, for example "staging" or "production". You can deploy as many environments as you want into the same AWS account and they are all completely isolated from each other with their own resources. Environment names must contain only lower-case letters, numbers, and hyphens. To provide environment specific config create a corresponding `keelconfig.<env>.yaml` file. See [Configuration](#configuration) for more info.
+
+### `up`
+
+Deploys your app to your AWS account.
+
+```bash
+$ keel deploy up --env production
+```
+
+### `remove`
+
+Removes all resources associated with the environment with the exception of the S3 bucket used to store uploaded files, which is preserved. If you want to delete this bucket you can manually remove it using the AWS S3 console.
+
+Note that if you're using an external database, this command will not affect it.
+
+```bash
+$ keel deploy remove --env production
+```
+
+### `logs`
+
+**Flags**
+* `--since` How far back to show logs for, for example "1h" for all logs in the last hour. Cannot be used with `--start`.
+* `--start` A date/time for when to start showing logs from e.g. "2024-12-01 10:00:00". Cannot be used with `--since`.
+
+Shows aggregated Cloudwatch logs for your functions and the Keel runtime. Note that AWS platform logs are currently filtered out as these are very noisy.
+
+```bash
+$ keel deploy logs --env production --since 10m
+```
+
+### `secrets`
+
+Set of commands for managing secrets for deployed environments. Note that this command is separate from `keel secrets` which is only for managing secrets locally e.g. when using `keel run` or `keel test`.
+
+#### `set`
+
+**Args**
+* `name` The name of the secret. This must correspond to a secret defined in your config file
+* `value` The value of the secret.
+
+Sets a secret in your AWS account for the given environment. Secrets are stored in SSM as secure parameters.
+
+```bash
+$ keel deploy secrets set --env production MY_SECRET
+```
+
+#### `get`
+
+**Args**
+* `name` The name of the secret. This must correspond to a secret defined in your config file
+
+Retrieves and decrypts a secret set in your AWS account and prints it to the console.
+
+```bash
+$ keel deploy secrets get --env production MY_SECRET
+```
+
+#### `remove`
+
+**Args**
+* `name` The name of the secret. This must correspond to a secret defined in your config file
+
+Removes a secret that has been previously set. 
+
+```bash
+$ keel deploy secrets remove --env production MY_SECRET
+```
+
+## Configuration
+
+All configuration is provided via your config file under a `deploy` section. This section is required with the minimal configuration being a `projectName` and a `region`.
+
+```yaml
+deploy:
+  projectName: my-project
+  region: us-east-2
+```
+
+### Environment-specific configuration
+
+You can create different config files for each environment by creating a `keelconfig.<env>.yaml` file for each environment. For example if you deploy using `--env staging` and a `keelconfig.staging.yaml` file exists it will be used. 
+
+Just remember config files are **not merged**, so you must include the `deploy` section with the `projectName` and `region` in each config file as well as any environment variables, secrets, and other configuration you need.
+
+### `projectName`
+
+* Type: `string`
+
+This value, along with the environment name, is used to uniquely identity the set of resources created in your AWS account. It must contain only lower-case letters, numbers, and hyphens. 
+
+### `region`
+
+* Type: `string`
+
+The AWS region to deploy to, for example `eu-west-2`.
+
+### `database.provider`
+
+* Type: `rds` | `external`
+* Default: `rds`
+
+The default database setup uses an AWS RDS Postgres database with the `db.t4g.micro` instance type (2 vCVU's, 1GB RAM), in a single availability zone, with 20GB allocated storage. This costs around $16 a month but with the VPC and Internet Gateway costs factored in the total is around $25 a month.
+
+```yaml
+deploy:
+  database:
+    provider: rds
+```
+
+You can also use any publicly available Postgres database by setting `deploy.database.provider` to `external` and providing a `DATABASE_URL` secret. For example.
+
+```yaml
+deploy:
+  database:
+    provider: external
+secrets:
+  - name: DATABASE_URL
+```
+
+You can set this secret using `keel deploy secrets set --env <env> DATABASE_URL <>`.
+
+There are many providers that offer publicly available Postgres, for example [Supabase](https://supabase.com/), [Neon](https://neon.tech/), and [Render](https://render.com/) are all good options.
+
+When `database.provider` is set to external no VPC is required and so it's not created, which results in a lower AWS bill and faster deploys.
+
+### `database.rds`
+
+If using RDS you can configure the instance type, multi-az mode, and storage by adding a `database.rds` section to your config.
+
+```yaml
+deploy:
+  database:
+    provider: rds
+    rds:
+      # You can see all instance types here - https://aws.amazon.com/rds/instance-types/ 
+      instance: db.t4g.large
+      # This is in GiB and cannot be smaller than 20
+      storage: 50
+      # Setting this to true basically doubled the cost of the database.
+      multiAz: true
+```
+
+The above configuration will give you 2 vCPU's, 8GB memory, 50GB allocated storage, two availability zones, and will cost around $115 a month.
+
+### `telemetry.collector`
+
+You can configure your Keel app to send tracing data using Open Telemetry to any service that supports it by providing an OpenTelemetry collector config file. 
+
+```yaml
+deploy:
+  telemetry:
+    collector: ./collector.yaml
+```
+
+Below is an example OTEL collector config file that defines a single exporter. Note that a number of sections are required and must be included as shown below or your app will either not send tracing data correctly or crash on boot.
+
+```yaml filename="collector.yaml"
+# This section is required
+receivers:
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+# Define your exporters
+exporters:
+  # This defines a single exporter that sends tracing data to Axiom using HTTP
+  otlphttp:
+    compression: gzip
+    endpoint: https://api.axiom.co
+    headers:
+      # You can use any of your apps secrets in this file by using {{ .secrets.SECRET_NAME }}
+      # This is a Keel-specific feature to make the usage of things like API keys more secure
+      authorization: Bearer {{ .secrets.AXIOM_TOKEN }}
+
+      # You can also env var substitution - note the syntax here is different
+      # See https://opentelemetry.io/docs/collector/configuration/#environment-variables for more info
+      x-axiom-dataset: ${env:AXIOM_DATASET}
+
+# This section is required
+processors:
+  batch:
+
+# This section is required - just remember to include any exporters 
+# in service.pipelines.exports or they won't be used
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      # If you have multiple exporters make sure they are all added here too
+      exporters:
+        - otlphttp
+```
+
+#### Using environment variables and secrets
+
+The OpenTelemetry collector supports environment variable substitutation in the config file using the syntax `${env:MY_ENV_VAR}`. This is fine for non-sensitive values but isn't ideal for API keys as you don't want to check those into version control.
+
+To provide a secure way to use API keys in your collector config Keel also adds the ability to use secrets via the syntax `{{ .secrets.MY_SECRET }}`. These values are substituted at deploy time and managed using the `keel deploy secrets set` command.
+
+#### OpenTelemetry services
+
+There are a number of services that support tracing data being sent in OpenTelemetry format. A few are [Axiom](https://axiom.co/), [Honeycomb](https://www.honeycomb.io/), [Grafana](https://grafana.com/products/cloud/application-observability/), and [Baselime](https://baselime.io/).
