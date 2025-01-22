@@ -74,7 +74,7 @@ curl --request POST \
   --url 'http://localhost:8000/auth/token' \
   --header 'Content-Type: application/x-www-form-urlencoded' \
   --data grant_type=authorization_code \
-  --data subject_token={{auth_code}}
+  --data code={{auth_code}}
 ```
   </Tab>
   <Tab>
@@ -87,7 +87,7 @@ fetch('http://localhost:8000/auth/token', {
   },
   data: new URLSearchParams({
     grant_type: 'authorization_code,
-    subject_token: '{{auth_code}}'
+    code: '{{auth_code}}'
   })
 }).then(function (response) {
   console.log(response.data);
