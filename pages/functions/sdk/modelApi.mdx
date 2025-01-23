@@ -212,3 +212,73 @@ export default CreatePost({
   }
 });
 ```
+
+## Rich Data Types
+
+The SDK also provides class implementation for certain field types. These further simplify the interaction with these rich data types:
+
+| Field Type | Description | SDK Class |
+|------------|-------------|-----------|
+| `Duration` | A time interval (ISO 8601 format) | `Duration` |
+| `File` | A file input, supplied as a data URL | `File` and `InlineFile` |
+
+
+### `Duration`
+
+This class provides utility methods for working with durations, such as:
+
+* `Duration.fromISOString(s)`: Static constructor used to create an instance of `Duration`.
+* `toISOString()`: Converts the duration to an ISO 8601 string.
+* `toPostgres()`: Converts the duration to PostgreSQL's interval format.
+
+
+Creating and retrieving records with durations:
+
+```ts
+import { WriteCustomFunction, models, Duration } from "@teamkeel/sdk";
+
+export default WriteCustomFunction(async (ctx, inputs) => {
+  const post = await models.post.create({ readTime: Duration.fromISOString("PT1H") });
+  const readPost = await models.post.findOne({ id: post.id });
+  return {
+    readTime: readPost.readTime.toISOString(),
+  };
+});
+```
+
+When using a duration field as an input to a custom function, the input will automatically be an instance of the `Duration` class:
+
+```keel
+message DurationInput {
+    duration Duration
+}
+```
+
+```ts
+export default DurationInputFunction(async (ctx, inputs) => {
+  console.log(inputs.duration.toISOString());
+
+  const post = await models.post.create({ readTime: inputs.duration });
+  return {
+    readTime: post.readTime.toISOString(),
+  };
+});
+```
+
+<Callout type="info">
+  Duration fields are also returned as an instance of the `Duration` class when using the query builder:
+  ```ts
+  const posts = await useDatabase()
+  .selectFrom("posts")
+  .selectAll()
+  .execute();
+
+  return {
+    readTime: posts[0].readTime.toISOString()
+  };
+  ```
+</Callout>
+
+### `File` and `InlineFile`
+
+Keel provides a `File` TypeScript class in the functions runtime and full support for reading and writing files, which means that they can be used in `read` and `write` [custom functions](/functions/custom-functions), [action hooks](/functions/action-hooks), [jobs](/jobs) and [subscriber functions](/events). For more information please refer to the [Files](/files) documentation.
