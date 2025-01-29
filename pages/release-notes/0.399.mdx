@@ -1,0 +1,28 @@
+# 29 January, 2025
+
+## Duration field type
+
+This release introduces a new first-class Keel field type: `Duration`. This will capture an interval of time. For example:
+
+```keel
+model Employee {
+    fields {
+        name Text
+        startDate Date
+        periodOfService Duration
+    }
+}
+```
+
+Fields of this type will be persisted in the database as an `interval` value. API responses and requests will expect fields to be provided as [ISO8601](https://en.wikipedia.org/wiki/ISO_8601#Durations) formatted strings. 
+
+### ModelAPI & Functions runtime
+
+In the ModelAPI and the custom functions runtime, we are introducing a new `Duration` class. Similar to `File` and `InlineFile`, model fields of type duration will be instances of this `Duration` class. Please refer to the [Model API](/functions/sdk/modelApi#duration) documentation for full usage and more information on how to interact with these rich data types.
+
+---
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
