@@ -289,3 +289,72 @@ model BlogPost {
   }
 }
 ```
+
+## Computed fields
+
+A computed field is type of field which is annotated with the `@computed` attribute and whose value is automaticallygenerated based on the provided expression. 
+
+The simple example below illustrates how the `vat` field is computed based on multiplying the `total` field by 0.2 and the `totalExcludingVat` field is computed by subtracting the `vat` amount from `total`. Whenever the `total` field is set, the `vat` and `totalExcludingVat` fields will be automatically updated and within the same transaction. This means that your data will always be consistent.
+
+```keel
+model Order {
+  fields {
+    total Decimal
+    vat Decimal @computed(order.total * 0.2)
+    totalExcludingVat Decimal @computed(order.total - order.vat)
+  }
+}
+```
+
+Computed fields can also reference fields in related models. In the case a one-to-many lookup, aggregate functions can be used to perform a calculation across a set if related data. See the example below.
+
+```keel
+model Order {
+  fields {
+    // Performing an aggregated calculation in a one-to-many lookup
+    total Decimal @computed @computed(SUM(order.items.subTotal))
+    // Performing an simple calculation using the total fields on this model
+    vat Decimal @computed(order.total * 0.2)
+    // This demonstrates how computed fields can reference other computed fields
+    totalExcludingVat Decimal @computed(order.total - order.vat)
+    items OrderItem[]
+  }
+}
+
+model OrderItem {
+  fields {
+    order Order
+    product Product
+    quantity Number
+    // Performing a calculation on related data in a many-to-one lookup
+    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
+  }
+}
+
+model Product {
+  fields {
+    name Text
+    price Decimal
+  }
+}
+```
+
+The following table outlines the aggregate functions currently supported in computed expressions for one-to-many lookups.
+
+| Function | Description |
+|----------|-------------|
+| `SUM` | Calculates the sum by adding all the values |
+| `MIN` | Returns the minimum value |
+| `MAX` | Returns the maximum value |
+| `AVG` | Calculates the average (mean) |
+| `MEDIAN` | Calculates the middle value from the sorted values |
+| `COUNT` | Returns the total number of records |
+
+Computed fields have the following important characteristics and limitations:
+- Only available for `Decimal`, `Number`, and `Boolean` fields at present.
+- Persisted in the database just like any other field.
+- Can be filtered in action inputs or in `@where` expressions just like any other field.
+- Returned in action API responses just like any other field.
+- Cannot be set in actions nor in the ModelAPI.
+- Can be set as nullable provided that all the fields referenced in the expression are also nullable.
+- Computed fields are updated within the same transaction as the mutating.

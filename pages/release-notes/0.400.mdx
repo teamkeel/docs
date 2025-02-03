@@ -1,0 +1,65 @@
+import { Callout } from "@core/callout"
+
+# 03 February, 2025
+
+<Callout type="warning">
+This release contains a number of minor breaking changes to expressions. Please see the [this section](#changes-to-expressions) below for steps to migrate.
+</Callout>
+
+## Computed fields
+
+Today we've released a powerful new feature to the Keel runtime - [computed fields](/models#computed-fields). 
+
+This allows you to have a field automatically set or calculated based on an expression. Computed fields can even reference fields in related models. For one-to-many lookups, we've introduced functions which let you aggregate related data. At present, we support `SUM`, `MIN`, `MAX`, `AVG`, `MEDIAN`, and `COUNT` aggregate functions.
+
+See the example below.
+
+```keel
+model Order {
+  fields {
+    // Performing an aggregated calculation in a one-to-many lookup
+    total Decimal @computed @computed(SUM(order.items.subTotal))
+    // Performing an simple calculation using the total fields on this model
+    vat Decimal @computed(order.total * 0.2)
+    // This demonstrates how computed fields can reference other computed fields
+    totalExcludingVat Decimal @computed(order.total - order.vat)
+    items OrderItem[]
+  }
+}
+
+model OrderItem {
+  fields {
+    order Order
+    product Product
+    quantity Number
+    // Performing a calculation on related data in a many-to-one lookup
+    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
+  }
+}
+
+model Product {
+  fields {
+    name Text
+    price Decimal
+  }
+}
+```
+
+## Changes to expressions
+
+We've also made a few minor breaking changes to the expression syntax. We kindly ask that you consult the two changes listed below and make the necessary updates to your schema.
+
+### `&&` and `||` operators
+
+We'e replaced the `and` and `or` operators with `&&` and `||` respectively. The behaviour is the exact same except now the syntax is now more consistent with other languages.
+
+### `not in` deprecated
+
+The `not in` operator has been deprecated. In order to achieve the same result, we suggest that you use the negation, `!` operator.  For example, `!(ctx.identity in team.members.identity)`
+
+---
+Please make sure to update your CLI by running `npm install -g keel`.
+
+For any issues or feedback, please visit the support channel on our [community Discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!

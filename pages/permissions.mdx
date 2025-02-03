@@ -357,7 +357,7 @@ Here, the `updateDocument` action can only be performed by the user who owns the
 
 ```keel
 @permission(
-    expression: (post.user.role == "Admin" or post.user.role == "Editor") and post.isPublished == false,
+    expression: (post.user.role == "Admin" || post.user.role == "Editor") && post.isPublished == false,
     actions: [update, delete]
 )
 ```
@@ -531,7 +531,7 @@ model Task {
     @permission(
         actions: [get],
         expression: (
-            ctx.identity in task.project.users.user.identity and
+            ctx.identity in task.project.users.user.identity &&
             "Admin" in task.project.users.role
         )
     )

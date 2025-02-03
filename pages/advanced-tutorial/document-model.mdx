@@ -18,7 +18,7 @@ model Document {
             @permission(expression: ctx.identity == document.user.identity)
         }
         list listDocuments(user.id?, team.id?) {
-            @where(document.user.identity == ctx.identity or ctx.identity in document.team.members.user.identity)
+            @where(document.user.identity == ctx.identity || ctx.identity in document.team.members.user.identity)
         }
         delete deleteDocument(id, user.id?, team.id?) {
             @permission(expression: document.user.identity == ctx.identity)
