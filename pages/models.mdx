@@ -321,7 +321,7 @@ model OrderItem {
     order Order
     product Product
     quantity Number
-    subTotal Decimal @computed(product.price * orderItem.quantity)
+    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
   }
 }
 

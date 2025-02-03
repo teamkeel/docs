@@ -1,3 +1,5 @@
+import { Callout } from "@core/callout"
+
 # 03 February, 2025
 
 <Callout type="warning">
@@ -29,7 +31,7 @@ model OrderItem {
     product Product
     quantity Number
     // Performing a calculation on related data in a many-to-one lookup
-    subTotal Decimal @computed(product.price * orderItem.quantity)
+    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
   }
 }
 
