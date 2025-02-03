@@ -235,7 +235,7 @@ If a permission is defined on an individual action, it will replace any permissi
 
 ```keel
 @permission(
-    expression: employee.isActive == true and employee.department == "HR",
+    expression: employee.isActive == true && employee.department == "HR",
     actions: [update]
 )
 ```
@@ -685,6 +685,10 @@ Expressions are used within attributes and other constructs to define conditions
 
 Expressions support logical and comparison operations:
 
-- **Operators**: `==`, `!=`, `>`, `<`, `>=`, `<=`, `in`, `not in`, `and`, `or`, `=`, `+=`, `-=`
+- **`@where`, `@permission` and `@set` operators**: `==`, `!=`, `>`, `<`, `>=`, `<=`, `in`, `!`, `&&`, `||`, `=`
+- **`@computed` operators**: Same as above with the addition of `+`, `-`, `*`, `/`
+- **`@computed` aggregate functions**: `SUM`, `MIN`, `MAX`, `AVG`, `MEDIAN`, `COUNT`
 - **Values**: Literals (`true`, `false`, `null`, numbers, strings), identifiers, arrays.
 - **Parentheses**: Used for grouping, e.g., `(a == b) and (c > d)`
+
+
