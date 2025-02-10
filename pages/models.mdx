@@ -312,7 +312,7 @@ Computed fields can also reference fields in related models. In the case a one-t
 model Order {
   fields {
     // Performing an aggregated calculation in a one-to-many lookup
-    total Decimal @computed @computed(SUM(order.items.subTotal))
+    total Decimal @computed(SUM(order.items.subTotal))
     // Performing an simple calculation using the total fields on this model
     vat Decimal @computed(order.total * 0.2)
     // This demonstrates how computed fields can reference other computed fields
