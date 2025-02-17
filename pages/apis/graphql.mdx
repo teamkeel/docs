@@ -442,12 +442,16 @@ type PageInfo {
 
 ### Pagination
 
-The input type for a **list** action has four fields that relate to pagination.
+### Pagination
+
+The input type for a **list** action has six fields that relate to pagination.
 
 * `first` - Only return the first _N_ records. Can be used with `after`.
 * `last` - Only return the last _N_ records. Can be used with `before`.
 * `after` - Return records after this cursor.
 * `before` - Return records before this cursor.
+* `limit` - In the case of offset pagination, the maximum amount of items to return.
+* `offset` - How many records to skip. Used only in conjunction with `limit`
 
 The `startCursor` and `endCursor` fields of a `PageType` can be passed to `after` or `before` in subsequent queries. For example if you fetched the first 10 book records and in the response the `endCursor` value was "1234" then to get the next 10 records you would pass "1234" to the `after` input.
 

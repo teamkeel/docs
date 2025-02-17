@@ -1,0 +1,53 @@
+import { Callout } from "@core/callout"
+
+# 17 February, 2025
+
+## Offset pagination
+
+This release introduces support for offset pagination for all `list` actions. By default cursor pagination is used, but if the request contains a `limit` field, Offset pagination will be performed. For more information please refer to the [API docs](/apis/json#pagination).
+
+
+```jsonc
+// POST /api/json/listItems
+{
+  "limit": 5,
+  "offset": 5
+}
+
+// Response
+{
+  "pageInfo": {
+    "count": 3,
+    "endCursor": "2stp5GgcnJoakGgLhl8mqJi4i5n",
+    "hasNextPage": false,
+    "pageNumber": 2,
+    "startCursor": "2stp5nqGsXvJq6VlsDQOmsy7L9f",
+    "totalCount": 8
+  },
+  "results": [
+    {
+      "createdAt": "2025-02-11T14:35:44.276727Z",
+      "id": "2stp5nqGsXvJq6VlsDQOmsy7L9f",
+      "updatedAt": "2025-02-11T14:35:44.276727Z"
+    },
+    {
+      "createdAt": "2025-02-11T14:35:42.269212Z",
+      "id": "2stp5YCcPGWObc0GcU3hYqzPD75",
+      "updatedAt": "2025-02-11T14:35:42.269212Z"
+    },
+    {
+      "createdAt": "2025-02-11T14:35:40.008906Z",
+      "id": "2stp5GgcnJoakGgLhl8mqJi4i5n",
+      "updatedAt": "2025-02-11T14:35:40.008906Z"
+    }
+  ]
+}
+```
+
+## Fixes and Improvements
+
+We've also released some other fixes and improvements to the CLI, Schema Validator and Console Tools; please refer to our [changelog](https://github.com/teamkeel/keel/releases/) on our repository page for a complete list.
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
