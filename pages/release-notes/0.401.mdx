@@ -6,7 +6,6 @@ import { Callout } from "@core/callout"
 
 This release introduces support for offset pagination for all `list` actions. By default cursor pagination is used, but if the request contains a `limit` field, Offset pagination will be performed. For more information please refer to the [API docs](/apis/json#pagination).
 
-
 ```jsonc
 // POST /api/json/listItems
 {
@@ -41,6 +40,37 @@ This release introduces support for offset pagination for all `list` actions. By
       "updatedAt": "2025-02-11T14:35:40.008906Z"
     }
   ]
+}
+```
+
+## `@set` with relationships
+
+The `@set` attribute has been limited to just setting a model field from actions inputs and ctx. This extends `@set` functionality to support looking up fields in related models in both create and update actions.
+
+A nice example of this is to set the price of a purchase order once-off from a product's standard price:
+
+```keel
+model Order {
+    fields {
+        price Decimal
+        quantity Number
+        product Product
+        total Decimal @computed(order.price * order.quantity)
+    }
+    actions {
+        create createOrder() with (product.id, quantity, customer.id) {
+            @set(order.price = order.product.standardPrice)
+        }
+        update resetOrderPrice(id) {
+            @set(order.price = order.product.standardPrice)
+        }
+    }
+}
+
+model Product {
+    fields {     
+        standardPrice Decimal
+    }
 }
 ```
 
