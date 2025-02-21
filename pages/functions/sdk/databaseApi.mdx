@@ -31,4 +31,22 @@ import { Callout } from "@core/callout";
   automatically convert the casing from the former to the latter.
 </Callout>
 
+See below for a more involved example query with multiple conditions.
+
+```tsx
+const persons = await db
+  .selectFrom('person')
+  .selectAll()
+  // 1. Using the `or` method on the expression builder:
+  .where((eb) => eb.or([
+    eb('firstName', '=', 'Jennifer'),
+    eb('firstName', '=', 'Sylvester')
+  ]))
+  // 2. Chaining expressions using the `or` method on the created expressions:
+  .where((eb) =>
+    eb('lastName', '=', 'Aniston').or('lastName', '=', 'Stallone')
+  )
+  .execute()
+```
+
 For more information see the [Kysely documentation](https://kysely.dev/docs/intro)
