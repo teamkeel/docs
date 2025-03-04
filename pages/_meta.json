@@ -117,6 +117,12 @@
       "breadcrumb": false
     }
   },
+  "self-hosting": {
+    "title": "Self-hosting",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- tools": {
     "title": "Tools",
     "type": "separator"
