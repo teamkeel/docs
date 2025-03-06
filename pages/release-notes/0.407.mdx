@@ -1,0 +1,56 @@
+# 06 March, 2025
+
+## `@computed` support for `Text` fields
+
+We now support computing values for `Text` fields.  In addition, you can build a custom string with concatenation and literals.  See example below.
+
+```keel
+model Order {
+  fields {
+    title Text @computed(order.customer.name + " order")
+    customer Customer
+  }
+}
+
+model Customer {
+  fields {
+    name Text
+  }
+}
+```
+
+## `@computed` for relationships
+
+There may be cases where you want to ensure a relationship is always the same at multiple places in your data model. This can now be achieved by using the `@computed` attribute on the "has-one" side of a relationship, as shown in the example below.
+
+```keel
+model ProcessOrder {
+  fields {
+    customer Customer @computed(orderJob.order.customer)
+    order Order 
+  }
+}
+
+model Order {
+  fields {
+    customer Customer
+  }
+}
+
+model Customer {
+  fields {
+    name Text
+    orders Order[]
+  }
+}
+```
+
+## Fixes and Improvements
+
+An important change included in this release is the fix to missing function traces on the Monitoring page in the Console.
+
+See all the [fixes and improvements here](https://github.com/teamkeel/keel/releases/tag/v0.407.0).
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so)**.**
+
+Thank you for using Keel!
