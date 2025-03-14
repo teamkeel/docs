@@ -76,6 +76,12 @@
       "breadcrumb": false
     }
   },
+  "routes": {
+    "title": "Routes",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- Reference": {
     "title": "Reference",
     "type": "separator"
