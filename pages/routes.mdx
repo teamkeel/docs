@@ -1,0 +1,121 @@
+# Routes
+
+Routes allow you to define custom HTTP endpoints in your Keel application. These are useful for integrating webhooks, handling API calls, or exposing functionality directly via HTTP. Unlike Actions, which abstract away request handling, Routes give you full control over the raw HTTP request and response, making them more flexible when dealing with external services.
+
+## Defining Routes
+
+Routes are defined in your schema in a `routes` block.
+
+```keel filename="schema.keel"
+routes {
+    post("/my/endpoint", myHandler)
+}
+```
+
+In the example above, a single route is defined to accept HTTP POST requests at `/my/endpoint`. As well as `post` you can define `get`, `put`, and `delete` endpoints.
+
+The second argument in the route definition specifies the handler function. This must match a TypeScript file in the routes/ directory, using the same name as the function, for example `routes/myHandler.ts` for `myHandler`.
+
+## Path Parameters
+
+A route pattern can contain dynamic segments using the `:paramName` syntax, for example:
+
+```keel
+routes {
+    post("/some/webhook/:id", myWebhookHandler)
+}
+```
+
+In this case the route will match URL's like `/some/webhook/1234` and `/some/webhook/abcdef`. The route handler function can access the parameter values by using `request.params`.
+
+```ts filename="routes/myHandler.ts"
+import { RouteFunction } from "@teamkeel/sdk";
+
+const handler: RouteFunction = async (request, ctx) => {
+  // the path parameters can be access on request.params
+  request.params.id;
+
+  return {
+    body: "..."
+  };
+};
+
+export default handler;
+```
+
+## Route Handler
+
+A route handler is a TypeScript file with a default export that is the handler function for that route. For example:
+
+```ts filename="routes/myHandler.ts"
+import { RouteFunction } from "@teamkeel/sdk";
+
+const handler: RouteFunction = async (request, ctx) => {
+  return {
+    body: "..."
+  };
+};
+
+export default handler;
+```
+
+You can scaffold out new route handlers by running `keel generate`.
+
+The handler function receives two arguments - `request` and `ctx`. The `request` object will look something like this:
+
+```json filename="Example request object"
+{
+    "body": "<raw body of request>",
+    "method": "POST",
+    "path": "/my/endpoint",
+    "params": {},
+    "query": "",
+    "headers": {
+        "Content-Type": "application/json"
+    }
+}
+```
+
+The handler function should return a `RouteFunctionResponse` object which must contain a `body` and can optionally contain `statusCode` and `headers`. If `statusCode` is omitted then `200 OK` will be used.
+
+```ts filename="routes/myHandler.ts"
+import { RouteFunction } from "@teamkeel/sdk";
+
+const handler: RouteFunction = async (request, ctx) => {
+  return {
+    body: JSON.stringify({
+        foo: 'bar',
+    }),
+    statusCode: 200,
+    headers: {
+        "Content-Type": "application/json"
+    },
+  };
+};
+
+export default handler;
+```
+
+The second argument, `ctx`, is similar to the context object in Action functions, but it does not include the `headers` or `response` properties. Request headers are accessed via the `request` object, and the function returns an HTTP response containing any headers.
+
+### Accessing Query Parameters
+
+ Query parameters (the bit after `?` in a URL) are passed to the handler in the `request.query` property as a string. You can use the Node.js built-in [`URLSearchParams`](https://nodejs.org/api/url.html#class-urlsearchparams) utility to parse the query string and access any parameters you need. For example:
+
+ ```ts
+import { RouteFunction } from "@teamkeel/sdk";
+
+const handler: RouteFunction = async (request, ctx) => {
+  // parse query string
+  const q = new URLSearchParams(request.query);
+
+  // access parameters
+  q.get("someParam");
+
+  return {
+    body: '...',
+  };
+};
+
+export default handler;
+ ```
