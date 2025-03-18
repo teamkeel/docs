@@ -16,6 +16,11 @@ In the example above, a single route is defined to accept HTTP POST requests at 
 
 The second argument in the route definition specifies the handler function. This must match a TypeScript file in the routes/ directory, using the same name as the function, for example `routes/myHandler.ts` for `myHandler`.
 
+Once added to the schema, you can scaffold out the route handler by running
+```bash
+keel generate
+```
+
 ## Path Parameters
 
 A route pattern can contain dynamic segments using the `:paramName` syntax, for example:
