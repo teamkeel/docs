@@ -17,7 +17,13 @@
       "include": "#operator"
     },
     {
+      "include": "#function-name"
+    },
+    {
       "include": "#action-type"
+    },
+    {
+      "include": "#route-type"
     },
     {
       "include": "#action-name"
@@ -42,11 +48,15 @@
     },
     "keyword": {
       "name": "keyword.keel",
-      "match": "\\b(model|fields|actions|enum|api|models|job|role|emails|domains|inputs|with|returns)\\s+"
+      "match": "\\b(model|fields|actions|enum|api|models|job|role|emails|domains|inputs|with|returns|routes)\\s+"
     },
     "operator": {
-      "name": "keyword.keel",
-      "match": "(and|or|not|in|!=|==|>=|<=|>|<)\\s+"
+      "name": "keyword.operator.keel",
+      "match": "(&&|\\|\\||!|in|!=|==|>=|<=|>|<|\\+|-|\\*|\\(|\\))\\s+"
+    },
+    "function-name": {
+      "name": "support.function.aggregate.keel",
+      "match": "\\b(SUM|COUNT|AVG|MIN|MAX|MEDIAN)\\b"
     },
     "action-type": {
       "name": "keyword.keel",
@@ -55,6 +65,10 @@
     "action-name": {
       "name": "support.function.action.keel",
       "match": "(?<=get |create |update |list |delete |read |write )\\s*\\w+"
+    },
+    "route-type": {
+      "name": "keyword.keel",
+      "match": "\\b(post|get|put|patch|delete)\\s*\\("
     },
     "type-name": {
       "name": "entity.name.type.keel",
@@ -87,6 +101,9 @@
         },
         {
           "include": "#literal"
+        },
+        {
+          "include": "#function-name"
         },
         {
           "include": "#identitifer"
