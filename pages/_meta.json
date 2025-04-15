@@ -129,6 +129,12 @@
       "breadcrumb": false
     }
   },
+  "seeding-data": {
+    "title": "Seeding data",
+    "theme": {
+      "breadcrumb": false
+    }
+  },
   "-- tools": {
     "title": "Tools",
     "type": "separator"
