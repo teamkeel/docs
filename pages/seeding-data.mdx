@@ -1,0 +1,44 @@
+# Seeding data
+
+Working with realistic data in your local environment makes development much smoother. Seed data allows you to pre-populate your database with data that you can use to test your app.
+
+- Get your development environment up and running quickly
+- Test how your app handles complex relationships
+- Create test cases that you can run again and again
+
+## Setting up seed data
+
+Seed data is stored in SQL files within a `seed` directory in your project. Each `.sql` file in this directory will be executed in alphabetical order when seeding your database. This allows you to control the order of data insertion by prefixing your files with numbers (e.g., `01-users.sql`, `02-products.sql`).
+
+By checking in your seed files to version control, you can ensure that everyone on your team starts with the same data.
+
+### Automatic seeding
+
+Seed data is automatically applied in two scenarios:
+1. When running `keel run` and it creates a fresh database
+2. When using the `--reset` flag with `keel run`
+
+### Manual seeding
+
+You can manually trigger the seeding process using the `keel seed` command:
+
+```bash
+keel seed
+```
+
+## Taking database snapshots
+
+Keel provides a convenient way to capture your current database state as seed data:
+
+```bash
+keel seed snapshot
+```
+
+This will write the current state of your Keel tables to `seed/snapshot.sql`.
+You can then edit that snapshot file to remove any tables that are not relevant.
+
+## Best practices
+
+1. **Organize seed files**: Use descriptive names for your seed files (e.g., `01-users.sql`, `02-products.sql`) to control the order of execution
+2. **Version control**: Include your seed files in version control to ensure consistent development environments
+3. **Trim down snapshots**: Use snapshots to quickly capture the state of your database and then remove any tables that are not relevant.
