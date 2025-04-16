@@ -87,7 +87,7 @@ Default values are implemented at the database level, which means if you provide
 
 An enum is a set of *named* values. They are useful when you want to constrain a field to only contain certain values. For example if you are defining a model for an order and want to make sure that the status of the order can only be placed, picked, packed or dispatched, then you can do that with an enum.
 
-Enum names and values must be written in **UpperCamelCase**.
+Enum names must be written in **UpperCamelCase**, however, enum values can follow any casing as long as they don't start with a number.
 
 ```keel
 enum OrderStatus {
@@ -95,6 +95,7 @@ enum OrderStatus {
   Picked
   Packed
   Dispatched
+  In_Transit
 }
 
 model Order {
