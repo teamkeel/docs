@@ -1,8 +1,8 @@
 # Models
 
-A Keel app is built around your data, which is described using models. Models are defined in your schema files and look like this.
+A Keel app is built around your data, which is described using models. You define models in your Keel schema like this:
 
-```keel
+```keel filename="schema.keel"
 model Product {
   fields {
     title Text
@@ -23,7 +23,7 @@ model Product {}
 
 ## Naming
 
-Keel enforces certain naming conventions to ensure consistency in your schema and API's. Specifically, your models must be named in **UpperCamelCase**, and your fields must be named in **lowerCamelCase**.
+Keel enforces certain naming conventions to ensure consistency in your schema and APIs. Your models must be named in **UpperCamelCase**, and your fields must be named in **lowerCamelCase**.
 
 We also recommend that you name your models using singular terms, such as `Product` rather than `Products`.
 
@@ -44,7 +44,7 @@ The built-in Keel types are:
 
 As previously mentioned, all models **automatically** have the following fields:
 
-- `id` - a field of type `ID` that can be used to identify an individual record (we use [KSUIDs](https://github.com/segmentio/ksuid) for ID's)
+- `id` - a field of type `ID` that can be used to identify an individual record (Keel uses [KSUIDs](https://github.com/segmentio/ksuid) for ID's, which are sortable and globally unique)
 - `createdAt` - a field of type `Timestamp` which indicates when a record was created
 - `updatedAt` - a field of type `Timestamp` which indicates when a record was last updated
 
@@ -83,29 +83,6 @@ The value you provide to `@default` must match the field type, otherwise you wil
 
 Default values are implemented at the database level, which means if you provide a default value when adding a new field to an existing model that value will also be used to backfill the field on all existing rows in the database.
 
-## Enums
-
-An enum is a set of *named* values. They are useful when you want to constrain a field to only contain certain values. For example if you are defining a model for an order and want to make sure that the status of the order can only be placed, picked, packed or dispatched, then you can do that with an enum.
-
-Enum names and values must be written in **UpperCamelCase**.
-
-```keel
-enum OrderStatus {
-  Placed
-  Picked
-  Packed
-  Dispatched
-}
-
-model Order {
-  fields {
-    status OrderStatus
-  }
-}
-```
-
-Now you can be sure that the `status` field of an order can only be one of the values listed in the enum.
-
 ## Unique fields
 
 If you need a field to be unique across all records of a model you use the `@unique` attribute.
@@ -142,11 +119,132 @@ model Like {
 }
 ```
 
+## Computed fields
+
+A computed field is a type of field that is annotated with the `@computed` attribute and whose value is automatically generated based on the provided expression. 
+
+The simple example below illustrates how the `vat` field is computed based on multiplying the `total` field by 0.2 and the `totalExcludingVat` field is computed by subtracting the `vat` amount from `total`. Whenever the `total` field is set, the `vat` and `totalExcludingVat` fields will be automatically updated and within the same transaction. This means that your data will always be consistent.
+
+```keel
+model Order {
+  fields {
+    total Decimal
+    vat Decimal @computed(order.total * 0.2)
+    totalExcludingVat Decimal @computed(order.total - order.vat)
+  }
+}
+```
+
+Computed fields can also reference fields in related models. In the case a one-to-many lookup, aggregate functions can be used to perform a calculation across a set of related data. See the example below.
+
+```keel
+model Order {
+  fields {
+    // Performing an aggregated calculation in a one-to-many lookup
+    total Decimal @computed(SUM(order.items.subTotal))
+    // Performing a simple calculation using the total fields on this model
+    vat Decimal @computed(order.total * 0.2)
+    // This demonstrates how computed fields can reference other computed fields
+    totalExcludingVat Decimal @computed(order.total - order.vat)
+    items OrderItem[]
+  }
+}
+
+model OrderItem {
+  fields {
+    order Order
+    product Product
+    quantity Number
+    // Performing a calculation on related data in a many-to-one lookup
+    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
+  }
+}
+
+model Product {
+  fields {
+    name Text
+    price Decimal
+  }
+}
+```
+
+The following table outlines the aggregate functions currently supported in computed expressions for one-to-many lookups.
+
+| Function | Description |
+|----------|-------------|
+| `SUM` | Calculates the sum by adding all the values |
+| `MIN` | Returns the minimum value |
+| `MAX` | Returns the maximum value |
+| `AVG` | Calculates the average (mean) |
+| `MEDIAN` | Calculates the middle value from the sorted values |
+| `COUNT` | Returns the total number of records |
+
+Computed fields have the following important characteristics and limitations:
+- Can only be used on `Decimal`, `Number`, and `Boolean` fields
+- Persisted in the database just like any other field
+- Can be filtered in action inputs or in `@where` expressions just like any other field
+- Returned in action API responses just like any other field
+- Cannot be set in actions or with the model API
+- Can be set as nullable provided that all the fields referenced in the expression are also nullable
+- Automatically re-computed in the same transaction as any mutation that changes referenced fields
+
+## Sequence fields
+
+You can create auto-incrementing sequence fields using the `@sequence` attribute. This is useful when you need to generate sequential identifiers for records, such as order numbers or invoice numbers. The sequence attribute can only be used with `Text` fields and requires a prefix.
+
+```keel
+model Order {
+  fields {
+    orderNumber Text @sequence("ORD")
+  }
+}
+```
+
+In this example, orders will automatically be assigned numbers like "ORD0001", "ORD0002", "ORD0003", etc. The prefix string can be anything you want but cannot contain spaces.
+
+The numerical part is always padded with leading zeros to a minimum width of 4 digits - so `1` becomes `0001`, while numbers of 4 or more digits (like `1234`) are left as is. The sequence is guaranteed to be unique within that model.
+
+You can optionally specify a custom starting value by passing a number as the second argument to `@sequence`.
+
+```keel
+model Invoice {
+  fields {
+    invoiceNumber Text @sequence("INV-", 1000)
+  }
+}
+```
+
+This will start generating numbers from "INV-1000" onward e.g., "INV-1000", "INV-1001", "INV-9999", "INV-10000". If provided this value must be a positive integer.
+
+## Enums
+
+An enum is a set of *named* values. They are useful when you want to constrain a field to only contain certain values. For example if you are defining a model for an order and want to make sure that the status of the order can only be placed, picked, packed, or dispatched, then you can do that with an enum.
+
+Enum names must be written in **UpperCamelCase**, however, enum values can follow any casing as long as they don't start with a number.
+
+```keel
+enum OrderStatus {
+  Placed
+  Picked
+  Packed
+  Dispatched
+  In_Transit
+}
+
+model Order {
+  fields {
+    status OrderStatus
+  }
+}
+```
+
+Now you can be sure that the `status` field of an order can only be one of the values listed in the enum.
+
 ## Relationships
 
 Data in a Keel app is *relational*, which means that models can be related to one another. This is expressed in a Keel schema by using a **model as a field type**.
 
-When you create a relationship between two models a **foreign key** will be automatically created for you on one side of the relationship. You don't need to think about the foreign key field when working on your schema but you will see them in API responses and also when using the model API's in functions, so it's good to be aware of them.
+When you create a relationship between two models a **foreign key** will be automatically created for you on one side of the relationship. You don't need to think about the foreign key field when working on your schema but you will see them in API responses and also when using the model API in functions, so it's good to be aware of them.
 
 ### One-to-many
 
@@ -251,7 +349,7 @@ model City {
 
 Note that in this example it is **possible** for a country to have no capital city but it is **not possible** for a city to have no country. This is due to the fact that the foreign key can only be added to one side of the relationship, and in Keel it is added to the side that uses `@unique`. In fact, although a `Country` has a `capitalCity` field in the Keel schema, that field does not exist in the database.
 
-On which side you use `@unique` and which side you use `?` will depend on your data model but we recommend you think about which side **belongs to** to the other, for example it's more reasonable to say a city belongs to a country than the other way around. Another example would be a `User` model and a `Settings` model. You would likely say that settings belong to a user, and so you would put the `@unique` attribute in the `Settings` model.
+On which side you use `@unique` and which side you use `?` will depend on your data model but we recommend you think about which side **belongs to** the other, for example it's more reasonable to say a city belongs to a country than the other way around. Another example would be a `User` model and a `Settings` model. You would likely say that settings belong to a user, and so you would put the `@unique` attribute in the `Settings` model.
 
 ### The @relation attribute
 
@@ -289,72 +387,3 @@ model BlogPost {
   }
 }
 ```
-
-## Computed fields
-
-A computed field is type of field which is annotated with the `@computed` attribute and whose value is automaticallygenerated based on the provided expression. 
-
-The simple example below illustrates how the `vat` field is computed based on multiplying the `total` field by 0.2 and the `totalExcludingVat` field is computed by subtracting the `vat` amount from `total`. Whenever the `total` field is set, the `vat` and `totalExcludingVat` fields will be automatically updated and within the same transaction. This means that your data will always be consistent.
-
-```keel
-model Order {
-  fields {
-    total Decimal
-    vat Decimal @computed(order.total * 0.2)
-    totalExcludingVat Decimal @computed(order.total - order.vat)
-  }
-}
-```
-
-Computed fields can also reference fields in related models. In the case a one-to-many lookup, aggregate functions can be used to perform a calculation across a set if related data. See the example below.
-
-```keel
-model Order {
-  fields {
-    // Performing an aggregated calculation in a one-to-many lookup
-    total Decimal @computed(SUM(order.items.subTotal))
-    // Performing an simple calculation using the total fields on this model
-    vat Decimal @computed(order.total * 0.2)
-    // This demonstrates how computed fields can reference other computed fields
-    totalExcludingVat Decimal @computed(order.total - order.vat)
-    items OrderItem[]
-  }
-}
-
-model OrderItem {
-  fields {
-    order Order
-    product Product
-    quantity Number
-    // Performing a calculation on related data in a many-to-one lookup
-    subTotal Decimal @computed(orderItem.product.price * orderItem.quantity)
-  }
-}
-
-model Product {
-  fields {
-    name Text
-    price Decimal
-  }
-}
-```
-
-The following table outlines the aggregate functions currently supported in computed expressions for one-to-many lookups.
-
-| Function | Description |
-|----------|-------------|
-| `SUM` | Calculates the sum by adding all the values |
-| `MIN` | Returns the minimum value |
-| `MAX` | Returns the maximum value |
-| `AVG` | Calculates the average (mean) |
-| `MEDIAN` | Calculates the middle value from the sorted values |
-| `COUNT` | Returns the total number of records |
-
-Computed fields have the following important characteristics and limitations:
-- Only available for `Decimal`, `Number`, and `Boolean` fields at present.
-- Persisted in the database just like any other field.
-- Can be filtered in action inputs or in `@where` expressions just like any other field.
-- Returned in action API responses just like any other field.
-- Cannot be set in actions nor in the ModelAPI.
-- Can be set as nullable provided that all the fields referenced in the expression are also nullable.
-- Computed fields are updated within the same transaction as the mutating.
