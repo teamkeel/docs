@@ -9,22 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
-
     steps:
       - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v3
         with:
-          version: 8
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "pnpm"
+          node-version: 22.15
+      - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install
       - name: Run tests
-        run: npm run test
+        run: pnpm run test
