@@ -1,0 +1,90 @@
+# 24 April, 2025
+
+This release introduces several exciting new features: 
+
+- **Sequence Attribute**: Automatically generate sequential identifiers for your models
+- **Route Functions**: Create custom HTTP endpoints with full control over request/response handling
+- **Seed Data**: Pre-populate your database with test data for development
+
+## `@sequence` attribute
+
+The `@sequence` attribute allows you to create a field for which the value will be a user-defined prefix plus an incrementing numerical value. This is useful for creating order numbers, invoice numbers, or any other sequential identifiers. The sequence will automatically increment for each new record created.
+
+For example, to create a sequence for order numbers:
+
+```keel
+model Order {
+  fields {
+    orderNumber Number @sequence("order_")
+  }
+}
+```
+
+The sequence will start at 1 and increment by 1 for each new record. You can also provide a custom starting value for the sequence.
+
+```keel
+model Order {
+  fields {
+    orderNumber Number @sequence("order_", 1000)
+  }
+}
+```
+
+This would start the sequence at 1000, so the first value would be "order_1000". For more details on `@sequence`, see the [models documentation](/models).
+
+## Route functions
+
+Route functions allow you to define custom HTTP endpoints in your Keel application. These are useful for integrating webhooks, handling API calls, or exposing functionality directly via HTTP. Unlike Actions, which abstract away request handling, Routes give you full control over the raw HTTP request and response.
+
+Routes are defined in your schema in a `routes` block:
+
+```keel
+routes {
+    post("/webhooks/stripe", handleStripeWebhook)
+    get("/products/:id/reviews", getProductReviews)
+}
+```
+
+You can define `get`, `post`, `put`, and `delete` endpoints. The handler function must be defined in a TypeScript file in the routes/ directory, using the same name as the function.
+
+Route handlers receive a request object containing the raw HTTP request details and a context object for accessing your data models. They return a response object that can include a body, status code, and headers.
+
+For example:
+
+```ts
+import { RouteFunction } from "@teamkeel/sdk";
+
+const handler: RouteFunction = async (request, ctx) => {
+  return {
+    body: JSON.stringify({
+      message: "Hello World"
+    }),
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json"
+    }
+  };
+};
+
+export default handler;
+```
+
+For more details on route functions, see the [routes documentation](/routes).
+
+## Seed data
+
+Keel now supports database seeding, allowing you to pre-populate your database with test data. This feature helps you get your development environment up and running quickly and test how your app handles complex relationships.
+
+Seed data is stored in SQL files within a `seed` directory in your project. Each `.sql` file will be executed in alphabetical order when seeding your database. You can automatically seed your database when running `keel run` with a fresh database or manually trigger seeding using the `keel seed` command.
+
+You can also take snapshots of your current database state using `keel seed snapshot`, which will write the current state to `seed/snapshot.sql`.
+
+For more information about seeding data, see the [seeding data documentation](/seeding-data).
+
+## Fixes and Improvements
+
+See all the [fixes and improvements here](https://github.com/teamkeel/keel/releases/tag/v0.411.0).
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
