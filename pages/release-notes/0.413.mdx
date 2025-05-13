@@ -12,7 +12,7 @@ model Order {
     fields {
         orderDate Timestamp 
         deliveryDate Timestamp?
-        leadTime Duration? @computed(computedDuration.deliveryDate - computedDuration.orderDate)
+        leadTime Duration? @computed(order.deliveryDate - order.orderDate)
     }
 }
 ```
@@ -34,7 +34,7 @@ model Order {
 Searching records by computed fields
 ===
 
-Computed field values can now also be search upon with the `list` action, as shown below.
+Computed field values can now also be searched upon with the `list` action, as shown below.
 
 ```keel
 model Order {
