@@ -2,8 +2,7 @@
 
 This release includes the following minor improvements to [computed fields](/models#computed-fields). 
 
-Negation of timestamps
-===
+## Negation of timestamps
 
 A `Timestamp` less a `Timestamp` can be computed into a `Duration`, as shown below.
 
@@ -17,8 +16,7 @@ model Order {
 }
 ```
 
-Enum literals
-===
+## Enum literals
 
 We now support the use of enum literals in computed field expressions.
 
@@ -31,8 +29,7 @@ model Order {
 }
 ```
 
-Searching records by computed fields
-===
+## Searching records by computed fields
 
 Computed field values can now also be searched upon with the `list` action, as shown below.
 
