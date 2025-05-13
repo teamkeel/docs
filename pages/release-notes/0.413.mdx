@@ -1,0 +1,50 @@
+# 13 May, 2025
+
+This release includes the following minor improvements to [computed fields](/models#computed-fields). 
+
+Negation of timestamps
+===
+
+A `Timestamp` less a `Timestamp` can be computed into a `Duration`, as shown below.
+
+```keel
+model Order {
+    fields {
+        orderDate Timestamp 
+        deliveryDate Timestamp?
+        leadTime Duration? @computed(computedDuration.deliveryDate - computedDuration.orderDate)
+    }
+}
+```
+
+Enum literals
+===
+
+We now support the use of enum literals in computed field expressions.
+
+```keel
+model Order {
+    fields {
+        orderStatus OrderStatus
+        isComplete Boolean @computed(order.orderStatus == OrderStatus.DELIVERED)
+    }
+}
+```
+
+Searching records by computed fields
+===
+
+Computed field values can now also be search upon with the `list` action, as shown below.
+
+```keel
+model Order {
+    actions {
+        list listOrders(orderStatus, leadTime)
+    }
+}
+```
+
+
+For any issues or feedback, please visit the support channel on our [community discord](https://keel.so/discord) or contact us at [help@keel.so](mailto:help@keel.so).
+
+Thank you for using Keel!
