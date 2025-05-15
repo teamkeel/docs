@@ -1,3 +1,5 @@
+/* We don't have control over the theme so this file is one big CSS hack */
+
 html,
 body {
   font-size: 15px;
@@ -19,7 +21,7 @@ body {
   --border-tint: rgba(20, 9, 0, 0.06);
 
   --faint: rgba(20, 9, 0, 0.25);
-  --text-pale: rgba(20, 9, 0, 0.5);
+  --text-pale: rgba(20, 9, 0, 0.6);
   --text-content: rgba(20, 9, 0, 0.8);
   --text-mid: rgba(20, 9, 0, 0.75);
   --text-dark: rgba(20, 9, 0, 0.85);
@@ -90,13 +92,26 @@ nav {
   letter-spacing: -0.000204901px;
 }
 
+:is([dir="ltr"] .ltr\:nx-pl-3) {
+  padding-left: 0.5rem;
+}
+
+:is([dir="ltr"] .ltr\:nx-ml-3) {
+  margin-left: 0.5rem;
+}
+
+/* Force lowercase for ui elements */
+a[href="/flows/ui"] + div a {
+  text-transform: lowercase;
+}
+
 body {
   width: 100%;
   --tw-bg-opacity: 1;
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 
   background: var(--background);
-  font-size: 14px;
+  font-size: 14.5px;
 }
 
 .aspect-video {
@@ -173,8 +188,16 @@ h3 {
 }
 
 h4 {
-  font-weight: 500 !important;
-  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+}
+
+h4 + p {
+  margin-top: 0.5rem !important;
+}
+
+h3 + p {
+  margin-top: 0.5rem !important;
 }
 
 b,
