@@ -135,6 +135,10 @@ body {
   }
 }
 
+.prop + p.nx-mt-6 {
+  margin-top: 0rem !important;
+}
+
 /*  */
 
 .nx-bg-white {
@@ -235,6 +239,11 @@ code.nx-rounded-md {
   line-height: 1.2rem;
 }
 
+.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New,
+    monospace;
+}
+
 :focus-visible {
   /* --tw-ring-shadow: none !important; */
   --tw-ring-offset-color: var(--brand-green) !important;
@@ -294,6 +303,14 @@ code.nx-rounded-md {
 .nextra-sidebar-container button svg,
 .nextra-breadcrumb svg {
   color: var(--faint);
+}
+
+/* Horribly hacky targetting to not cut off the focus states with overflow */
+.nextra-sidebar-container > div.nextra-scrollbar div.nx-overflow-hidden {
+  padding: 0 3px;
+}
+.nextra-sidebar-container > div.nextra-scrollbar {
+  padding: 10px;
 }
 
 .nx-bg-primary-50 {
