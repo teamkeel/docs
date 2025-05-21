@@ -82,6 +82,9 @@
       "breadcrumb": false
     }
   },
+  "flows": {
+    "title": "Flows"
+  },
   "-- Reference": {
     "title": "Reference",
     "type": "separator"
