@@ -1,0 +1,64 @@
+# Select one
+
+A single-select dropdown or radio group input. Supports strings, numbers, booleans, or dates as option values.
+
+```ts
+ctx.ui.select.one("name", config);
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+import InputProps from "@components/defaultInputProps.mdx";
+
+<InputProps />
+
+<PropDefinition
+  data={{
+    field: "defaultValue",
+    type: "string | number | boolean | Date",
+  }}
+/>
+The default selected value.
+
+<PropDefinition
+  data={{
+    field: "options",
+    type: `({ label: string; value: string | number | boolean | Date } | string | number | boolean | Date)[]`,
+  }}
+/>
+The list of selectable options. Each option can be a primitive (`string`, `number`, `boolean`, or `Date`),
+or an object with `label` and `value` fields. If only a primitive is provided, it will be used as both
+the value and label.
+
+## Usage
+
+Elements are rendered by adding them to a `page`. A page that contains input elements will return an object with keys matching the `name` of each input.
+
+```ts
+const result = await ctx.ui.page({
+  title: "Select one input",
+  content: [
+    ctx.ui.select.one("favoriteFruit", {
+      label: "Favorite fruit",
+      options: ["Apple", "Banana", "Mango"],
+    }),
+    ctx.ui.select.one("userRole", {
+      label: "User role",
+      options: [
+        { label: "Administrator", value: "admin" },
+        { label: "Editor", value: "editor" },
+        { label: "Viewer", value: "viewer" },
+      ],
+      defaultValue: "editor",
+    }),
+  ],
+});
+
+console.log(result.favoriteFruit);
+console.log(result.userRole);
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="selectOne" height={300} />
