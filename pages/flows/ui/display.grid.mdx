@@ -1,0 +1,98 @@
+# Grid
+
+Displays data in a grid layout.
+
+```ts
+ctx.ui.display.grid(config);
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "data",
+    type: "T[]",
+    required: true,
+    border: false,
+  }}
+/>
+An array of data to display in the grid.
+
+<PropDefinition
+  data={{
+    field: "render",
+    type: "(data: T) => GridItem",
+    required: true,
+  }}
+/>
+
+A function that takes a row from the `data` array and returns a `GridItem`.
+
+```ts
+render: (item: T) => {
+  title?: string;
+  description?: string;
+  image?: {
+    // a URL to the image
+    url?: string
+    // the image alt tag
+    alt?: string
+    // the image aspect ratio, e.g. `1` or `16 / 9`, defaults to 16 / 9.
+    aspectRatio?: number
+    // whether the image should be resized to fill its container or
+    // be cropped to fit, defaults to 'cover'.
+    fit?: 'cover' | 'contain'
+  }
+}
+```
+
+## Usage
+
+```ts
+await ctx.ui.page({
+  title: "Grid",
+  content: [
+    ctx.ui.display.grid({
+      data: [
+        {
+          title: "AI in Healthcare",
+          description:
+            "How artificial intelligence is revolutionizing medical diagnosis and patient care through advanced imaging analysis and predictive modeling.",
+          image: "https://picsum.photos/id/287/300/600",
+        },
+        {
+          title: "Sustainable Cities",
+          description:
+            "Exploring innovative urban designs that combine green architecture, renewable energy, and smart transportation systems for a carbon-neutral future.",
+          image: "https://picsum.photos/id/26/300/600",
+        },
+        {
+          title: "Deep Ocean Discoveries",
+          description:
+            "Recent findings from deep-sea expeditions revealing previously unknown species and underwater ecosystems in the hadal zones.",
+          image: "https://picsum.photos/id/134/300/600",
+        },
+        {
+          title: "Space Tourism",
+          description:
+            "The rise of commercial space travel and how private companies are making orbital vacations a reality for civilian astronauts.",
+          image: "https://picsum.photos/id/41/300/600",
+        },
+      ],
+      renderItem: (row) => ({
+        label: row.title,
+        description: row.description,
+        image: {
+          url: row.image,
+        },
+      }),
+    });
+  ]
+})
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="grid" />

@@ -1,0 +1,8 @@
+{
+  "[mdx]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "prettier.documentSelectors": ["**/*.mdx"],
+  "prettier.printWidth": 100
+}
