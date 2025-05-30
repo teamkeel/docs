@@ -33,14 +33,14 @@ the value and label.
 
 ## Usage
 
-Elements are rendered by adding them to a `page`. A page that contains input elements will return an object with keys matching the `name` of each input.
+Elements are rendered by adding them to a `page`. A page that contains select elements will return an object with keys matching the `name` of each input.
 
 ```ts
 const result = await ctx.ui.page({
   title: "Select one input",
   content: [
-    ctx.ui.select.one("favoriteFruit", {
-      label: "Favorite fruit",
+    ctx.ui.select.one("favouriteFruit", {
+      label: "Favourite fruit",
       options: ["Apple", "Banana", "Mango"],
     }),
     ctx.ui.select.one("userRole", {
@@ -55,7 +55,7 @@ const result = await ctx.ui.page({
   ],
 });
 
-console.log(result.favoriteFruit);
+console.log(result.favouriteFruit);
 console.log(result.userRole);
 ```
 
