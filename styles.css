@@ -67,7 +67,7 @@ nav {
   font-weight: 500;
   font-size: 13px;
   letter-spacing: 0em !important;
-  color: rgba(6, 5, 0, 0.89) !important;
+  /* color: rgba(6, 5, 0, 0.89) !important; */
   padding-top: 0.3rem;
   padding-bottom: 0.3rem;
 }
@@ -88,7 +88,7 @@ nav {
   font-weight: 600;
   font-size: 12px;
   letter-spacing: 0em !important;
-  color: rgba(12, 12, 0, 0.52) !important;
+  /* color: rgba(12, 12, 0, 0.52) !important; */
   letter-spacing: -0.000204901px;
 }
 
