@@ -1,1 +1,147 @@
 # Function steps
+
+## Step name
+
+Each function step must have a unique name within its flow. This name serves as the identifier for the step and is used as the key for persisting the step's data. If a step with the same name is encountered again, the flow will use the previously persisted data instead of executing the step again.
+
+```ts
+export default MyFlow({}, async (ctx, inputs) => {
+    // This step will execute and persist its data
+    const result1 = await ctx.step("process data", async () => {
+        return { value: 42 };
+    });
+
+    // This step will execute and persist its data
+    const result2 = await ctx.step("validate result", async () => {
+        return { isValid: true };
+    });
+
+    // This step will NOT execute again - it will return the persisted data from the first "process data" step
+    const result3 = await ctx.step("process data", async () => {
+        return { value: 100 }; // This code will never run
+    });
+
+    // result1 and result3 will be the same object: { value: 42 }
+});
+```
+
+## Step data
+
+Function steps are designed to return data that can be used throughout your flow. The data returned from a function step is automatically persisted and can be accessed in subsequent steps or in the flow's body. This data persistence is a key feature that enables flows to maintain state across multiple executions.
+
+For example, if you need to process data from an external API and use it in multiple places:
+
+```ts
+// First step: Fetch and process data
+const processedData = await ctx.step("process data", async () => {
+    const rawData = await fetchExternalData();
+    return transformData(rawData);
+});
+
+// Later in the flow: Use the processed data
+if (processedData.status === "ready") {
+    await ctx.step("handle ready data", async () => {
+        // The processed data is available here
+        await saveToDatabase(processedData);
+    });
+}
+```
+
+The data returned from function steps is automatically persisted, which means:
+- It's available even if the flow is interrupted and restarted
+- It can be used to make decisions in the flow's body
+- It's preserved between flow executions
+- It can be used to resume the flow from where it left off
+
+## Durable execution
+
+Flows allow you to code in a durable way through the use of *functions*, which are designed to handle errors gracefully and to perform retry attempts on your code. This is very useful as it means your flow does not need to become victim to intermittent downtime experienced on services out of your control.
+
+Durable functions are particularly important for several reasons:
+
+1. **Idempotency**: Each function step is guaranteed to execute at most once, even if the flow is interrupted and restarted. This is crucial for operations that must not be repeated, such as processing payments or sending notifications.
+
+2. **Resilience**: Functions automatically handle transient failures through retries, making your flows more robust against temporary issues like network glitches or service unavailability.
+
+3. **State Management**: The results of function steps are automatically persisted, allowing flows to resume from where they left off if interrupted. This eliminates the need for manual state tracking.
+
+4. **Consistency**: By ensuring each step runs exactly once and its results are preserved, durable functions help maintain data consistency across your application.
+
+In the example below, we are querying an open source map API, Nominatim, to get a list of matching delivery addresses. It's possible that requests to this API might timeout. This could be due to intermittent network issues or even rate limiting. By wrapping this service call in a function, we can be a lot more certain that it won't fail due to transient errors.
+
+```ts
+import { DispatchOrder, models, OrderStatus, DeliveryStatus } from "@teamkeel/sdk";
+
+export default DispatchOrder({}, async (ctx, inputs) => {
+    // Retrieve the order and validate that it can be dispatched.
+    const order = await models.order.findOne({ id: inputs.orderId});
+    if (order.status != DeliveryStatus.New) {
+        return new Error("order has already been dispatched or delivered"); 
+    }
+
+    // Using the order address, lookup all physical address that match it.
+    const matches = await ctx.step(`find addresses`, async () => {
+        return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(order.address)}`).then(res => res.json());
+    });
+
+    // Continue executing the flow...
+});
+```
+
+Further to being resilient, functions are guaranteed to successfully run to completion at most once, even if the flow itself needs to run multiple times (more on this in the [flow lifecycle](/flows/writing-flows#flow-lifecycle)). You can therefore encapsulate an important once-off operation, such as performing a payment, in a function knowing that it will never be executed twice. See the example below where we call on Stripe's API to perform a refund back to a customer.
+
+```ts
+import { ProcessRefund, models, PaymentStatus } from "@teamkeel/sdk";
+
+export default ProcessRefund({}, async (ctx, inputs) => {
+    // Retrieve the order and validate that it can be refunded.
+    const order = await models.order.findOne({ id: inputs.orderId });
+    if (order.status != PaymentStatus.Completed) {
+        return new Error("order must be completed before refunding"); 
+    }
+
+    // Process the refund through Stripe only once.
+    const refund = await ctx.step(`process refund`, async () => {
+        const stripe = require('stripe')(ctx.env.STRIPE_SECRET_KEY);
+        return stripe.refunds.create({
+            payment_intent: order.stripePaymentIntentId,
+            amount: inputs.refundAmount * 100, // Convert to cents
+            reason: inputs.refundReason || 'requested_by_customer'
+        });
+    });
+
+    // Continue executing the flow...
+});
+```
+
+## Retry logic
+
+If an exception is thrown or a step times out, it will be retried four more times. Therefore a step has five attempts in which to run successfully by default. However, this can be configured as shown below. This retry mechanism is particularly useful for handling transient errors from external services or temporary network issues.
+
+```ts
+  await ctx.step(
+    "some step", 
+    { maxRetries: 3 }, 
+    async () => {
+      // step logic
+    }
+  );
+```
+
+## Execution timeout
+
+The default maximum execution timeout for a function step is sixty seconds. This means that each step execution can run for 60s before it errors. If there are retry attempts available, then the step will execute again. This timeout is separate from the overall [flow execution duration](/flows/writing-flows#duration-of-execution).
+
+This can be configured as shown below.
+
+```ts
+  await ctx.step(
+    "some step", 
+    { timeoutInMs: 10000 }, 
+    async () => {
+      // step logic
+    }
+  );
+```
+
+For more information about building robust flows with function steps, check out our [best practices](/flows/best-practices) guide.

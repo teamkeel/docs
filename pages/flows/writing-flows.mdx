@@ -1,0 +1,150 @@
+# Writing flows
+
+The [introduction page](/flows) demonstrates how to write a simple flow with a function step, a UI step, and some logic in between. Here, we dig into a bit more details about the important mechanics of how flows execute.
+
+## Flow inputs
+
+A flow can be defined to accept inputs at start, whether optional or required. Flows support all of the standard Keel types. These inputs are available throughout the flow's execution and can be used to make decisions or pass data between steps.
+
+For example, a flow that processes an order might accept inputs like:
+
+```ts
+export default ProcessOrder({
+    orderId: string;      // Required: The ID of the order to process
+    priority?: boolean;   // Optional: Whether this is a priority order
+    notes?: string;       // Optional: Additional processing notes
+}, async (ctx, inputs) => {
+    // The inputs are available throughout the flow
+    const order = await models.order.findOne({ id: inputs.orderId });
+    
+    if (inputs.priority) {
+        // Handle priority orders differently
+        await ctx.step("expedite processing", async () => {
+            // Priority processing logic
+        });
+    }
+    
+    // Continue with normal processing...
+});
+```
+
+## Flow steps
+
+A flow is made up of a *body* and zero or many *steps*. A step can either be a [function step](/flows/functions) or a [UI step](/flows/ui). Function steps execute logic and UI steps wait on users for input. The body of the flow contains the logic that connects these steps together and makes decisions based on their results.
+
+Here's an example of a flow that combines both types of steps:
+
+```ts
+export default OrderApproval({}, async (ctx, inputs) => {
+    // Function step: Validate the order
+    const validation = await ctx.step("validate order", async () => {
+        const order = await models.order.findOne({ id: inputs.orderId });
+        return {
+            isValid: order.total > 0,
+            requiresApproval: order.total > 1000
+        };
+    });
+
+    // Body logic: Make decisions based on validation
+    if (!validation.isValid) {
+        return new Error("Invalid order");
+    }
+
+    if (validation.requiresApproval) {
+        // UI step: Get manager approval
+        const approval = await ctx.ui.page({
+            title: "Order Approval Required",
+            content: [
+                ctx.ui.display.text(`Order ${inputs.orderId} requires approval`),
+                ctx.ui.input.button("approve", { label: "Approve Order" }),
+                ctx.ui.input.button("reject", { label: "Reject Order" })
+            ]
+        });
+
+        if (approval.reject) {
+            return new Error("Order rejected by manager");
+        }
+    }
+
+    // Function step: Process the approved order
+    await ctx.step("process order", async () => {
+        // Order processing logic
+    });
+});
+```
+
+## Flow lifecycle
+
+It's important to know that a single instance of a flow can actually be executed many times. However, each step can only ever be executed a single time. Once a step has been executed, the returned data will be persisted. If the instance of the flow happens to execute again, then the resulting data from a previously executed step will be returned instead of the step executing again.
+
+You may be wondering why a flow body might be executed multiple times? This is intentional, and it happens whenever a new function or UI step is encountered; the entire flow will execute from the top all the way until that step and including that step, and then it will exit and start again from the beginning (assuming it didn't reach the end of the flow). Because a step may take some time to complete (for example, a UI step needs to wait on a user's input), with this knowledge you can design your flow in such a way that it is always dealing with fresh and relevant data.
+
+For example, consider a flow that processes an order and then waits for shipping confirmation:
+
+```ts
+export default OrderProcessing({}, async (ctx, inputs) => {
+    // This step will only run once, even if the flow restarts
+    const order = await ctx.step("process order", async () => {
+        // Process the order
+        return { status: "processed", trackingNumber: "123456" };
+    });
+
+    // The flow will restart here, but the order processing step won't run again
+    const shippingStatus = await ctx.step("check shipping", async () => {
+        // Check shipping status
+        return { delivered: false, estimatedDelivery: "2024-03-20" };
+    });
+
+    if (!shippingStatus.delivered) {
+        // UI step: Show shipping status to user
+        await ctx.ui.page({
+            title: "Shipping Status",
+            content: [
+                ctx.ui.display.text(`Estimated delivery: ${shippingStatus.estimatedDelivery}`),
+                ctx.ui.input.button("refresh", { label: "Refresh Status" })
+            ]
+        });
+        
+        // Flow will restart from the beginning, but previous steps won't re-run
+    }
+});
+```
+
+## Failures
+
+If an exception is thrown in the body of a flow, then the entire flow will stop and its status will be set to `FAILED`. This is different from function step failures, which will trigger retry attempts as described in the [function steps documentation](/flows/functions#retry-logic).
+
+For example:
+
+```ts
+export default RiskyOperation({}, async (ctx, inputs) => {
+    try {
+        // This might fail, but the function step will retry
+        const result = await ctx.step("risky operation", async () => {
+            return await externalService.doSomething();
+        });
+
+        // This failure in the flow body will stop the entire flow
+        if (!result.isValid) {
+            throw new Error("Invalid result");
+        }
+    } catch (error) {
+        // Handle flow-level errors
+        await models.auditLog.create({
+            type: "FLOW_FAILURE",
+            error: error.message
+        });
+        throw error; // Re-throw to mark flow as failed
+    }
+});
+```
+
+## Duration of execution
+
+Executing a flow has a duration threshold of 15 minutes. However, this can be easily misunderstood. Because a flow is re-executed from the beginning for each step encountered and because each function step's logic is actually executed in independent flow executions, the total runtime of a flow has no real limit. This means you can build flows that take days or weeks to complete, as long as each individual step execution stays within its timeout limits.
+
+## Concurrency
+
+At present we do not support running steps concurrently, so please use `async` when calling on steps, i.e. when `async ctx.step` or `async ctx.page`. This ensures that steps are executed in the correct sequence and that their results are properly handled.
+
+For more information about building robust flows, check out our [best practices](/flows/best-practices) guide.
