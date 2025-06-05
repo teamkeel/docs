@@ -1,12 +1,76 @@
+import { Callout } from "@core/callout"
+
 # Writing flows
 
-The [introduction page](/flows) demonstrates how to write a simple flow with a function step, a UI step, and some logic in between. Here, we dig into a bit more details about the important mechanics of how flows execute.
+The [introduction page](/flows) demonstrated how to write a simple flow with a function step, a UI step, and some logic in between. Let us now dig into a bit more details about the important mechanics of how flows execute.
 
-## Flow inputs
+## Flow architecture
 
-A flow can be defined to accept inputs at start, whether optional or required. Flows support all of the standard Keel types. These inputs are available throughout each of the flow's execution runs.
+A flow is made up of the following discernable parts:
 
-For example, a flow that processes an order might be defined in the schema as follows:
+ - **Inputs:** Values passed into the body of the flow implementation
+ - **Body:** The implementation of the flow in TypeScript, containing code and any number of steps
+ - **Steps:** Durable units of work defined in TypeScript
+
+A step can either a:
+
+ - **Function step:** Executes background logic which needs to run in a durable way
+ - **UI step:** Presents interfaces to a user and waits on them for input
+
+As mentioned, a flow's body can be made up of some code and any number of *steps*.  In fact, if you don't have code which is needed to execute in a durable way and if you don't require any user input, then steps aren't necessary and your flow body itself can contain all the code logic.
+
+## Flow lifecycle
+
+It's important to know that a single instance of a flow can actually be executed many times. However, each step in the flow's body can only ever be successfully executed a single time. Once a step has successfully executed, the data it returns data will be persisted. When the instance of the flow happens to execute again, andf that same step is re-encountered, then its previously returned data will be substituted in place of the step executing again. This behaviour applies to both function and UI steps.
+
+You may be wondering why a flow body might be executed multiple times? This is intentional, and it happens whenever a new function or UI step is encountered; the entire flow will execute from the top all the way until that encountered step and including that step, and then it will exit the flow and start again from the beginning (assuming it didn't reach the end of the flow). A step may take some time to complete (for example, a UI step needs to wait on user input), so with this knowledge you can design your flow in such a way that it is always dealing with fresh and relevant data.
+
+For example, consider this flow that confirms the delivery address of an order and then dispatches it to the courier company:
+
+```ts
+export default DispatchOrder({}, async (ctx, inputs) => {
+    // This will execute with every pass of the flow because we always want to get the latest data.
+    const order = await models.order.findOne({ id: inputs.orderId });
+    if (order.status == OrderStatus.Shipped) {
+        throw new Error("order has already been shipped");
+    }
+
+    // Present the order address to the user for correcting. This must only ever happen once.
+    const { address } = await ctx.ui.page("confirm address", {
+        title: "Address confirmation",
+        stage: "selectOrder",
+        description: "Please update the delivery address where necessary",
+        content: [
+            ctx.ui.input.text("address", {
+                label: "Select order",
+                optional: false,
+                placeholder: order.deliveryAddress,
+            }),
+        ],
+    });
+
+    // Submit this order to the courier company and retrieve the tracking number. This must only ever happen once.
+    const trackingNumber = await ctx.step("submit to courier", async () => {
+        return submitToCourier(order);
+    });
+
+    // Now update the order accordingly.
+    await models.order.update(
+        { id: inputs.orderId },
+        { 
+            trackingNumber: trackingNumber,
+            deliveryAddress: address,
+            status: DeliveryStatus.Shipped
+        }
+    );
+});
+```
+
+## Inputs
+
+A flow can be defined to accept inputs. Flows support all of the standard Keel types and the inputs can be defined as optional or required. These inputs are captured once, right when a new instance of a flow is started, and are then passed to your flow implementation as arguments.
+
+For example, a flow that processes an order might be defined in the schema as follows.
 
 ```keel
 flow ProcessOrder {
@@ -17,6 +81,8 @@ flow ProcessOrder {
   @permission(roles: [Manager])
 }
 ```
+
+These values are captured when starting and flow, and are passed to the body of the flow in `inputs`.
 
 ```ts
 export default ProcessOrder({}, async (ctx, inputs) => {
@@ -31,33 +97,23 @@ export default ProcessOrder({}, async (ctx, inputs) => {
 });
 ```
 
-## Flow steps
+<Callout >
+  After defining your flow in the schema, running `keel generate` at the root of your project will scaffold out your new flow in the `/flows` directory.
+</Callout>
 
-A flow is made up of a *body* and zero or many *steps*. A step can either be a [function step](/flows/functions) or a [UI step](/flows/ui). Function steps execute logic and UI steps wait on users for input. The body of the flow contains the logic that connects these steps together and makes decisions based on their results.
+## Flow context
 
-Here's an example of a flow that combines both types of steps:
+As already demonstrated, the `ctx` argument passed into the flow body is used to define function and UI steps, but it also passes in other useful information to the flow, as highlighted in the table below.
 
-```ts
-export default OrderApproval({}, async (ctx, inputs) => {
-   // todo example
-});
-```
+| Property | Description | Example |
+| :------- | :========== | :====== |
+| `step` | Defines a function step | `await ctx.step("my step", async () => { ... }`); |
+| `page` | Defines a UI step | `await ctx.page({ ... }); |
+| `identity` | The identity executing the flow | `ctx.identity.email` |
+| `env` | Your [environment variables](/envvars) | `ctx.env.STRIPE_CUSTOMER_ID` |
+| `secrets` | Your [environment secrets](/secrets) | `ctx.secrets.STRIPE_API_KEY` |
 
-## Flow lifecycle
-
-It's important to know that a single instance of a flow can actually be executed many times. However, each step can only ever be executed a single time. Once a step has been executed, the returned data will be persisted. If the instance of the flow happens to execute again, then the resulting data from a previously executed step will be returned instead of the step executing again.
-
-You may be wondering why a flow body might be executed multiple times? This is intentional, and it happens whenever a new function or UI step is encountered; the entire flow will execute from the top all the way until that step and including that step, and then it will exit and start again from the beginning (assuming it didn't reach the end of the flow). Because a step may take some time to complete (for example, a UI step needs to wait on a user's input), with this knowledge you can design your flow in such a way that it is always dealing with fresh and relevant data.
-
-For example, consider a flow that processes an order and then waits for shipping confirmation:
-
-```ts
-export default OrderProcessing({}, async (ctx, inputs) => {
-    // todo example
-});
-```
-
-## Flow stages
+## Stages
 
 TODO
 

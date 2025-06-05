@@ -4,26 +4,7 @@
 
 Each function step must have a unique name within its flow. This name serves as the identifier for the step and is used as the key for persisting the step's data. If a step with the same name is encountered again, the flow will use the previously persisted data instead of executing the step again.
 
-```ts
-export default MyFlow({}, async (ctx, inputs) => {
-    // This step will execute and persist its data
-    const result1 = await ctx.step("process data", async () => {
-        return { value: 42 };
-    });
-
-    // This step will execute and persist its data
-    const result2 = await ctx.step("validate result", async () => {
-        return { isValid: true };
-    });
-
-    // This step will NOT execute again - it will return the persisted data from the first "process data" step
-    const result3 = await ctx.step("process data", async () => {
-        return { value: 100 }; // This code will never run
-    });
-
-    // result1 and result3 will be the same object: { value: 42 }
-});
-```
+//todo more
 
 ## Step data
 
@@ -70,8 +51,6 @@ Durable functions are particularly important for several reasons:
 In the example below, we are querying an open source map API, Nominatim, to get a list of matching delivery addresses. It's possible that requests to this API might timeout. This could be due to intermittent network issues or even rate limiting. By wrapping this service call in a function, we can be a lot more certain that it won't fail due to transient errors.
 
 ```ts
-import { DispatchOrder, models, OrderStatus, DeliveryStatus } from "@teamkeel/sdk";
-
 export default DispatchOrder({}, async (ctx, inputs) => {
     // Retrieve the order and validate that it can be dispatched.
     const order = await models.order.findOne({ id: inputs.orderId});
