@@ -1,0 +1,82 @@
+# List
+
+Displays a list of items with optional titles, descriptions, and images. This is useful for summarizing objects, search results, or previews in a structured format.
+
+```ts
+ctx.ui.display.list({ data, render });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "data",
+    type: "T[]",
+  }}
+/>
+An array of data items to display. Each item will be passed to the `render` function.
+
+<PropDefinition
+  data={{
+    field: "render",
+    type: "(data: any) => { title?: string; description?: string; image?: { url: string; alt?: string; fit?: 'cover' | 'contain' } }",
+  }}
+/>
+A function that receives each data item and returns a display configuration for the list item.
+
+## List item properties
+
+Each object returned from `render` can include the following fields:
+
+<PropDefinition
+  data={{
+    field: "title",
+    type: "string",
+  }}
+/>
+Optional title to display for the item.
+
+<PropDefinition
+  data={{
+    field: "description",
+    type: "string",
+  }}
+/>
+Optional description text for the item.
+
+<PropDefinition
+  data={{
+    field: "image",
+    type: `{ url: string; alt?: string; fit?: "cover" | "contain" }`,
+  }}
+/>
+Optional image to display alongside the item. `fit` controls how the image is resized within its container.
+
+## Usage
+
+Lists are useful for visualizing collections of structured data, such as search results, product listings, or summaries.
+
+```ts
+ctx.ui.page({
+  title: "List example",
+  content: [
+    ctx.ui.display.list({
+      data: [
+        { name: "Apple", info: "Red fruit", img: "/apple.png" },
+        { name: "Banana", info: "Yellow fruit", img: "/banana.png" },
+      ],
+      render: (item) => ({
+        title: item.name,
+        description: item.info,
+        image: { url: item.img, alt: item.name, fit: "contain" },
+      }),
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="list" height={300} />

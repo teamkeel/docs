@@ -1,0 +1,44 @@
+# Markdown
+
+Displays custom content using Markdown syntax. Useful for adding formatted text, links, headings, lists, and more to a UI page.
+
+```ts
+ctx.ui.display.markdown({ content });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "content",
+    type: "string",
+  }}
+/>
+The Markdown string to render. Supports GitHub-flavored Markdown (GFM), including **bold**, _italic_,
+`code`, lists, links, headings, and more.
+
+## Usage
+
+Markdown elements can be used to provide context, descriptions, or instructions between input or display components.
+
+```ts
+ctx.ui.page({
+  title: "Markdown example",
+  content: [
+    ctx.ui.display.markdown({
+      content: `
+### Welcome to the form
+
+Please fill out the information below. If you have any questions, contact [support](mailto:support@keel.so).
+`,
+    }),
+    ctx.ui.input.text("name", { label: "Your name" }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="markdown" height={300} />
