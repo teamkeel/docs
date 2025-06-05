@@ -108,16 +108,12 @@ export default ProcessOrder({}, async (ctx, inputs) => {
 As already demonstrated, the `ctx` argument passed into the flow body is used to define function and UI steps, but it also passes in other useful information to the flow, as highlighted in the table below.
 
 | Property | Description | Example |
-|----------|-------------|---------|
+|:---------|:------------|:--------|
 | `step` | Defines a function step | `await ctx.step("my step", async () => { ... });` |
 | `page` | Defines a UI step | `await ctx.page({ ... });` |
 | `identity` | The identity executing the flow | `ctx.identity.email` |
 | `env` | Your [environment variables](/envvars) | `ctx.env.STRIPE_CUSTOMER_ID` |
 | `secrets` | Your [environment secrets](/secrets) | `ctx.secrets.STRIPE_API_KEY` |
-
-## Stages
-
-TODO
 
 ## Failures
 
