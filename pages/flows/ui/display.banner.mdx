@@ -1,0 +1,63 @@
+# Banner
+
+Displays an attention-grabbing message with a title and description. Useful for showing status messages, alerts, or contextual information.
+
+```ts
+ctx.ui.display.banner({ title, description, mode });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "title",
+    type: "string",
+  }}
+/>
+The main heading of the banner.
+
+<PropDefinition
+  data={{
+    field: "description",
+    type: "string",
+  }}
+/>
+Additional text providing more context or explanation.
+
+<PropDefinition
+  data={{
+    field: "mode",
+    type: `"info" | "warning" | "error" | "success"`,
+    default: `"info"`,
+  }}
+/>
+
+Controls the visual style of the banner. Use:
+
+- `"info"` for neutral messages
+- `"warning"` for cautionary alerts
+- `"error"` for critical issues
+- `"success"` for confirmation or success messages
+
+## Usage
+
+Use banners to communicate important messages clearly and consistently.
+
+```ts
+ctx.ui.page({
+  title: "Account Status",
+  content: [
+    ctx.ui.display.banner({
+      title: "Upgrade Required",
+      description: "Your current plan does not support this feature.",
+      mode: "warning",
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="banner" height={300} />

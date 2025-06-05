@@ -1,0 +1,65 @@
+# Image
+
+Displays an image with optional sizing, alt text, and a caption.
+
+```ts
+ctx.ui.display.image({ url, alt, size, caption });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "url",
+    type: "string",
+  }}
+/>
+The URL of the image to display.
+
+<PropDefinition
+  data={{
+    field: "alt",
+    type: "string",
+  }}
+/>
+Alternative text for the image, used for accessibility and in case the image fails to load.
+
+<PropDefinition
+  data={{
+    field: "size",
+    type: `"thumbnail" | "small" | "medium" | "large" | "full"`,
+  }}
+/>
+Optional size preset to control the image’s display size. Defaults to natural size if not specified.
+
+<PropDefinition
+  data={{
+    field: "caption",
+    type: "string",
+  }}
+/>
+Optional caption to display below the image.
+
+## Usage
+
+Use image elements to visually enhance pages with diagrams, photos, or illustrations.
+
+```ts
+ctx.ui.page({
+  title: "Image example",
+  content: [
+    ctx.ui.display.image({
+      url: "https://example.com/chart.png",
+      alt: "Chart showing sales trends",
+      size: "medium",
+      caption: "Sales trends over the past 6 months",
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="image" height={300} />

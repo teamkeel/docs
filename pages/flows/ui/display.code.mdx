@@ -1,0 +1,48 @@
+# Code
+
+Displays a syntax-highlighted code block. Useful for showing examples, logs, or output from scripts.
+
+```ts
+ctx.ui.display.code({ code, language });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "code",
+    type: "string",
+  }}
+/>
+The code content to display.
+
+<PropDefinition
+  data={{
+    field: "language",
+    type: "string",
+  }}
+/>
+The programming language used for syntax highlighting (e.g., `"javascript"`, `"python"`, `"json"`). Optional—defaults
+to plain text if not provided.
+
+## Usage
+
+Use code blocks to display read-only code or structured output on a page.
+
+```ts
+ctx.ui.page({
+  title: "API Example",
+  content: [
+    ctx.ui.display.code({
+      code: `console.log('Hello, world!');`,
+      language: "typescript",
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="code" height={300} />
