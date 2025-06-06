@@ -123,6 +123,6 @@ Flow execution has a 15-minute threshold per step. Since steps execute independe
 
 ## Concurrency
 
-Steps must execute sequentially. Use `async` when calling steps (`async ctx.step` or `async ctx.page`) to ensure proper execution order and result handling. We do not support concurrent execution yet.
+Steps must execute sequentially. Use `await` when calling steps (`await ctx.step` or `await ctx.page`) to ensure proper execution order and result handling. We do not support concurrent execution yet.
 
 For more information, see our [best practices](/flows/best-practices) guide.
