@@ -1,0 +1,52 @@
+# Table
+
+A read-only table for displaying structured data.
+
+```ts
+ctx.ui.display.table({ data, columns });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "data",
+    type: " T[]",
+  }}
+/>
+An array of objects representing the rows of the table. Each object's keys will be used as column names
+unless `columns` is specified.
+
+<PropDefinition
+  data={{
+    field: "columns",
+    type: "string[]",
+  }}
+/>
+(Optional) An array of keys from the row objects to explicitly define the column order and selection.
+If not provided, all keys from the first row are used in natural order.
+
+## Usage
+
+Tables are display-only elements. They are useful for presenting data summaries, lists, or results. Add them to a `page` like any other element.
+
+```ts
+ctx.ui.page({
+  title: "Data table",
+  content: [
+    ctx.ui.display.table({
+      data: [
+        { name: "Alice", age: 30, country: "USA" },
+        { name: "Bob", age: 25, country: "UK" },
+      ],
+      columns: ["name", "age", "country"], // optional
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="table" height={300} />

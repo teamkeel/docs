@@ -1,0 +1,72 @@
+# Number input
+
+A numeric input field
+
+```ts
+ctx.ui.input.number("name", config);
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+import InputProps from "@components/defaultInputProps.mdx";
+
+<InputProps />
+
+<PropDefinition
+  data={{
+    field: "defaultValue",
+    type: "number",
+  }}
+/>
+The default value of the input.
+
+<PropDefinition
+  data={{
+    field: "placeholder",
+    type: "string",
+  }}
+/>
+The placeholder text of the input.
+
+<PropDefinition
+  data={{
+    field: "min",
+    type: "number",
+  }}
+/>
+The minimum permitted value.
+
+<PropDefinition
+  data={{
+    field: "max",
+    type: "number",
+  }}
+/>
+The maximum permitted value.
+
+## Usage
+
+Elements are rendered by adding them to a `page`. A page that contains input elements will return an object with keys matching the `name` of each input.
+
+```ts
+const result = await ctx.ui.page({
+  title: "Number inputs",
+  content: [
+    ctx.ui.input.number("height"),
+    ctx.ui.input.number("age", {
+      label: "Your age",
+      placeholder: "Enter your age",
+      min: 0,
+      max: 120,
+    }),
+  ],
+});
+
+console.log(result.height);
+console.log(result.age);
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="number" height={300} />

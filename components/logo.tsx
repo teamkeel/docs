@@ -3,7 +3,9 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1596 512" {...props}>
     <defs>
       <style>
-        {"#text{fill:#000}@media (prefers-color-scheme:dark){#text{fill:#fff}}"}
+        {
+          "#text{fill:#000}@media (prefers-color-scheme:dark){#text{fill:#fff}} html[class~='dark'] #text{fill:#fff}"
+        }
       </style>
     </defs>
     <path

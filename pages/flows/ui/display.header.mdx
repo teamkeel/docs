@@ -1,0 +1,60 @@
+# Header
+
+Displays a section heading with an optional description. Useful for organizing pages into clearly labeled sections.
+
+```ts
+ctx.ui.display.header({ level, title, description });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "level",
+    type: "1 | 2 | 3",
+    default: "2",
+  }}
+/>
+The visual level of the header. Affects the font size and visual hierarchy. Level `1` is the largest,
+`3` is the smallest.
+
+<PropDefinition
+  data={{
+    field: "title",
+    type: "string",
+  }}
+/>
+The main title text of the header.
+
+<PropDefinition
+  data={{
+    field: "description",
+    type: "string",
+  }}
+/>
+Optional description text shown below the title, useful for providing context or additional explanation.
+
+## Usage
+
+Use headers to break up long forms or group elements under a common theme.
+
+```ts
+ctx.ui.page({
+  title: "Profile setup",
+  content: [
+    ctx.ui.display.header({
+      level: 1,
+      title: "Basic Information",
+      description: "Tell us about yourself.",
+    }),
+    ctx.ui.input.text("name", { label: "Full name" }),
+    ctx.ui.input.text("email", { label: "Email address" }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="header" height={300} />

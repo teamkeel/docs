@@ -1,0 +1,33 @@
+# Divider
+
+Visually separates sections of a page. Useful for breaking up groups of inputs or display elements.
+
+```ts
+ctx.ui.display.divider();
+```
+
+## Config
+
+This element does not accept any configuration options.
+
+## Usage
+
+Use dividers to add visual structure to complex pages or group related content.
+
+```ts
+ctx.ui.page({
+  title: "Account settings",
+  content: [
+    ctx.ui.input.text("username", { label: "Username" }),
+    ctx.ui.input.text("email", { label: "Email address" }),
+    ctx.ui.display.divider(),
+    ctx.ui.input.boolean("newsletter", {
+      label: "Subscribe to newsletter",
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="divider" height={300} />

@@ -1,0 +1,43 @@
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "name",
+    type: "string",
+    required: true,
+    border: false,
+  }}
+/>
+The name of the input. This will be the key in the result object.
+
+<PropDefinition
+  data={{
+    field: "label",
+    type: "string",
+  }}
+/>
+The label of the input. If this is not provided, the name will be used as the label.
+
+<PropDefinition
+  data={{
+    field: "helpText",
+    type: "string",
+  }}
+/>
+The help text of the input.
+
+<PropDefinition
+  data={{
+    field: "optional",
+    type: "boolean",
+  }}
+/>
+Whether the input is optional. Inputs are required by default.
+
+<PropDefinition
+  data={{
+    field: "disabled",
+    type: "boolean",
+  }}
+/>
+Whether the input is disabled.

@@ -1,0 +1,57 @@
+# Key Value
+
+Displays key-value pairs in a structured format. Ideal for showing object metadata, summaries, or item properties.
+
+```ts
+ctx.ui.display.keyValue({ data, mode });
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "data",
+    type: `{ key: string; value: string | number | Date | boolean; }[]`,
+  }}
+/>
+An array of key-value pairs to display.
+
+<PropDefinition
+  data={{
+    field: "mode",
+    type: `"list" | "grid" | "card"`,
+    default: `"list"`,
+  }}
+/>
+Controls the visual layout of the key-value data:
+
+- `"list"`: vertical stack (default)
+- `"grid"`: compact, multi-column layout
+- `"card"`: card-style container for each entry
+
+## Usage
+
+Use key-value elements for summarizing object fields or simple structured data.
+
+```ts
+ctx.ui.page({
+  title: "User Profile",
+  content: [
+    ctx.ui.display.keyValue({
+      mode: "grid",
+      data: [
+        { key: "Name", value: "Jane Doe" },
+        { key: "Age", value: 32 },
+        { key: "Member since", value: new Date("2020-01-15") },
+        { key: "Active", value: true },
+      ],
+    }),
+  ],
+});
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="keyValue" height={300} />
