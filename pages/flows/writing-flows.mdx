@@ -2,7 +2,7 @@ import { Callout } from "@core/callout"
 
 # Writing flows
 
-The [introduction page](/flows) demonstrated how to write a simple flow with a function step, a UI step, and some logic in between. Let us now dig into a bit more details about the important mechanics of how flows execute.
+The [introduction page](/flows) demonstrated how to write a simple flow with a function step, a UI step, and some logic in between. This page covers the important mechanics of how flows execute.
 
 ## Flow architecture
 
@@ -17,17 +17,15 @@ A step can either be a:
  - **Function step:** Executes background logic in a durable way
  - **UI step:** Presents interfaces to a user and waits on them for input
 
-As mentioned, a flow's body can be made up of some code and any number of steps.  In fact, if you don't have code which is needed to execute in a durable way and if you don't require any user input, then steps aren't necessary and your flow body itself can contain all the code logic needed.  In the next section, we will explain more about a flow's lifecycle and where steps come into play.
+A flow's body can be made up of code and any number of steps. If no durable execution or user input is needed, steps aren't necessary and the flow body can contain all the code logic needed.
 
 ## Flow lifecycle
 
-It's important to know that a single instance of a flow can actually be executed many times. However, each step in the flow's body can only ever be successfully executed a single time.  This might seem unintuitive at first, but is actually important characteristic of flows which make them incredibly resilient.  
+A flow instance can execute multiple times, but each step executes successfully only once. When a step completes, its data persists and returns to the flow body. On subsequent executions, previously returned data substitutes for re-execution.
 
-Once a step has successfully executed, the data it returns will be persisted by the runtime and returned to the body of the flow. When the instance of the flow happens to execute again, and this same step is re-encountered, then that previously returned data will be substituted in place of the step executing again. This behaviour applies to both function and UI steps.
+The flow body executes from the start each time a new step is encountered, continuing until the step completes. This ensures fresh data handling.
 
-You may be wondering why a flow body might be executed multiple times? This is intentional, and it happens whenever a new function or UI step is encountered; the entire flow will execute from the top all the way until that encountered step and including that step, and then it will exit the flow and start again from the beginning of the flow.  This will continue, for each step, until the end of the flow body is reached.  A step may take some time to complete (for example, a UI step needs to wait on user input), so with this knowledge you can design your flow in such a way that it is always dealing with fresh and relevant data.
-
-For example, consider the flow below which confirms the delivery address of an order and then dispatches it to the courier company.
+Example flow for order delivery:
 
 ```ts
 export default DispatchOrder({}, async (ctx, inputs) => {
@@ -121,10 +119,10 @@ If an exception is thrown in the body of a flow, then the entire flow will stop 
 
 ## Duration of execution
 
-Executing a flow has a duration threshold of 15 minutes. However, this can be easily misunderstood. Because a flow is re-executed from the beginning for each step encountered and because each function step's logic is actually executed in independent flow executions, the total runtime of a flow has no real limit. This means you can build flows that take days or weeks to complete, as long as each individual step execution stays within its timeout limits.
+Flow execution has a 15-minute threshold per step. Since steps execute independently, total flow runtime is unlimited. Flows can run for days or weeks if individual steps stay within timeout limits.
 
 ## Concurrency
 
-At present we do not support running steps concurrently, so please use `async` when calling on steps, i.e. when `async ctx.step` or `async ctx.page`. This ensures that steps are executed in the correct sequence and that their results are properly handled.
+Steps must execute sequentially. Use `await` when calling steps (`await ctx.step` or `await ctx.page`) to ensure proper execution order and result handling. We do not support concurrent execution yet.
 
-For more information about building robust flows, check out our [best practices](/flows/best-practices) guide.
+For more information, see our [best practices](/flows/best-practices) guide.
