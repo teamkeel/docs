@@ -1,1 +1,25 @@
 # UI steps
+
+Keel Flows support two kinds of steps: **UI steps** and **Function steps**. Understanding their differences helps structure your flow to be both user-friendly and functionally robust.
+
+UI steps render **interactive pages** to the user. These involve form inputs, display elements, and actions. UI steps are used to collect user input or to display information to the user as part of a flow's execution.
+
+Use `ctx.ui.page()` to create a UI step. It automatically wraps itself in a step internally — you **don't** need to call `ctx.step()`:
+
+```ts
+const values = await ctx.ui.page("userInfo", {
+  stage: "stage1",
+  title: "User Info",
+  content: [
+    ctx.ui.inputs.text("name", { label: "Your name" }),
+    ctx.ui.inputs.number("age", { label: "Your age" }),
+  ],
+});
+```
+
+When executing a UI step that expects user input, the flow's status will be changed to `AWAITING_INPUT`. Once the user submits the information the execution of the flow will resume and subsequent steps will be executed. UI steps can be combined with function steps in any order desired. Due to this interoperability, we can design highly powerful and versatile flows.
+
+## Re-execution and Replay
+
+- Function steps are **idempotent and replayable**.
+- UI steps are **persistent** — once user input is collected, it doesn't rerun unless explicitly reset.
