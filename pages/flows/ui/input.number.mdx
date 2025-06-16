@@ -3,7 +3,7 @@
 A numeric input field
 
 ```ts
-ctx.ui.input.number("name", config);
+ctx.ui.inputs.number("name", config);
 ```
 
 ## Config
@@ -53,8 +53,8 @@ Elements are rendered by adding them to a `page`. A page that contains input ele
 const result = await ctx.ui.page({
   title: "Number inputs",
   content: [
-    ctx.ui.input.number("height"),
-    ctx.ui.input.number("age", {
+    ctx.ui.inputs.number("height"),
+    ctx.ui.inputs.number("age", {
       label: "Your age",
       placeholder: "Enter your age",
       min: 0,

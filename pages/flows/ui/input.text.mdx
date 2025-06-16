@@ -3,7 +3,7 @@
 A text input field
 
 ```ts
-ctx.ui.input.text("name", config);
+ctx.ui.inputs.text("name", config);
 ```
 
 ## Config
@@ -61,8 +61,8 @@ Elements are rendered by by adding to a `page`. A page that contains input eleme
 const result = await ctx.ui.page({
   title: "Text inputs",
   content: [
-    ctx.ui.input.text("name");
-    ctx.ui.input.text("email", {
+    ctx.ui.inputs.text("name");
+    ctx.ui.inputs.text("email", {
       label: "Email address",
       placeholder: "Enter your email address",
     }),

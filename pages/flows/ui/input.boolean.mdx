@@ -3,7 +3,7 @@
 A boolean input field rendered as a checkbox or switch.
 
 ```ts
-ctx.ui.input.boolean("name", config);
+ctx.ui.inputs.boolean("name", config);
 ```
 
 ## Config
@@ -38,8 +38,8 @@ Elements are rendered by adding them to a `page`. A page that contains input ele
 const result = await ctx.ui.page({
   title: "Boolean inputs",
   content: [
-    ctx.ui.input.boolean("acceptTerms"),
-    ctx.ui.input.boolean("enableFeatures", {
+    ctx.ui.inputs.boolean("acceptTerms"),
+    ctx.ui.inputs.boolean("enableFeatures", {
       label: "Enable advanced features",
       defaultValue: true,
       mode: "switch",
