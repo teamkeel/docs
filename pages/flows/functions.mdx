@@ -4,8 +4,6 @@
 
 Each function step must have a unique name within its flow. This name serves as the identifier for the step and is used as the key for persisting the step's data. If a step with the same name is encountered again, the flow will use the previously persisted data instead of executing the step again.
 
-//todo more
-
 ## Step data
 
 Function steps are designed to return data that can be used throughout your flow. The data returned from a function step is automatically persisted and can be accessed in subsequent steps or in the flow's body. This data persistence is a key feature that enables flows to maintain state across multiple executions.
