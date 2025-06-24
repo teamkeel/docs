@@ -1,8 +1,45 @@
 # Function steps
 
+Function steps are blocks of code that will durably execute as part of your Flow which:
+
+- Ensure code is successfully executed only once
+- Handle errors gracefully
+- Perform retry attempts on errors
+- Persist data between executions (such as waiting for user input)
+
+Function steps are particularly useful for:
+
+- Calling external APIs
+- Writing to the database
+- Sending notifications
+- Breaking long running work into smaller chunks
+
+A function step has a name, an optional config object, and the function that will be executed.
+
+```ts
+const output = await ctx.step("step name", async () => {
+  // step logic
+});
+
+// Optional config object
+const output = await ctx.step("step name", { maxRetries: 1 }, async () => {
+  // step logic
+});
+```
+
 ## Step name
 
-Each function step must have a unique name within its flow. This name serves as the identifier for the step and is used as the key for persisting the step's data. If a step with the same name is encountered again, the flow will use the previously persisted data instead of executing the step again.
+Each function step must have a unique name within its flow. If a step with the same name is encountered again, the flow will use the previously persisted data instead of executing the step again.
+
+You can create functions steps in loops to work through data. When doing this you can generate unique step names for each iteration of the loop.
+
+```ts
+for (const item of items) {
+  await ctx.step(`process item ${item.id}`, async () => {
+    // step logic
+  });
+}
+```
 
 ## Step data
 
@@ -13,20 +50,23 @@ For example, if you need to process data from an external API and use it in mult
 ```ts
 // First step: Fetch and process data
 const processedData = await ctx.step("process data", async () => {
-    const rawData = await fetchExternalData();
-    return transformData(rawData);
+  const rawData = await fetchExternalData();
+  return transformData(rawData);
 });
 
 // Later in the flow: Use the processed data
 if (processedData.status === "ready") {
-    await ctx.step("handle ready data", async () => {
-        // The processed data is available here
-        await saveToDatabase(processedData);
-    });
+  await ctx.step("handle ready data", async () => {
+    // The processed data is available here
+    await saveToDatabase(processedData);
+  });
 }
 ```
 
+You can return any JSON-serializable data from a function step. Complex data like classes, functions and dates are not returnable.
+
 The data returned from function steps is automatically persisted, which means:
+
 - It's available even if the flow is interrupted and restarted
 - It can be used to make decisions in the flow's body
 - It's preserved between flow executions
@@ -34,7 +74,7 @@ The data returned from function steps is automatically persisted, which means:
 
 ## Durable execution
 
-Flows allow you to code in a durable way through the use of *functions*, which are designed to handle errors gracefully and to perform retry attempts on your code. This is very useful as it means your flow does not need to become victim to intermittent downtime experienced on services out of your control.
+Flows allow you to code in a durable way through the use of _functions_, which are designed to handle errors gracefully and to perform retry attempts on your code. This is very useful as it means your flow does not need to become victim to intermittent downtime experienced on services out of your control.
 
 Durable functions are particularly important for several reasons:
 
@@ -50,18 +90,22 @@ In the example below, we are querying an open source map API, Nominatim, to get 
 
 ```ts
 export default DispatchOrder({}, async (ctx, inputs) => {
-    // Retrieve the order and validate that it can be dispatched.
-    const order = await models.order.findOne({ id: inputs.orderId});
-    if (order.status != DeliveryStatus.New) {
-        return new Error("order has already been dispatched or delivered"); 
-    }
+  // Retrieve the order and validate that it can be dispatched.
+  const order = await models.order.findOne({ id: inputs.orderId });
+  if (order.status != DeliveryStatus.New) {
+    return new Error("order has already been dispatched or delivered");
+  }
 
-    // Using the order address, lookup all physical address that match it.
-    const matches = await ctx.step(`find addresses`, async () => {
-        return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(order.address)}`).then(res => res.json());
-    });
+  // Using the order address, lookup all physical address that match it.
+  const matches = await ctx.step(`find addresses`, async () => {
+    return fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        order.address
+      )}`
+    ).then((res) => res.json());
+  });
 
-    // Continue executing the flow...
+  // Continue executing the flow...
 });
 ```
 
@@ -71,23 +115,23 @@ Further to being resilient, functions are guaranteed to successfully run to comp
 import { ProcessRefund, models, PaymentStatus } from "@teamkeel/sdk";
 
 export default ProcessRefund({}, async (ctx, inputs) => {
-    // Retrieve the order and validate that it can be refunded.
-    const order = await models.order.findOne({ id: inputs.orderId });
-    if (order.status != PaymentStatus.Completed) {
-        return new Error("order must be completed before refunding"); 
-    }
+  // Retrieve the order and validate that it can be refunded.
+  const order = await models.order.findOne({ id: inputs.orderId });
+  if (order.status != PaymentStatus.Completed) {
+    return new Error("order must be completed before refunding");
+  }
 
-    // Process the refund through Stripe only once.
-    const refund = await ctx.step(`process refund`, async () => {
-        const stripe = require('stripe')(ctx.env.STRIPE_SECRET_KEY);
-        return stripe.refunds.create({
-            payment_intent: order.stripePaymentIntentId,
-            amount: inputs.refundAmount * 100, // Convert to cents
-            reason: inputs.refundReason || 'requested_by_customer'
-        });
+  // Process the refund through Stripe only once.
+  const refund = await ctx.step(`process refund`, async () => {
+    const stripe = require("stripe")(ctx.env.STRIPE_SECRET_KEY);
+    return stripe.refunds.create({
+      payment_intent: order.stripePaymentIntentId,
+      amount: inputs.refundAmount * 100, // Convert to cents
+      reason: inputs.refundReason || "requested_by_customer",
     });
+  });
 
-    // Continue executing the flow...
+  // Continue executing the flow...
 });
 ```
 
@@ -96,13 +140,9 @@ export default ProcessRefund({}, async (ctx, inputs) => {
 If an exception is thrown or a step times out, it will be retried four more times. Therefore a step has five attempts in which to run successfully by default. However, this can be configured as shown below. This retry mechanism is particularly useful for handling transient errors from external services or temporary network issues.
 
 ```ts
-  await ctx.step(
-    "some step", 
-    { maxRetries: 3 }, 
-    async () => {
-      // step logic
-    }
-  );
+await ctx.step("some step", { maxRetries: 3 }, async () => {
+  // step logic
+});
 ```
 
 ## Execution timeout
@@ -112,13 +152,9 @@ The default maximum execution timeout for a function step is sixty seconds. This
 This can be configured as shown below.
 
 ```ts
-  await ctx.step(
-    "some step", 
-    { timeoutInMs: 10000 }, 
-    async () => {
-      // step logic
-    }
-  );
+await ctx.step("some step", { timeoutInMs: 10000 }, async () => {
+  // step logic
+});
 ```
 
 For more information about building robust flows with function steps, check out our [best practices](/flows/best-practices) guide.

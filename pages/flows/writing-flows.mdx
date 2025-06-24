@@ -1,4 +1,4 @@
-import { Callout } from "@core/callout"
+import { Callout } from "@core/callout";
 
 # Writing flows
 
@@ -8,14 +8,14 @@ The [introduction page](/flows) demonstrated how to write a simple flow with a f
 
 A flow is made up of the following discernable parts:
 
- - **Inputs:** Values passed into the body of the flow implementation
- - **Body:** The implementation of the flow in TypeScript, containing code and any number of steps
- - **Steps:** Durable units of work defined in TypeScript
+- **Inputs:** Values passed into the body of the flow implementation
+- **Body:** The implementation of the flow in TypeScript, containing code and any number of steps
+- **Steps:** Durable units of work defined in TypeScript
 
 A step can either be a:
 
- - **Function step:** Executes background logic in a durable way
- - **UI step:** Presents interfaces to a user and waits on them for input
+- **Function step:** Executes background logic in a durable way
+- **UI step:** Presents interfaces to a user and waits on them for input
 
 A flow's body can be made up of code and any number of steps. If no durable execution or user input is needed, steps aren't necessary and the flow body can contain all the code logic needed.
 
@@ -29,89 +29,110 @@ Example flow for order delivery:
 
 ```ts
 export default DispatchOrder({}, async (ctx, inputs) => {
-    // This will execute with every pass of the flow because we always want to get the latest data.
-    const order = await models.order.findOne({ id: inputs.orderId });
-    if (order.status == OrderStatus.Shipped) {
-        throw new Error("order has already been shipped");
+  // This will execute with every pass of the flow because we always want to get the latest data.
+  const order = await models.order.findOne({ id: inputs.orderId });
+  if (order.status == OrderStatus.Shipped) {
+    throw new Error("order has already been shipped");
+  }
+
+  // Present the order address to the user for correcting. This must only ever happen once.
+  const { address } = await ctx.ui.page("confirm address", {
+    title: "Address confirmation",
+    stage: "selectOrder",
+    description: "Please update the delivery address where necessary",
+    content: [
+      ctx.ui.input.text("address", {
+        label: "Select order",
+        optional: false,
+        placeholder: order.deliveryAddress,
+      }),
+    ],
+  });
+
+  // Submit this order to the courier company and retrieve the tracking number. This must only ever happen once.
+  const trackingNumber = await ctx.step("submit to courier", async () => {
+    return submitToCourier(order);
+  });
+
+  // Now update the order accordingly.
+  await models.order.update(
+    { id: inputs.orderId },
+    {
+      trackingNumber: trackingNumber,
+      deliveryAddress: address,
+      status: DeliveryStatus.Shipped,
     }
-
-    // Present the order address to the user for correcting. This must only ever happen once.
-    const { address } = await ctx.ui.page("confirm address", {
-        title: "Address confirmation",
-        stage: "selectOrder",
-        description: "Please update the delivery address where necessary",
-        content: [
-            ctx.ui.input.text("address", {
-                label: "Select order",
-                optional: false,
-                placeholder: order.deliveryAddress,
-            }),
-        ],
-    });
-
-    // Submit this order to the courier company and retrieve the tracking number. This must only ever happen once.
-    const trackingNumber = await ctx.step("submit to courier", async () => {
-        return submitToCourier(order);
-    });
-
-    // Now update the order accordingly.
-    await models.order.update(
-        { id: inputs.orderId },
-        { 
-            trackingNumber: trackingNumber,
-            deliveryAddress: address,
-            status: DeliveryStatus.Shipped
-        }
-    );
+  );
 });
 ```
 
+## Creating a Flows
+
+Flows are defined in the Schema. Flows must have a role permission defined to be visible in the console. See [Permissions](/permissions) for more information.
+
+```keel
+flow ProcessOrder {
+  @permission(roles: [Manager])
+}
+```
+
+<Callout type="info">
+  After defining your flow in the schema, running `keel generate` at the root of your project will
+  scaffold out your new flow in the `/flows` directory.
+</Callout>
+
 ## Inputs
 
-A flow can be defined to accept inputs. Flows support all of the standard Keel types and the inputs can be defined as optional or required. These inputs are captured once, right when a new instance of a flow is started, and are then passed to your flow implementation as arguments.
-
-For example, a flow that processes an order might be defined in the schema as follows.
+Flows can accept inputs. Flows support all of the standard Keel types and the inputs can be defined as optional or required. These inputs are captured once, right when a new instance of a flow is started, and are then passed to your flow implementation as arguments.
 
 ```keel
 flow ProcessOrder {
   inputs {
     orderId ID
-    priority Boolean
   }
   @permission(roles: [Manager])
 }
 ```
 
-These values are captured when starting and flow, and are passed to the body of the flow in `inputs`.
+These values are captured when starting a Flow, and are passed to the body of the flow in `inputs` parameter.
 
 ```ts
 export default ProcessOrder({}, async (ctx, inputs) => {
-    // The inputs are available throughout the flow
-    const order = await models.order.findOne({ id: inputs.orderId });
-    
-    if (inputs.priority) {
-        // Handle priority orders differently
-    }
-    
-    // Continue with normal processing...
+  // The inputs are available throughout the flow
+  const order = await models.order.findOne({ id: inputs.orderId });
+
+  // Continue with normal processing...
 });
 ```
 
-<Callout >
-  After defining your flow in the schema, running `keel generate` at the root of your project will scaffold out your new flow in the `/flows` directory.
+<Callout type="info">
+  Inputs should be used for data you want to programatically pass into the Flow (such as linking to
+  a Flow from a Tool in the console). If you want to capture input from the user, it's best to use
+  UI steps with inputs.
 </Callout>
+
+## Showing progress
+
+It's useful to give the user some indication on what is required in a flow. To do this you can defined `stages` in your Flow config.
+You can then link function and UI steps to stages to show progress.
+
+The names of steps aren't shown to the user, by using steps you can group multiple steps together to control how progress is shown. E.g. you might have a page and then multiple function steps to process a refund and you can group that activity into a single stage.
+
+Stages are shown to the user in the sidebar of Flows in the order they are defined. As you hit steps that are linked to a stage, previously stages will be shown as completed.
+
+![Flow stages showing progress](public/screenshots/flows/flow-stages.png)
 
 ## Flow context
 
 As already demonstrated, the `ctx` argument passed into the flow body is used to define function and UI steps, but it also passes in other useful information to the flow, as highlighted in the table below.
 
-| Property | Description | Example |
-|:---------|:------------|:--------|
-| `step` | Defines a function step | `await ctx.step("my step", async () => { ... });` |
-| `page` | Defines a UI step | `await ctx.page({ ... });` |
-| `identity` | The identity executing the flow | `ctx.identity.email` |
-| `env` | Your [environment variables](/envvars) | `ctx.env.STRIPE_CUSTOMER_ID` |
-| `secrets` | Your [environment secrets](/secrets) | `ctx.secrets.STRIPE_API_KEY` |
+| Property   | Description                            | Example                                           |
+| :--------- | :------------------------------------- | :------------------------------------------------ |
+| `step`     | Defines a function step                | `await ctx.step("my step", async () => { ... });` |
+| `page`     | Defines a UI step                      | `await ctx.page({ ... });`                        |
+| `identity` | The identity executing the flow        | `ctx.identity.email`                              |
+| `env`      | Your [environment variables](/envvars) | `ctx.env.STRIPE_CUSTOMER_ID`                      |
+| `secrets`  | Your [environment secrets](/secrets)   | `ctx.secrets.STRIPE_API_KEY`                      |
 
 ## Failures
 

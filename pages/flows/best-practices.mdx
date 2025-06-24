@@ -1,6 +1,46 @@
+import { Callout } from "@core/callout";
+
 # Best practices
 
+## When to use a function step
 
-Thinking:
- - the body of a flow must be rerunnable
- - keep function steps short (like a single unit of work)
+Code in the body of the flow can run multiple times while the Flow is running. If you need to perform work that should only run once, you should use a function step.
+
+It's best to keep function steps short and focused on a task so that you can handle errors and retrying on small units of work.
+
+As a general rule, code that could take a while to execute (e.g. calling an external API or processing data) should be in a function step.
+
+## Reading data from the database
+
+When reading data from the database, you can choose to use a function step or to read the data in the body of the flow.
+
+If you use a function step, the data will be read once and then persisted. This means that if the flow is interrupted and restarted, the data won't be re-read from the database. This is useful if you want to decide on the work to be done upfront.
+
+<Callout type="warning">
+  Be careful about reading data in a Function step and then writing it back to the database. It
+  could easily become stale during the flow's execution.
+</Callout>
+
+If you read the data in the body of the flow, the data will be read every time the flow is run. This is useful if you want to display data in UI steps and ensure that it is fresh data.
+
+## Writing data to the database
+
+In most cases, you should use a function step to write data to the database so that it only happens once.
+
+## Using Flow inputs
+
+Flows can define inputs via the schema. These inputs are designed for programatic triggering of the Flow. If you want to capture input from the user, it's best to use UI steps with inputs.
+
+For examples, for a Refund Order flow, you could define an input for the order ID.
+
+```keel
+flow RefundOrder {
+  inputs {
+    orderId Text?
+  }
+}
+```
+
+Which can then be used in a data mapping from a GetOrder tool in the console. This allows you to trigger the flow with a specific order ID and jump straight into it.
+
+If you need to capture additional input from the user, you can use UI steps.
