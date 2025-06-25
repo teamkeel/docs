@@ -15,7 +15,7 @@ For example, to create a sequence for order numbers:
 ```keel
 model Order {
   fields {
-    orderNumber Number @sequence("order_")
+    orderNumber Text @sequence("order_")
   }
 }
 ```
@@ -25,7 +25,7 @@ The sequence will start at 1 and increment by 1 for each new record. You can als
 ```keel
 model Order {
   fields {
-    orderNumber Number @sequence("order_", 1000)
+    orderNumber Text @sequence("order_", 1000)
   }
 }
 ```
