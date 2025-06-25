@@ -1,0 +1,56 @@
+# Boolean input
+
+A boolean input field rendered as a checkbox or switch.
+
+```ts
+ctx.ui.inputs.boolean("name", config);
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+import InputProps from "@components/defaultInputProps.mdx";
+
+<InputProps />
+
+<PropDefinition
+  data={{
+    field: "defaultValue",
+    type: "boolean",
+  }}
+/>
+The default value of the input.
+
+<PropDefinition
+  data={{
+    field: "mode",
+    type: `"checkbox" | "switch"`,
+  }}
+/>
+Defines how the boolean input is rendered. `"checkbox"` renders a standard checkbox, `"switch"` renders
+a toggle switch. Default is `"checkbox"`.
+
+## Usage
+
+Elements are rendered by adding them to a `page`. A page that contains input elements will return an object with keys matching the `name` of each input.
+
+```ts
+const result = await ctx.ui.page({
+  title: "Boolean inputs",
+  content: [
+    ctx.ui.inputs.boolean("acceptTerms"),
+    ctx.ui.inputs.boolean("enableFeatures", {
+      label: "Enable advanced features",
+      defaultValue: true,
+      mode: "switch",
+    }),
+  ],
+});
+
+console.log(result.acceptTerms);
+console.log(result.enableFeature);
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="boolean" height={300} />

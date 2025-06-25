@@ -1,6 +1,8 @@
+/* We don't have control over the theme so this file is one big CSS hack */
+
 html,
 body {
-  /* font-size: 15px; */
+  font-size: 15px;
 }
 
 :root {
@@ -19,16 +21,20 @@ body {
   --border-tint: rgba(20, 9, 0, 0.06);
 
   --faint: rgba(20, 9, 0, 0.25);
-  --text-pale: rgba(20, 9, 0, 0.5);
-  --text-content: rgba(20, 9, 0, 0.7);
+  --text-pale: rgba(20, 9, 0, 0.6);
+  --text-content: rgba(20, 9, 0, 0.8);
   --text-mid: rgba(20, 9, 0, 0.75);
-  --text-dark: rgba(20, 9, 0, 0.8);
+  --text-dark: rgba(20, 9, 0, 0.85);
 
   --brand-green: #077460;
   --brand-green-faded: #07746031;
 
   --code-bg: rgb(234 227 218 / 50%);
   --row-highlight: rgb(234 227 218 / 25%);
+  --nav-active: rgb(241, 233, 221);
+
+  --nav-text: rgba(6, 5, 0, 0.89);
+  --nav-headers: rgba(12, 12, 0, 0.52);
 }
 
 :is(html[class~="dark"] body) {
@@ -50,11 +56,63 @@ body {
 
   --code-bg: rgb(234 227 218 / 6%);
 
+  --nav-active: rgba(241, 233, 221, 0.295);
+
+  --nav-text: rgba(255, 255, 255, 0.89);
+  --nav-headers: rgba(255, 255, 255, 0.52);
+
   background: var(--background);
 }
 
 nav {
   background: var(--background);
+}
+
+.nextra-sidebar-container a.nx-text-sm,
+.nextra-sidebar-container button.nx-text-sm {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0em !important;
+  color: var(--nav-text) !important;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+:is(html[class~="dark"] .dark\:nx-text-primary-600) {
+  /* color: rgba(6, 5, 0, 0.89) !important; */
+}
+
+.nextra-sidebar-container li {
+  padding-bottom: 1px;
+}
+
+.nx-leading-7 {
+  line-height: 1.5rem !important;
+}
+
+/* Nav section headings */
+.nextra-sidebar-container li.nx-mb-2 {
+  margin-bottom: 4px;
+  margin-top: 12px;
+
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0em !important;
+  color: var(--nav-headers) !important;
+  letter-spacing: -0.000204901px;
+}
+
+:is([dir="ltr"] .ltr\:nx-pl-3) {
+  padding-left: 0.5rem;
+}
+
+:is([dir="ltr"] .ltr\:nx-ml-3) {
+  margin-left: 0.5rem;
+}
+
+/* Force lowercase for ui elements */
+a[href="/flows/ui"] + div a {
+  text-transform: lowercase;
 }
 
 body {
@@ -63,7 +121,7 @@ body {
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
 
   background: var(--background);
-  font-size: 15px;
+  font-size: 14.5px;
 }
 
 .aspect-video {
@@ -85,6 +143,10 @@ body {
     padding-left: 2rem;
     padding-right: 2rem;
   }
+}
+
+.prop + p.nx-mt-6 {
+  margin-top: 0rem !important;
 }
 
 /*  */
@@ -126,11 +188,12 @@ body {
 
 h1 {
   @apply font-display text-5xl font-medium;
+  font-size: 2.8rem !important;
 }
 
 h2 {
   font-weight: 700 !important;
-  font-size: 1.7rem !important;
+  font-size: 1.5rem !important;
 }
 
 h3 {
@@ -140,7 +203,15 @@ h3 {
 
 h4 {
   font-weight: 600 !important;
-  font-size: 1.2rem !important;
+  font-size: 1.1rem !important;
+}
+
+h4 + p {
+  margin-top: 0.5rem !important;
+}
+
+h3 + p {
+  margin-top: 0.5rem !important;
 }
 
 b,
@@ -178,6 +249,11 @@ code.nx-rounded-md {
   line-height: 1.2rem;
 }
 
+.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New,
+    monospace;
+}
+
 :focus-visible {
   /* --tw-ring-shadow: none !important; */
   --tw-ring-offset-color: var(--brand-green) !important;
@@ -204,7 +280,7 @@ code.nx-rounded-md {
 
 .nx-bg-primary-100,
 .dark\:nx-text-primary-600 {
-  background: #317c6f !important;
+  background: var(--nav-active) !important;
 }
 
 .nx-bg-primary-500\/10,
@@ -239,6 +315,14 @@ code.nx-rounded-md {
   color: var(--faint);
 }
 
+/* Horribly hacky targetting to not cut off the focus states with overflow */
+.nextra-sidebar-container > div.nextra-scrollbar div.nx-overflow-hidden {
+  padding: 0 3px;
+}
+.nextra-sidebar-container > div.nextra-scrollbar {
+  padding: 10px;
+}
+
 .nx-bg-primary-50 {
   background: var(--bg-pale) !important;
 }
@@ -253,7 +337,7 @@ code.nx-rounded-md {
 }
 
 .nextra-sidebar-container a.nx-text-primary-800 {
-  color: white;
+  /* color: white; */
 }
 
 .nextra-sidebar-container .nx-gap-1 {

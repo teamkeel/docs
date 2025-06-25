@@ -1,0 +1,164 @@
+import { Callout } from "@core/callout";
+
+# Flows
+
+<Callout type="warning">
+  Flows are in early preview. They are usable in live projects but the APIs and UIs are subject to
+  change. We're love to hear your feedback.
+</Callout>
+
+Flows in Keel help you build powerful, multi-step operations that go beyond simple actions. Think of Flows as a sequence of steps that you can run one after another, some automatic and others requiring user input, to handle more complex operational processes. Whether you're managing internal approvals, onboarding new team members, processing invoices, or connecting multiple external systems together, Flows simplifies building reliable and interactive internal workflows.
+
+## Why use Flows?
+
+Flows are especially useful when operational tasks involve multiple dependent steps. For example, imagine you're onboarding a new employee: you'll need to set up their account, notify their manager, schedule training sessions, and confirm their system access. With Flows, each of these tasks becomes an organized, manageable step.
+
+Flows also handles tasks, like waiting for approvals or user input, and retrying operations automatically when errors occur, letting you focus on the logic of your operations.
+
+## Creating a Flow
+
+Flows are declared in the Keel schema using the `flow` keyword, specifying permissions and optionally any inputs needed.
+
+```keel
+flow RefundOrder {
+  inputs {
+	  orderId Text?
+  }
+  @permission(roles: [Manager])
+}
+```
+
+Then run
+
+```keel
+keel generate
+```
+
+To scaffold the Flow function, creating `flows/refundOrder.ts`
+
+## Implementing a Flow
+
+Flow logic is implemented in the generated TypeScript file using the Flows SDK. Each flow function receives a context object (`ctx`) and the validated input parameters.
+
+Flows are built up from steps. There are two types of steps:
+
+#### Function Steps
+
+Function steps run in the background to securely interact with your data and execute your business logic, such as creating records, sending notifications, or integrating with external services.
+
+A function step is defined using `ctx.step`, which encapsulates a unit of work. Steps are durable and resilient: if a step fails, it is retried according to configuration. Once a step succeeds, its result is persisted and reused on subsequent retries. Steps must return JSON-serializable data.
+
+```tsx
+const refund = await ctx.step("refund order", async () => {
+  const order = await models.order.findOne({ id: inputs.orderId });
+  const refund = await stripe.refunds.create({
+    payment_intent: order.paymentIntentId,
+  });
+  return refund;
+});
+```
+
+Read more about [function steps](/flows/functions).
+
+#### UI Steps
+
+UI steps pause the Flow to display information and gather input or approvals from users. This can range from simple forms to complex, dynamic interfaces.
+
+Flows can prompt for user input using UI pages, defined with `ctx.ui.page`, which renders UI through a series of UI elements. These elements can be used to display information and capture input.
+
+```tsx
+const email = await ctx.ui.page("customer", {
+  title: "Customer details",
+  content: [ctx.ui.inputs.text("name"), ctx.ui.inputs.text("email", { label: "Email address" })],
+});
+```
+
+Read more about [UI steps](/flows/ui)
+
+### Bringing it all together
+
+This shows a simple Flow that takes a customer email, lets the user select from their open orders and then refunds it.
+
+```tsx
+import { RefundOrder, models } from "@teamkeel/sdk";
+
+export default RefundOrder(async (ctx, inputs) => {
+  // Capture the customer email
+  const customer = await ctx.ui.page("customer", {
+    title: "Refund order",
+    description: "Enter the customer email to refund",
+    content: [ctx.ui.inputs.text("email", { label: "Customer email" })],
+  });
+
+  // Get their pending orders
+  const pendingOrders = await ctx.step("pending orders", async () => {
+    const customer = await models.customer.findOne({ email: customer.email });
+    if (!customer) {
+      throw new Error("Customer not found");
+    }
+    return await models.order.findMany({
+      customerId: {
+        equals: customer.id,
+      },
+      status: {
+        equals: OrderStatus.Pending,
+      },
+    });
+  });
+
+  // Present the user with pending orders to select from
+  const order = await ctx.ui.page("select order", {
+    description: "Select the order to refund",
+    content: [
+      ctx.ui.select.table("orderId", {
+        label: "Select order",
+        data: pendingOrders.map((order) => ({
+          _value: order.id,
+          ref: order.ref,
+          status: order.status,
+          total: order.total,
+          created: order.createdAt,
+        })),
+      }),
+    ],
+  });
+
+  // Process the refund and update the order
+  const refund = await ctx.step("refund order", async () => {
+    // Get the latest order
+    const order = await models.order.findOne({ id: order.orderId });
+
+    // Check it's still pending
+    if (order.status !== OrderStatus.Pending) {
+      throw new Error("Order is no longer pending so cannot be refunded");
+    }
+
+    // Refund the order
+    const refund = await stripe.refunds.create({
+      payment_intent: order.paymentIntentId,
+    });
+
+    // Update the order
+    await models.order.update({
+      id: order.id,
+      status: OrderStatus.Cancelled,
+      refundId: refund.id,
+    });
+    return { refund, order };
+  });
+
+  return {
+    title: "Refund processed",
+    data: {
+      refundId: refund.refund.id,
+      orderId: refund.order.id,
+    },
+  };
+});
+```
+
+When run, this Flow will display the following UI for the user to select an order to refund.
+
+![flow screenshot](public/screenshots/flows/intro-flow.png)
+
+See [writing flows](/flows/writing-flows) for full details on how to implement a flow.

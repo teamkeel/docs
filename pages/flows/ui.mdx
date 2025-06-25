@@ -1,0 +1,159 @@
+# UI steps
+
+UI steps pause execution of the flow and displays UI to the user. UI steps are used to collect user input or to display information to the user.
+
+Use `ctx.ui.page()` to create a UI step
+
+```ts
+const values = await ctx.ui.page("userInfo", {
+  stage: "stage1",
+  title: "User Info",
+  content: [
+    ctx.ui.inputs.text("name", { label: "Your name" }),
+    ctx.ui.inputs.number("age", { label: "Your age" }),
+  ],
+});
+```
+
+A page is built up from UI elements. These element are available via the `ctx.ui` object.
+
+**Inputs elements**
+
+- [Text](./ui/input.text)
+- [Number](./ui/input.number)
+- [Boolean](./ui/input.boolean)
+
+**Display elements**
+
+- [Markdown](./ui/display.markdown)
+- [Image](./ui/display.image)
+- [Header](./ui/display.header)
+- [Table](./ui/display.table)
+- [List](./ui/display.list)
+- [Key Values](./ui/display.keyvalue)
+- [Grid](./ui/display.grid)
+- [Divider](./ui/display.divider)
+- [Code](./ui/display.code)
+- [Banner](./ui/display.banner)
+
+**Select elements**
+
+- [Select one](./ui/select.one)
+
+## Response data
+
+Pages with inputs will return data. The response data will be an object with the keys being the names of the inputs and the values being the values of the inputs.
+
+```ts
+const values = await ctx.ui.page("userInfo", {
+  content: [
+    ctx.ui.inputs.text("name", { label: "Your name" }),
+    ctx.ui.inputs.number("age", { label: "Your age" }),
+  ],
+});
+
+console.log(values);
+// { name: "John Doe", age: 30 }
+```
+
+If you have custom actions defined, the repsonse will be the action key and a data property with the response data.
+
+```ts
+const values = await ctx.ui.page("userInfo", {
+  actions: [
+    { label: "Continue", value: "continue", mode: "primary" },
+    { label: "Cancel", value: "cancel" },
+  ],
+  content: [
+    ctx.ui.inputs.text("name", { label: "Your name" }),
+    ctx.ui.inputs.number("age", { label: "Your age" }),
+  ],
+});
+
+console.log(values);
+// { action: "continue", data: { name: "John Doe", age: 30 } }
+```
+
+## Page configuration
+
+import { PropDefinition } from "@components/propDefinition";
+
+<PropDefinition
+  data={{
+    field: "title",
+    type: "string",
+    optional: true,
+  }}
+/>
+Title displayed at the top of the page.
+
+<PropDefinition
+  data={{
+    field: "description",
+    type: "string",
+    optional: true,
+  }}
+/>
+Short description or subtitle for the page.
+
+<PropDefinition
+  data={{
+    field: "content",
+    type: "UIElements[]",
+  }}
+/>
+An array of elements that make up the body of the page.
+
+<PropDefinition
+  data={{
+    field: "stage",
+    type: "string",
+    optional: true,
+    border: false,
+  }}
+/>
+(Optional) The flow stage this page belongs to. Used for organizing multi-stage flows. For more information
+on stages, see [Showing progress](/flows/writing-flows#showing-progress).
+
+<PropDefinition
+  data={{
+    field: "validate",
+    type: "(data) => Promise<true | string>",
+    optional: true,
+  }}
+/>
+Optional async validation function applied to the entire form's data. Returns a string error message.
+
+<PropDefinition
+  data={{
+    field: "actions",
+    type: `({ label: string; value: string; mode?: "primary" | "secondary" | "destructive" } | string)[]`,
+    optional: true,
+  }}
+/>
+Defines what actions are shown at the bottom of the page.{" "}
+
+## Usage
+
+```ts
+await ctx.ui.page({
+  stage: "setup",
+  title: "Configure Workspace",
+  description: "Set up your project preferences.",
+  content: [
+    ctx.ui.input.text("projectName", { label: "Project Name" }),
+    ctx.ui.input.boolean("notifications", {
+      label: "Enable Notifications",
+      defaultValue: true,
+    }),
+  ],
+  actions: [
+    { label: "Continue", value: "continue", mode: "primary" },
+    { label: "Cancel", value: "cancel" },
+  ],
+  validate: async (data) => {
+    if (!data.projectName) return "Project name is required";
+    return true;
+  },
+});
+```

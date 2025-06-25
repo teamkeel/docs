@@ -1,0 +1,23 @@
+# Permissions
+
+Flows must have a role to be accessible by users. You can define a role in the Keel schema using the `@permission` directive.
+Only Flows that match the user's role will be visible in the console.
+
+```keel
+role Staff {
+	domains {
+		"myco.com"
+	}
+}
+
+flow RefundOrder {
+	inputs {
+		orderId Text?
+	}
+	@permission(roles: [Staff])
+}
+```
+
+### Permission expressions
+
+Support for permission expressions for Flows is coming soon.

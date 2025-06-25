@@ -1,0 +1,78 @@
+# Text input
+
+A text input field
+
+```ts
+ctx.ui.inputs.text("name", config);
+```
+
+## Config
+
+import { PropDefinition } from "@components/propDefinition";
+import InputProps from "@components/defaultInputProps.mdx";
+
+<InputProps />
+
+<PropDefinition
+  data={{
+    field: "defaultValue",
+    type: "string",
+  }}
+/>
+The default value of the input.
+
+<PropDefinition
+  data={{
+    field: "placeholder",
+    type: "string",
+  }}
+/>
+The placeholder text of the input.
+
+<PropDefinition
+  data={{
+    field: "multiline",
+    type: "boolean",
+  }}
+/>
+Whether the input is a multiline text input. Default is `false` and will render a single line text input.
+
+<PropDefinition
+  data={{
+    field: "maxLength",
+    type: "number",
+  }}
+/>
+The maximum length of the input.
+
+<PropDefinition
+  data={{
+    field: "minLength",
+    type: "number",
+  }}
+/>
+The minimum length of the input.
+
+## Usage
+
+Elements are rendered by by adding to a `page`. A page that contains input elements, will return an object with the keys matching the `name` property of each input.
+
+```ts
+const result = await ctx.ui.page({
+  title: "Text inputs",
+  content: [
+    ctx.ui.inputs.text("name");
+    ctx.ui.inputs.text("email", {
+      label: "Email address",
+      placeholder: "Enter your email address",
+    }),
+  ],
+});
+
+console.log(result.name);
+console.log(result.email);
+```
+
+import { Flow } from "@components/flow";
+
+<Flow flow="text" height={300} />
