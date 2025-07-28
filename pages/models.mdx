@@ -177,12 +177,12 @@ The following table outlines the aggregate functions currently supported in comp
 |----------|-------------| ------- |
 | `SUM` | Calculates the sum by adding all the values | `SUM(invoice.items.total)` |
 | `SUMIF` | Calculates the sum by adding all the values of a filtered dataset | `SUM(invoice.items.total, !invoice.items.product.isDeleted)` |
-| `COUNT` | Returns the total number of records | 'COUNT(class.enrollments)` |
-| `COUNTIF` | Returns the total number of records of a filtered dataset | 'COUNT(class.enrollments, class.enrollments.student.isActive && class.enrollments.isActive)` |
+| `COUNT` | Returns the total number of records | `COUNT(class.enrollments)` |
+| `COUNTIF` | Returns the total number of records of a filtered dataset | `COUNT(class.enrollments, class.enrollments.student.isActive && class.enrollments.isActive)` |
 | `MIN` | Returns the minimum value | `MIN(period.sales.total, period.sales.channel == Channel.Website && period.sales.status != Status.Draft)` |
-| `MINIF` | Returns the minimum value of a filtered dataset | 'MINIF(period.sales.total)` |
+| `MINIF` | Returns the minimum value of a filtered dataset | `MINIF(period.sales.total)` |
 | `MAX` | Returns the maximum value | `MAX(period.sales.total, period.sales.channel == Channel.Website)` |
-| `MAX` | Returns the maximum value of a filtered dataset | 'MAXIF(period.sales.total)` |
+| `MAX` | Returns the maximum value of a filtered dataset | `MAXIF(period.sales.total)` |
 | `AVG` | Calculates the average (mean) | `AVG(class.enrollments.grade)` |
 | `AVGIF` | Calculates the average (mean) of a filtered dataset | `AVGIF(class.enrollments.grade, class.enrollments.student.isActive)` |
 | `MEDIAN` | Calculates the middle value from the sorted values | `MEDIAN(class.enrollments.grade)` |
