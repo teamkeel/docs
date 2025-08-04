@@ -56,7 +56,7 @@
     },
     "function-name": {
       "name": "support.function.aggregate.keel",
-      "match": "\\b(SUM|COUNT|AVG|MIN|MAX|MEDIAN)\\b"
+      "match": "\\b(SUM|COUNT|AVG|MIN|MAX|MEDIAN|SUMIF|COUNTIF|AVGIF|MINIF|MAXIF|MEDIANIF)\\b"
     },
     "action-type": {
       "name": "keyword.keel",
