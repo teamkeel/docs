@@ -1,0 +1,63 @@
+# Scheduling
+
+Flows can be scheduled for execution by using the `@schedule` attribute, which accepts a string that defines the schedule. The schedule string can either be a simple **human-readable** expression or for more complex cases a unix-style **cron** expression.
+
+### Defining a schedule
+
+The **human-readable form** starts with the word `every` and then either describes a time interval (e.g. `every 10 minutes`), or a day and time (e.g. `every monday at 9am`). The interval form also allows for a time-range, for example `every 2 hours from 8am to 6pm`. Although the syntax of these expressions is very simple they support a lot of common scheduling patterns and have the benefit of being much easier to read than cron.
+
+```keel filename="A scheduled flow using human-readable expression"
+flow EmailNewCustomerReport {
+  @schedule("every monday at 9am")
+}
+```
+
+These are the formats the human-readable schedule format accepts:
+
+- `every N minutes`
+- `every N hours`
+- `every N minutes from T to T`
+- `every N hours from T to T`
+- `every D at T`
+
+Where `N` is an integer, `T` is a 12-hour time, and `D` is a day of the week. `D` can also be `day` for everyday or `weekday` for Monday-Friday.
+
+In the format `every D at T` both `D` and `T` can be a list of values, for example `every monday and tuesday at 9am, 12pm, and 3pm`. The values must be comma-separated but the word `and` is also allowed to improve readability.
+
+---
+
+The **cron form** uses unix-style crontab, with five fields corresponding to minute, hour, day-of-month, month, and day-of-week. An example being `0 9 * * 1`, which would trigger every Monday at 9am. Cron allows for very complex scheduling, for example `*/5 6-8,15-17 * 1 1,3,5`, which would trigger every five minutes between 6am and 8am on Mondays, Wednesdays, and Fridays in January.
+
+```keel filename="A scheduled flow using cron syntax"
+flow EmailNewCustomerReport {
+  @schedule("0 9 * * 1")
+}
+```
+
+The table below shows examples of the human-readable form with the equivalent cron syntax.
+
+| Human-readable                                       | Cron                   |
+| :--------------------------------------------------- | :--------------------- |
+| `"every 10 minutes"`                                 | `"*/10 * * * *"`       |
+| `"every 30 minutes from 10am to 2pm"`                | `"*/30 10-14 * * *"`   |
+| `"every 2 hours"`                                    | `"0 */2 * * *"`        |
+| `"every 2 hours from 9am to 3pm"`                    | `"0 9,11,13,15 * * *"` |
+| `"every monday at 9am"`                              | `"0 9 * * 1"`          |
+| `"every tuesday and thursday at 8am, 12pm, and 5pm"` | `"0 8,12,17 * * 2,4"`  |
+
+If you're not familiar with cron syntax you can use a tool like [crontab.guru](https://crontab.guru/) to help you build your schedule.
+
+### Validation
+
+Keel will check your flow's schedule at build time to make sure it is valid. Examples of validation errors are:
+
+- Having more than one `@schedule` attribute per flow definition
+- A schedule that doesn't divide evenly into the time-unit e.g. `every 5 hours` would be an error because 24 does not divide evently by 5
+- Invalid cron syntax e.g. `0 9am * * *` would result in the error `invalid value '9am' for the hours field`
+
+import { Callout } from "@core/callout";
+
+<Callout type="warning" emoji="⚠️">
+  Scheduled flows cannot be defined with inputs. Flows will be initiated automatically according to
+  the specified schedule and therefore cannot be passed any input.
+</Callout>
