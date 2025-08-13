@@ -70,7 +70,7 @@ const config: DocsThemeConfig = {
         titleTemplate: "%s – Keel",
         description:
           frontMatter.description ||
-          "Keel solves the backend puzzle so you can focus on customers.",
+          "Keel brings operators and engineers together to solve your most critical ops challenges.",
       };
     }
   },
